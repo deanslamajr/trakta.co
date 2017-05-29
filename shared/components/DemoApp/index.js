@@ -12,9 +12,9 @@ import './globals.css';
 import Error404 from './Error404';
 import Header from './Header';
 
-import AsyncHomeRoute from './AsyncHomeRoute';
 import AsyncCounterRoute from './AsyncCounterRoute';
 import AsyncAboutRoute from './AsyncAboutRoute';
+import AsyncRecorder from './AsyncRecorder';
 
 function DemoApp() {
   return (
@@ -111,12 +111,12 @@ function DemoApp() {
           href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css"
         />
       </Helmet>
-      <Header />
       <div style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
         <Switch>
-          <Route exact path="/" component={AsyncHomeRoute} />
+          <Route exact path="/" component={AsyncRecorder} />
           <Route path="/counter" component={AsyncCounterRoute} />
           <Route path="/about" component={AsyncAboutRoute} />
+          <Route path="/recorder" component={AsyncRecorder} />
           <Route component={Error404} />
         </Switch>
       </div>

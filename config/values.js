@@ -15,7 +15,7 @@ const values = {
   clientConfigFilter: {
     // This is here as an example showing that you can expose variables
     // that were potentially provivded by the environment
-    welcomeMessage: true,
+    appTitle: true,
     // We only need to expose the enabled flag of the service worker.
     serviceWorker: {
       enabled: true,
@@ -34,10 +34,8 @@ const values = {
   // The port on which the client bundle development server should run.
   clientDevServerPort: EnvVars.number('CLIENT_DEV_PORT', 7331),
 
-  // This is an example environment variable which is used within the react
-  // application to demonstrate the usage of environment variables across
-  // the client and server bundles.
-  welcomeMessage: EnvVars.string('WELCOME_MSG', 'Hello world!'),
+  // The title of the application
+  appTitle: EnvVars.string('APP_TITLE', 'tracta.co'),
 
   // Disable server side rendering?
   disableSSR: false,

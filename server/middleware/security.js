@@ -19,7 +19,11 @@ const cspConfig = {
     ],
     fontSrc: ["'self'"],
     objectSrc: ["'self'"],
-    mediaSrc: ["'self'"],
+    mediaSrc: [
+      "'self'",
+      // @todo This is needed for displaying recordings from blobs, can remove after prototype is finished
+      'blob:',
+    ],
     manifestSrc: ["'self'"],
     scriptSrc: [
       // Allow scripts hosted from our application.
