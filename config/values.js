@@ -8,6 +8,8 @@
 import * as EnvVars from './utils/envVars';
 
 const values = {
+  ENV: EnvVars.string('ENV'),
+
   // The configuration values that should be exposed to our client bundle.
   // This value gets passed through the /shared/utils/objects/filterWithRules
   // util to create a filter object that can be serialised and included
@@ -30,6 +32,13 @@ const values = {
   host: EnvVars.string('HOST', '0.0.0.0'),
   // The port on which the server should run.
   port: EnvVars.number('PORT', 1337),
+
+  // AWS credentials
+  //
+  // AWS Access key ID
+  AWS_ACCESS_KEY_ID: EnvVars.string('AWS_ACCESS_KEY_ID'),
+  // AWS Secret access key
+  AWS_SECRET_ACCESS_KEY: EnvVars.string('AWS_SECRET_ACCESS_KEY'),
 
   // The port on which the client bundle development server should run.
   clientDevServerPort: EnvVars.number('CLIENT_DEV_PORT', 7331),

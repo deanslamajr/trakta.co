@@ -4,12 +4,15 @@ import express from 'express';
 import compression from 'compression';
 import { resolve as pathResolve } from 'path';
 import appRootDir from 'app-root-dir';
+
 import reactApplication from './middleware/reactApplication';
 import security from './middleware/security';
 import clientBundle from './middleware/clientBundle';
 import serviceWorker from './middleware/serviceWorker';
 import offlinePage from './middleware/offlinePage';
 import errorHandlers from './middleware/errorHandlers';
+import api from './api';
+
 import config from '../config';
 
 // Create our express based server.
@@ -42,6 +45,8 @@ app.use(config('bundles.client.webPath'), clientBundle);
 // Note: these will be served off the root (i.e. '/') of our application.
 app.use(express.static(pathResolve(appRootDir.get(), config('publicAssetsPath'))));
 
+app.use('/api', api);
+
 // The React application middleware.
 app.get('*', reactApplication);
 
@@ -50,7 +55,8 @@ app.use(...errorHandlers);
 
 // Create an http listener for our express app.
 const listener = app.listen(config('port'), () =>
-  console.log(`Server listening on port ${config('port')}`));
+  console.log(`Server listening on port ${config('port')}`),
+);
 
 // We export the listener as it will be handy for our development hot reloader,
 // or for exposing a general extension layer for application customisations.

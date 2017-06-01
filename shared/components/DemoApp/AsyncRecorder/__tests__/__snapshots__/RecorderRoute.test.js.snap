@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<RecorderRoute /> renders 1`] = `
+<div
+  style={
+    Object {
+      "textAlign": "center",
+    }
+  }
+>
+  <HelmetWrapper
+    encodeSpecialCharacters={true}
+  >
+    <title>
+      tracta.co - recorder
+    </title>
+  </HelmetWrapper>
+  <button
+    onClick={[Function]}
+  >
+    Start
+  </button>
+  <div />
+</div>
+`;
