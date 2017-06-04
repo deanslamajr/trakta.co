@@ -15,11 +15,9 @@ exports[`<RecorderRoute /> renders 1`] = `
       tracta.co - recorder
     </title>
   </HelmetWrapper>
-  <button
-    onClick={[Function]}
-  >
-    Start
-  </button>
+  <div>
+    Waiting on encoder to initialize
+  </div>
   <div />
 </div>
 `;
