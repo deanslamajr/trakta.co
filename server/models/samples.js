@@ -25,7 +25,6 @@ function save(stream) {
     // Create the streams
     // var compress = zlib.createGzip();
     const upload = s3Stream.upload({
-      // @todo have this bucket suffix be set from env vars
       Bucket: `samples-${config('ENV')}`,
       Key: `${uuid}.mp3`,
     });
