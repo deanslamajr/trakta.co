@@ -1,6 +1,6 @@
 import React from 'react';
 import Helmet from 'react-helmet';
-import lamejs from 'lamejs';
+import lamejs from 'iso-lamejs';
 import ReactAudioPlayer from 'react-audio-player';
 import axios from 'axios';
 
