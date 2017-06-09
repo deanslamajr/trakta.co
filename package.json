@@ -15,18 +15,10 @@
     "deploy": "babel-node internal/scripts/deploy",
     "develop": "cross-env DEPLOYMENT=development babel-node internal/development",
     "lint": "eslint client server shared config internal",
-    "precommit": "lint-staged",
-    "prepush": "jest",
     "prestart": "babel-node internal/scripts/build --optimize",
     "start": "cross-env NODE_ENV=production node build/server",
     "test": "jest",
     "test:coverage": "jest --coverage"
-  },
-  "lint-staged": {
-    "*.js": [
-      "prettier-eslint --write",
-      "git add"
-    ]
   },
   "jest": {
     "collectCoverageFrom": [
@@ -114,9 +106,7 @@
     "glob": "7.1.1",
     "happypack": "3.0.3",
     "html-webpack-plugin": "2.28.0",
-    "husky": "0.13.3",
     "jest": "19.0.2",
-    "lint-staged": "3.4.0",
     "md5": "2.2.1",
     "modernizr-loader": "1.0.1",
     "node-notifier": "5.1.2",
