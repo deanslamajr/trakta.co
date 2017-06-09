@@ -1,0 +1,11 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "node:boron-onbuild"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 80
+    }
+  ]
+}
