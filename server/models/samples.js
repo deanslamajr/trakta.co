@@ -35,18 +35,9 @@ function save(stream) {
 
     // Handle errors.
     upload.on('error', (error) => {
+      // @todo metric and log error
       console.log(error);
       reject(error);
-    });
-
-    /* Handle progress. Example details object:
-      { ETag: '"f9ef956c83756a80ad62f54ae5e7d34b"',
-        PartNumber: 5,
-        receivedSize: 29671068,
-        uploadedSize: 29671068 }
-    */
-    upload.on('part', (details) => {
-      console.log(`part event details:${details}`);
     });
 
     /* Handle upload completion. Example details object:
@@ -56,16 +47,16 @@ function save(stream) {
         ETag: '"bf2acbedf84207d696c8da7dbb205b9f-5"' }
     */
     upload.on('uploaded', (details) => {
-      console.log(`uploaded event details:${details}`);
+      // @todo metric this event and log details
     });
 
     upload.on('finish', (result) => {
-      console.log(`upload finished, result:${result}`);
       resolve(result);
     });
 
     // Pipe the incoming filestream through compression, and up to S3.
-    stream.pipe(upload); // .pipe(compress).pipe(upload);
+    // @todo implment the compression: .pipe(compress).pipe(upload);
+    stream.pipe(upload); 
   });
 }
 
