@@ -8,7 +8,7 @@ import asyncBootstrapper from 'react-async-bootstrapper';
 import config from '../../../config';
 
 import ServerHTML from './ServerHTML';
-import DemoApp from '../../../shared/components/DemoApp';
+import App from '../../../shared/components/App';
 
 /**
  * React application middleware, supports server side rendering.
@@ -46,7 +46,7 @@ export default function reactApplicationMiddleware(request, response) {
   const app = (
     <AsyncComponentProvider asyncContext={asyncComponentsContext}>
       <StaticRouter location={request.url} context={reactRouterContext}>
-        <DemoApp />
+        <App />
       </StaticRouter>
     </AsyncComponentProvider>
   );
