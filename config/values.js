@@ -78,9 +78,9 @@ const values = {
   // We make use of react-helmet to consume the values below.
   // @see https://github.com/nfl/react-helmet
   htmlPage: {
-    titleTemplate: 'React, Universally - %s',
-    defaultTitle: 'React, Universally',
-    description: 'A starter kit giving you the minimum requirements for a production ready universal react application.',
+    titleTemplate: 'trakta.co - %s',
+    defaultTitle: 'trakta.co',
+    description: 'make a sound',
   },
 
   // Content Security Policy (CSP)
@@ -89,7 +89,7 @@ const values = {
     childSrc: [],
     connectSrc: [],
     defaultSrc: [],
-    fontSrc: ['fonts.googleapis.com/css', 'fonts.gstatic.com'],
+    fontSrc: [],
     imgSrc: [],
     mediaSrc: [],
     manifestSrc: [],
@@ -99,10 +99,7 @@ const values = {
       // polyfill.
       'cdn.polyfill.io',
     ],
-    styleSrc: [
-      'cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css',
-      'fonts.googleapis.com/css',
-    ],
+    styleSrc: [],
   },
 
   // Path to the public assets that will be served off the root of the
@@ -235,7 +232,12 @@ const values = {
       srcEntryFile: './server/index.js',
 
       // Src paths.
-      srcPaths: ['./server', './shared', './config'],
+      srcPaths: [
+        './client',
+        './server', 
+        './shared', 
+        './config'
+      ],
 
       // Where does the server bundle output live?
       outputPath: './build/server',

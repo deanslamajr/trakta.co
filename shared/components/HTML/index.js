@@ -15,7 +15,7 @@ function HTML(props) {
       <head>
         {headerElements}
       </head>
-      <body>
+      <body style={{ backgroundColor: "#333333" }}>
         <div id="app" dangerouslySetInnerHTML={{ __html: appBodyString }} />
         {bodyElements}
       </body>

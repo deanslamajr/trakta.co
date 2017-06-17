@@ -10,15 +10,12 @@ import config from '../../../config';
 import './globals.css';
 
 import Error404 from './Error404';
-import Header from './Header';
 
-import AsyncCounterRoute from './AsyncCounterRoute';
-import AsyncAboutRoute from './AsyncAboutRoute';
 import AsyncRecorder from './AsyncRecorder';
 
-function DemoApp() {
+function App() {
   return (
-    <div style={{ padding: '2rem' }}>
+    <div>
       <Helmet>
         <html lang="en" />
         <title>{config('htmlPage.defaultTitle')}</title>
@@ -96,26 +93,10 @@ function DemoApp() {
         <meta name="msapplication-wide310x150logo" content="/favicons/mstile-310x150.png" />
         <meta name="msapplication-square310x310logo" content="/favicons/mstile-310x310.png" />
         <link rel="manifest" href="/manifest.json" />
-
-        {/*
-          NOTE: This is simply for quick and easy styling on the demo. Remove
-          this and the related items from the Content Security Policy in the
-          global config if you have no intention of using milligram.
-        */}
-        <link
-          rel="stylesheet"
-          href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"
-        />
-        <link
-          rel="stylesheet"
-          href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css"
-        />
       </Helmet>
-      <div style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+      <div>
         <Switch>
           <Route exact path="/" component={AsyncRecorder} />
-          <Route path="/counter" component={AsyncCounterRoute} />
-          <Route path="/about" component={AsyncAboutRoute} />
           <Route path="/recorder" component={AsyncRecorder} />
           <Route component={Error404} />
         </Switch>
@@ -124,4 +105,4 @@ function DemoApp() {
   );
 }
 
-export default DemoApp;
+export default App;

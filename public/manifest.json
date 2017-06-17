@@ -1,7 +1,7 @@
 {
-	"name": "React Universally",
-	"short_name": "Rct-Unvrslly",
-	"description": "A starter kit giving you the minimum requirements for a production ready universal react application.",
+	"name": "trakta.co",
+	"short_name": "trakta.co",
+	"description": "make a sound",
 	"lang": "en",
 	"start_url": "./",
 	"icons": [
