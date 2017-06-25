@@ -1,14 +1,15 @@
 import React from 'react';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import viewportDimensions from 'viewport-dimensions';
 import Tone from 'tone';
+
+import styles from './Recorder.css'
 
 const resolution = 256;
 
 class Recorder extends React.Component {
   constructor(props) {
     super(props);
-
-    console.log('taco!!');
 
     this.prompts = {
       START: this._renderInitializingRecorderPrompt.bind(this)
@@ -94,7 +95,7 @@ class Recorder extends React.Component {
 
   _renderStartRecordingPrompt() {
     return (
-      <div>
+      <div className={styles.blueMask}>
         { /* overlay start mask e.g. <button onClick={this._startRecording} class='green-mask'>Start</button> */ }
       </div>
     );
@@ -109,18 +110,12 @@ class Recorder extends React.Component {
       ? viewportDimensions.height() && viewportDimensions.height() - 5
       : 300;
 
-
-    
-
-
-
-
-
     return (
       <div>
         {this.state.currentPrompt()}
         { /* @todo remove this */ this._drawBlobs()}
         <canvas 
+          className={styles.container}
           width={width} 
           height={height}
           ref={(canvas) => { this.canvas = canvas; }}
@@ -145,7 +140,7 @@ class Recorder extends React.Component {
   _renderUserMediaNotSupported() {
     return (
       // @todo replace with imported css
-      <div style={{ color: 'white' }}>
+      <div className={styles.notSupportedMessage}>
         WebAudio is not supported by this browser.
         <br/>
         Please upgrade this browser's version or switch to a browser that supports this technology.
@@ -174,11 +169,9 @@ class Recorder extends React.Component {
   }
 
   render() {
-    console.log('taco!!');
-
     return (
       // @todo replace with imported css
-      <div style={{ textAlign: 'center' }}>
+      <div>
         { 
           this.state.userMediaSupported 
             ? this._renderUserMediaSupported() 
@@ -189,4 +182,5 @@ class Recorder extends React.Component {
   }
 }
 
-export default Recorder;
+export default withStyles(styles)(Recorder)
+// export default Recorder;

@@ -1,11 +1,17 @@
 import React from 'react';
 import Helmet from 'react-helmet';
+
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+
 // import ReactAudioPlayer from 'react-audio-player';
 // import axios from 'axios';
 
+import config from '../../../../config';
+
 import Recorder from '../../../../client/components/Recorder';
 
-import config from '../../../../config';
+import styles from './RecorderRoute.css';
+
 
 class RecorderRoute extends React.Component {
   constructor(props) {
@@ -89,7 +95,7 @@ class RecorderRoute extends React.Component {
   _renderLoading() {
     return (
       // @todo replace with imported css
-      <div style={{ color: 'white', fontSize: '20px' }}>
+      <div className={styles.loadingMessage}>
         !Loading!
       </div>
     );
@@ -102,7 +108,7 @@ class RecorderRoute extends React.Component {
   render() {
     return (
       // @todo replace with imported css
-      <div style={{ textAlign: 'center' }}>
+      <div className={styles.container}>
         <Helmet>
           <title>{`recorder - ${config('appTitle')}`}</title>
         </Helmet>
@@ -116,4 +122,4 @@ class RecorderRoute extends React.Component {
   }
 }
 
-export default RecorderRoute;
+export default withStyles(styles)(RecorderRoute)

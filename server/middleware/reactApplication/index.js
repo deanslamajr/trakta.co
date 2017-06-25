@@ -8,7 +8,12 @@ import asyncBootstrapper from 'react-async-bootstrapper';
 import config from '../../../config';
 
 import ServerHTML from './ServerHTML';
-import App from '../../../shared/components/App';
+import wrapAppsRouterComponentsWithContext from '../../../shared/components/App/wrapAppsRouterComponentsWithContext';
+
+// We're using this outer context to store all server-rendered css for injection in server rendered header style tag
+// necessary configuration to support isomorphic-style-loader
+const css = new Set();
+const App = wrapAppsRouterComponentsWithContext((styles) => css.add(styles._getCss()));
 
 /**
  * React application middleware, supports server side rendering.
@@ -28,6 +33,7 @@ export default function reactApplicationMiddleware(request, response) {
       // eslint-disable-next-line no-console
       console.log('==> Handling react route without SSR');
     }
+
     // SSR is disabled so we will return an "empty" html page and
     // rely on the client to initialize and render the react application.
     const html = renderToStaticMarkup(<ServerHTML nonce={nonce} />);
@@ -59,6 +65,7 @@ export default function reactApplicationMiddleware(request, response) {
     // Generate the html response.
     const html = renderToStaticMarkup(
       <ServerHTML
+        css={css}
         reactAppString={appString}
         nonce={nonce}
         helmet={Helmet.rewind()}

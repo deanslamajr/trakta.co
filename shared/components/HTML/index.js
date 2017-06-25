@@ -4,18 +4,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+function addStyles(css) {
+  return (
+    <style type="text/css">{[...css].join('')}</style>
+  )
+}
+
 /**
  * The is the HTML shell for our React Application.
  */
 function HTML(props) {
-  const { htmlAttributes, headerElements, bodyElements, appBodyString } = props;
+  const { css, htmlAttributes, headerElements, bodyElements, appBodyString } = props;
 
   return (
     <html {...htmlAttributes}>
       <head>
         {headerElements}
+        { 
+          css && css.size
+            ? addStyles(css)
+            : null
+        }
       </head>
-      <body style={{ backgroundColor: "#333333" }}>
+      <body style={{ backgroundColor: '#333333' }} >
         <div id="app" dangerouslySetInnerHTML={{ __html: appBodyString }} />
         {bodyElements}
       </body>

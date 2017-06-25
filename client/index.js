@@ -9,7 +9,8 @@ import { AsyncComponentProvider } from 'react-async-component';
 import './polyfills';
 
 import ReactHotLoader from './components/ReactHotLoader';
-import App from '../shared/components/App';
+
+import App from './App';
 
 // Get the DOM Element that will host our React application.
 const container = document.querySelector('#app');
@@ -51,14 +52,14 @@ renderApp(App);
 // This registers our service worker for asset caching and offline support.
 // Keep this as the last item, just in case the code execution failed (thanks
 // to react-boilerplate for that tip.)
-require('./registerServiceWorker');
+// require('./registerServiceWorker');
 
 // The following is needed so that we can support hot reloading our application.
 if (process.env.BUILD_FLAG_IS_DEV === 'true' && module.hot) {
   // Accept changes to this file for hot reloading.
   module.hot.accept('./index.js');
   // Any changes to our App will cause a hotload re-render.
-  module.hot.accept('../shared/components/App', () => {
-    renderApp(require('../shared/components/App').default);
+  module.hot.accept('../shared/components/App/App', () => {
+    renderApp(require('./App').default);
   });
 }

@@ -40,7 +40,7 @@ function scriptTag(jsFilePath) {
 // COMPONENT
 
 function ServerHTML(props) {
-  const { asyncComponentsState, helmet, nonce, reactAppString } = props;
+  const { asyncComponentsState, helmet, nonce, reactAppString, css } = props;
 
   // Creates an inline script definition that is protected by the nonce.
   const inlineScript = body => (
@@ -92,6 +92,7 @@ function ServerHTML(props) {
 
   return (
     <HTML
+      css={css}
       htmlAttributes={ifElse(helmet)(() => helmet.htmlAttributes.toComponent(), null)}
       headerElements={headerElements.map((x, idx) => (
         <KeyedComponent key={idx}>{x}</KeyedComponent>

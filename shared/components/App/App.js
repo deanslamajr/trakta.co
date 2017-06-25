@@ -11,10 +11,9 @@ import './globals.css';
 
 import Error404 from './Error404';
 
-import AsyncRecorder from './AsyncRecorder';
-
-function App() {
-  return (
+function App({ ContextWrappedAsyncRecorder }) {
+  
+  return () => (
     <div>
       <Helmet>
         <html lang="en" />
@@ -96,8 +95,8 @@ function App() {
       </Helmet>
       <div>
         <Switch>
-          <Route exact path="/" component={AsyncRecorder} />
-          <Route path="/recorder" component={AsyncRecorder} />
+          <Route exact path="/" component={ContextWrappedAsyncRecorder} />
+          <Route path="/recorder" component={ContextWrappedAsyncRecorder} />
           <Route component={Error404} />
         </Switch>
       </div>

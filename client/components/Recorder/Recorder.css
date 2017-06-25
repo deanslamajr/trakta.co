@@ -1,0 +1,29 @@
+.container {
+  text-align: center;
+  animation: fadein 3s;
+}
+
+.not-supported-message {
+  color: white;
+}
+
+.blue-mask {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #0055B0;
+  opacity: .2;
+  animation: maskFadein .2s;
+}
+
+@keyframes maskFadein {
+    from { opacity: 0; }
+    to   { opacity: .2; }
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

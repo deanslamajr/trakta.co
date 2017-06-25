@@ -1,6 +1,5 @@
 import appRootDir from 'app-root-dir';
 import AssetsPlugin from 'assets-webpack-plugin';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import nodeExternals from 'webpack-node-externals';
 import path from 'path';
 import webpack from 'webpack';
@@ -10,7 +9,7 @@ import { happyPackPlugin } from '../utils';
 import { ifElse } from '../../shared/utils/logic';
 import { mergeDeep } from '../../shared/utils/objects';
 import { removeNil } from '../../shared/utils/arrays';
-import withServiceWorker from './withServiceWorker';
+// import withServiceWorker from './withServiceWorker';
 import config from '../../config';
 
 /**
@@ -311,16 +310,6 @@ export default function webpackConfigFactory(buildOptions) {
           }),
       ),
 
-      // For the production build of the client we need to extract the CSS into
-      // CSS files.
-      ifProdClient(
-        () =>
-          new ExtractTextPlugin({
-            filename: '[name]-[contenthash].css',
-            allChunks: true,
-          }),
-      ),
-
       // -----------------------------------------------------------------------
       // START: HAPPY PACK PLUGINS
       //
@@ -406,12 +395,19 @@ export default function webpackConfigFactory(buildOptions) {
         happyPackPlugin({
           name: 'happypack-devclient-css',
           loaders: [
-            'style-loader',
+            'isomorphic-style-loader',
             {
               path: 'css-loader',
               // Include sourcemaps for dev experience++.
-              query: { sourceMap: true },
+              query: { 
+                sourceMap: true,
+                modules: true,
+                localIdentName: '[path][name]__[local]--[hash:base64:5]',
+                importLoaders: 1,
+                camelCase: true
+              }
             },
+            { path: 'postcss-loader' },
           ],
         }),
       ),
@@ -451,22 +447,37 @@ export default function webpackConfigFactory(buildOptions) {
             ifDevClient({
               loaders: ['happypack/loader?id=happypack-devclient-css'],
             }),
-            // For a production client build we use the ExtractTextPlugin which
-            // will extract our CSS into CSS files. We don't use happypack here
-            // as there are some edge cases where it fails when used within
-            // an ExtractTextPlugin instance.
-            // Note: The ExtractTextPlugin needs to be registered within the
-            // plugins section too.
             ifProdClient(() => ({
-              loader: ExtractTextPlugin.extract({
-                fallback: 'style-loader',
-                use: ['css-loader'],
-              }),
+              loaders: [
+                'isomorphic-style-loader',
+                {
+                  loader: 'css-loader',
+                  query: {
+                    sourceMap: true,
+                    modules: true,
+                    localIdentName: '[path][name]__[local]--[hash:base64:5]',
+                    importLoaders: 1,
+                    camelCase: true
+                  }
+                },
+                'postcss-loader',
+              ],
             })),
-            // When targetting the server we use the "/locals" version of the
-            // css loader, as we don't need any css files for the server.
             ifNode({
-              loaders: ['css-loader/locals'],
+              loaders: [
+                'isomorphic-style-loader',
+                {
+                  loader: 'css-loader',
+                  query: {
+                    sourceMap: true,
+                    modules: true,
+                    localIdentName: '[path][name]__[local]--[hash:base64:5]',
+                    importLoaders: 1,
+                    camelCase: true
+                  }
+                },
+                'postcss-loader'
+              ],
             }),
           ),
         ),
@@ -512,9 +523,9 @@ export default function webpackConfigFactory(buildOptions) {
     },
   };
 
-  if (isProd && isClient) {
-    webpackConfig = withServiceWorker(webpackConfig, bundleConfig);
-  }
+  // if (isProd && isClient) {
+  //   webpackConfig = withServiceWorker(webpackConfig, bundleConfig);
+  // }
 
   // Apply the configuration middleware.
   return config('plugins.webpackConfig')(webpackConfig, buildOptions);
