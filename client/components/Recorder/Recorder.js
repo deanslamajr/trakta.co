@@ -9,39 +9,34 @@ import axios from 'axios';
 import styles from './Recorder.css'
 
 const resolution = 256;
-const maxSamples = 1152;
 
 let dataBuffer;
 let mp3Encoder;
 
-
-
-
-function inititializeEncoder() {
-  // const encoderConfig = prefConfig || {};
-  mp3Encoder = new lamejs.Mp3Encoder(1, 44100, 80,);
+function inititializeEncoder(sampleRate) {
+  mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
   clearBuffer();
-  console.log('encoder has been initialized');
-  // @todo enable the record button at this time
-
-  // encoderConfig.success();
 }
+
 function clearBuffer() {
   dataBuffer = [];
 }
-function encode(arrayBuffer) {
+
+function encode(arrayBuffer, bufferSize) {
   const samplesMono = convertBuffer(arrayBuffer);
   let remaining = samplesMono.length;
-  for (let i = 0; remaining >= 0; i += maxSamples) {
-    const left = samplesMono.subarray(i, i + maxSamples);
+  for (let i = 0; remaining >= 0; i += bufferSize) {
+    const left = samplesMono.subarray(i, i + bufferSize);
     const mp3buf = mp3Encoder.encodeBuffer(left);
     appendToBuffer(mp3buf);
-    remaining -= maxSamples;
+    remaining -= bufferSize;
   }
 }
+
 function appendToBuffer(mp3Buf) {
   dataBuffer.push(new Int8Array(mp3Buf));
 }
+
 function convertBuffer(arrayBuffer) {
   // need to clone the incoming buffer otherwise we end up with 
   // samples reflecting the sound coming from the microphone at the instant we stopped recording
@@ -50,17 +45,18 @@ function convertBuffer(arrayBuffer) {
   floatTo16BitPCM(data, output);
   return output;
 }
+
 function floatTo16BitPCM(input, output) {
   for (let i = 0; i < input.length; i++) {
     const s = Math.max(-1, Math.min(1, input[i]));
     output[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
   }
 }
+
 function finishRecording() {
   appendToBuffer(mp3Encoder.flush());
   return new Blob(dataBuffer, { type: 'audio/mp3' });
 }
-
 
 
 
@@ -92,7 +88,6 @@ class Recorder extends React.Component {
         size : resolution
       });
 
-      // streams
       this.userMedia.connect(this.analyser);
     }
 
@@ -211,12 +206,11 @@ class Recorder extends React.Component {
   _drawBlobs() {
     return (
       <div>
-        {this.state.blob
-          ? <ReactAudioPlayer src={window.URL.createObjectURL(this.state.blob)} controls />
-          : null}
-        {this.state.backedupBlob
-          ? <ReactAudioPlayer src={window.URL.createObjectURL(this.state.backedupBlob)} controls />
-          : null}
+        {
+          this.state.blob
+            ? <ReactAudioPlayer src={window.URL.createObjectURL(this.state.blob)} controls />
+            : null
+        }
       </div>
     );
   }
@@ -287,18 +281,19 @@ class Recorder extends React.Component {
     // opening the input asks the user to activate their mic
     this.userMedia.open()
       .then(() => {
-        inititializeEncoder()
-
         // save a reference to the AudioContext
         this.context = this.userMedia.context._context;
 
+        inititializeEncoder(this.context.sampleRate)
+
         // a bufferSize of 0 instructs the browser to choose the best bufferSize
-        this.processor = this.context.createScriptProcessor(0, 1, 1);       
+        this.processor = this.context.createScriptProcessor(0, 1, 1);
+        const bufferSize = this.processor.bufferSize;
 
         this.processor.onaudioprocess = (event) => {
           const arrayBuffer = event.inputBuffer.getChannelData(0);
           // @todo move to webworker
-          encode(arrayBuffer);
+          encode(arrayBuffer, bufferSize);
         };
 
         // @todo tweak this for best performance
