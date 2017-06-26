@@ -1,6 +1,6 @@
 .container {
   text-align: center;
-  animation: fadein 3s;
+  animation: fadein .5s;
 }
 
 .not-supported-message {
@@ -14,6 +14,17 @@
   top: 0;
   left: 0;
   background-color: #0055B0;
+  opacity: .2;
+  animation: maskFadein .2s;
+}
+
+.red-mask {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: red;
   opacity: .2;
   animation: maskFadein .2s;
 }
