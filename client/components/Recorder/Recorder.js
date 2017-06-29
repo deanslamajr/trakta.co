@@ -73,6 +73,7 @@ class Recorder extends React.Component {
     };
 
     this.state = {
+      isRecording: false,
       disableRecording: true,
       currentPrompt: this.prompts.START,
       userMediaSupported: Tone.UserMedia.supported,
@@ -116,6 +117,10 @@ class Recorder extends React.Component {
     const canvasWidth = this.canvasContext.canvas.width;
     const canvasHeight = this.canvasContext.canvas.height;
 
+    let x;
+    let y;
+    let isWhite = false;
+
     // @todo do we need to be able to clean this up? or will we beable to do a redirect to another page to clear this work?
     requestAnimationFrame(this._drawWave);
 
@@ -125,14 +130,33 @@ class Recorder extends React.Component {
     this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
     this.canvasContext.beginPath();
     this.canvasContext.lineJoin = 'round';
-    this.canvasContext.lineWidth = 2;
-    this.canvasContext.strokeStyle = '#CCCCCC';
-    this.canvasContext.moveTo((values[0] / 255) * canvasWidth, 0);
+    if(this.state.isRecording) {
+      this.canvasContext.lineWidth = 5;
+      this.canvasContext.strokeStyle = 'red';
+    }
+    else {
+      this.canvasContext.lineWidth = 2;
+      this.canvasContext.strokeStyle = '#CCCCCC';
+    }
+    this.canvasContext.moveTo((values[0] / 255) * canvasWidth, canvasHeight);
+
+    const now = Date.now();
     
-    for (let i = 1; i < values.length; i++){
+    for (let i = values.length; i > 0; i--){
+      if(this.state.isRecording) {
+        if ((1-i/values.length) > ((now - this.state.recordingStartTime)/10000) && !isWhite) {
+          isWhite = true;
+          this.canvasContext.stroke();
+          this.canvasContext.lineWidth = 2;
+          this.canvasContext.strokeStyle = '#CCCCCC';
+          this.canvasContext.beginPath();
+          this.canvasContext.moveTo(x, y);
+          this.canvasContext.lineJoin = 'round';
+        }
+      }
       const val = values[i] / (resolution - 1);
-      const x = val * canvasWidth;
-      const y = (i / (resolution - 1)) * canvasHeight;
+      x = val * canvasWidth;
+      y = (i / (resolution - 1)) * canvasHeight;
       this.canvasContext.lineTo(x, y);
     }
 
@@ -233,6 +257,11 @@ class Recorder extends React.Component {
       this.userMedia.connect(this.processor);
       // if the ScriptProcessorNode is not connected to an output the "onaudioprocess" event is not triggered in chrome
       this.processor.connect(this.context.destination);
+
+      this.setState({ 
+        recordingStartTime: Date.now(),
+        isRecording: true 
+      });
     }
     else {
       // @todo log and metric
