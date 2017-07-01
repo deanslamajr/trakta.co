@@ -4,7 +4,6 @@ import express from 'express';
 import compression from 'compression';
 import { resolve as pathResolve } from 'path';
 import appRootDir from 'app-root-dir';
-import express_enforces_ssl from 'express-enforces-ssl';
 
 import reactApplication from './middleware/reactApplication';
 import security from './middleware/security';
@@ -21,11 +20,6 @@ const app = express();
 
 // Don't expose any software information to potential hackers.
 app.disable('x-powered-by');
-
-// Force HTTPS
-if (config('ENV') !== 'local') {
-  app.use(express_enforces_ssl());
-}
 
 // Security middlewares.
 app.use(...security);
