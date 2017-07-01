@@ -4,6 +4,7 @@ import express from 'express';
 import compression from 'compression';
 import { resolve as pathResolve } from 'path';
 import appRootDir from 'app-root-dir';
+import nocache from 'nocache';
 
 import reactApplication from './middleware/reactApplication';
 import security from './middleware/security';
@@ -48,7 +49,7 @@ app.use(express.static(pathResolve(appRootDir.get(), config('publicAssetsPath'))
 app.use('/api', api);
 
 // The React application middleware.
-app.get('*', reactApplication);
+app.get('*', nocache(), reactApplication);
 
 // Error Handler middlewares.
 app.use(...errorHandlers);
