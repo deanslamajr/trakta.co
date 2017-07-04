@@ -5,10 +5,13 @@ import Tone from 'tone';
 import lamejs from 'lamejs';
 import ReactAudioPlayer from 'react-audio-player';
 import axios from 'axios';
+import WaveformData from 'waveform-data';
 
 import styles from './Recorder.css'
 
 const resolution = 256;
+
+const audioBuffers = [];
 
 let dataBuffer;
 let mp3Encoder;
@@ -24,6 +27,7 @@ function clearBuffer() {
 
 function encode(arrayBuffer, bufferSize) {
   const samplesMono = convertBuffer(arrayBuffer);
+
   let remaining = samplesMono.length;
   for (let i = 0; remaining >= 0; i += bufferSize) {
     const left = samplesMono.subarray(i, i + bufferSize);
@@ -31,6 +35,11 @@ function encode(arrayBuffer, bufferSize) {
     appendToBuffer(mp3buf);
     remaining -= bufferSize;
   }
+}
+
+function generateMp3Blob() {
+  appendToBuffer(mp3Encoder.flush());
+  return new Blob(dataBuffer, { type: 'audio/mp3' });
 }
 
 function appendToBuffer(mp3Buf) {
@@ -41,7 +50,8 @@ function convertBuffer(arrayBuffer) {
   // need to clone the incoming buffer otherwise we end up with 
   // samples reflecting the sound coming from the microphone at the instant we stopped recording
   const data = new Float32Array(arrayBuffer);
-  const output = new Int16Array(arrayBuffer.length);
+  const output = new Int16Array(data.length);
+  
   floatTo16BitPCM(data, output);
   return output;
 }
@@ -49,15 +59,24 @@ function convertBuffer(arrayBuffer) {
 function floatTo16BitPCM(input, output) {
   for (let i = 0; i < input.length; i++) {
     const s = Math.max(-1, Math.min(1, input[i]));
+    // magic bit shuffling
     output[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
   }
 }
 
-function finishRecording() {
-  appendToBuffer(mp3Encoder.flush());
-  return new Blob(dataBuffer, { type: 'audio/mp3' });
-}
-
+/**
+ * Creates a new Uint8Array based on two different ArrayBuffers
+ *
+ * @param {ArrayBuffer} buffer1 The first buffer.
+ * @param {ArrayBuffer} buffer2 The second buffer.
+ * @return {ArrayBuffer} The new ArrayBuffer created out of the two.
+ */
+function appendBuffer(buffer1, buffer2) {
+  var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+  tmp.set(new Uint8Array(buffer1), 0);
+  tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+  return tmp.buffer;
+};
 
 
 class Recorder extends React.Component {
@@ -67,6 +86,7 @@ class Recorder extends React.Component {
     this.prompts = {
       START: this._renderInitializingRecorderPrompt.bind(this),
       STOP: this._renderStopRecordingPrompt.bind(this),
+      FINISHED: this._renderFinishedRecordingPrompt.bind(this),
       SAVE_PENDING: this._renderSaveRecordingPrompt.bind(this),
       SAVE_SUCCESS: this._renderSaveSuccessPrompt.bind(this),
       SAVE_ERROR: this._renderSaveErrorPrompt.bind(this),
@@ -78,7 +98,7 @@ class Recorder extends React.Component {
       disableRecording: true,
       currentPrompt: this.prompts.START,
       userMediaSupported: Tone.UserMedia.supported,
-      // @todo remove
+      drawWave: false,
       blob: undefined
     };
 
@@ -102,6 +122,8 @@ class Recorder extends React.Component {
     this._drawWave = this._drawWave.bind(this);
     this._renderUserMediaNotSupported = this._renderUserMediaNotSupported.bind(this);
     this._saveRecording = this._saveRecording.bind(this);
+    this._drawSample = this._drawSample.bind(this);
+    this._combineBuffers = this._combineBuffers.bind(this);
   }
 
   _renderUserMediaDenied() {
@@ -111,11 +133,13 @@ class Recorder extends React.Component {
   }
 
   _openRecorderAndBeginDrawingWaves() {
-    this.canvasContext = this.canvas.getContext('2d');
+    this.canvasContext = this.canvas.getContext('2d'); 
 
     // @todo have these resize with window resize
     this.canvasContext.canvas.width = this.canvas.width;
     this.canvasContext.canvas.height = this.canvas.height;
+
+    this.setState({ drawWave: true })
 
     this._drawWave();
   }
@@ -128,14 +152,15 @@ class Recorder extends React.Component {
     let y;
     let isWhite = false;
 
-    // @todo do we need to be able to clean this up? or will we beable to do a redirect to another page to clear this work?
-    requestAnimationFrame(this._drawWave);
+    if (this.state.drawWave) {
+      requestAnimationFrame(this._drawWave);
+    }
 
     // draw the waveform
     const values = this.analyser.analyse();
 
-    this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
     this.canvasContext.beginPath();
+    this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
     this.canvasContext.lineJoin = 'round';
     if(this.state.isRecording) {
       this.canvasContext.lineWidth = 5;
@@ -154,6 +179,7 @@ class Recorder extends React.Component {
         if ((1-i/values.length) > ((now - this.state.recordingStartTime)/10000) && !isWhite) {
           isWhite = true;
           this.canvasContext.stroke();
+          this.canvasContext.closePath();
           this.canvasContext.lineWidth = 2;
           this.canvasContext.strokeStyle = '#CCCCCC';
           this.canvasContext.beginPath();
@@ -168,6 +194,7 @@ class Recorder extends React.Component {
     }
 
     this.canvasContext.stroke();
+    this.canvasContext.closePath();
   }
 
   _renderInitializingRecorderPrompt() {
@@ -202,6 +229,91 @@ class Recorder extends React.Component {
     );
   }
 
+  _combineBuffers() {
+    let combinedArrayBuffer = audioBuffers[0];
+    for(let i = 1; i < audioBuffers.length; i++) {
+      combinedArrayBuffer = appendBuffer(combinedArrayBuffer, audioBuffers[i])
+    }
+    return combinedArrayBuffer;
+  }
+
+  _renderFinishedRecordingPrompt() {
+    return (
+      <div className={styles.label}>
+        <div className={styles.subsetSelector}>Selector</div>
+        <div className={styles.playButton}>
+          { this._drawBlobs() }
+        </div>
+        <div className={styles.retryButton}>Retry</div>
+        <div className={styles.saveButton}>Save</div>
+      </div>
+    );
+  }
+
+  _drawSample(buffer) {
+    const waveFormData = WaveformData.create(buffer);
+    waveFormData.offset(0, buffer.byteLength/4);
+
+
+    const ctx = this.canvasContext;
+
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+
+
+
+
+    const interpolateHeight = (total_height) => {
+      const amplitude = 256;
+      return (size) => total_height - ((size + 128) * total_height) / amplitude;
+    };
+    const y = interpolateHeight(canvasHeight);
+
+
+
+
+
+    // ctx.beginPath();
+    // ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    // ctx.closePath();
+    
+    // ctx.lineJoin = 'round';
+    // ctx.lineWidth = 2;
+    // ctx.strokeStyle = 'white';
+
+    // // from 0 to 100 
+    // ctx.beginPath();
+    // ctx.moveTo(0, canvasHeight/2);
+    // waveFormData.min.forEach((val, x) => ctx.lineTo(x + 0.5, y(val) + 0.5));
+    // ctx.stroke();
+    // ctx.closePath();
+
+    // // then looping back from 100 to 0
+    // ctx.beginPath();
+    // ctx.moveTo(canvasWidth, canvasHeight/2);
+    // waveFormData.max.reverse().forEach((val, x) => {
+    //   ctx.lineTo((waveFormData.offset_length - x) + 0.5, y(val) + 0.5);
+    // });
+    // ctx.stroke();
+    // ctx.closePath();
+
+    ctx.beginPath();
+
+    // from 0 to 100
+    waveFormData.min.forEach((val, x) => ctx.lineTo(x + 0.5, y(val) + 0.5));
+
+    // then looping back from 100 to 0
+    waveFormData.max.reverse().forEach((val, x) => {
+      ctx.lineTo((waveFormData.offset_length - x) + 0.5, y(val) + 0.5);
+    });
+
+    ctx.closePath();
+    ctx.stroke();
+    //this.canvas.fillStroke();
+
+
+  }
+
   _renderSaveRecordingPrompt() {
     this._saveRecording();
     return <div> saving recording... </div>;
@@ -227,7 +339,6 @@ class Recorder extends React.Component {
     return (
       <div>
         {this.state.currentPrompt()}
-        { /* @todo remove this */ this._drawBlobs()}
         <canvas 
           className={styles.container}
           width={width} 
@@ -239,6 +350,8 @@ class Recorder extends React.Component {
   }
 
   _drawBlobs() {
+    console.dir(this.state.blob);
+
     return (
       <div>
         {
@@ -273,27 +386,38 @@ class Recorder extends React.Component {
         recordingStartTime: Date.now(),
         isRecording: true 
       });
+
+      this.setState({ currentPrompt: this.prompts.STOP });
     }
     else {
       // @todo log and metric
       console.error('this.processor has not been initialized!');
     }
-
-    this.setState({ currentPrompt: this.prompts.STOP });
   }
 
   _stopRecording() {
-    if (this.processor) {
-      this.processor.disconnect();
-      console.log('Recorder has stopped recording');
-      const blob = finishRecording();
-      this.setState({ 
-        currentPrompt: this.prompts.SAVE_PENDING,
-        blob });
-    } 
-    else {
-      console.log('Error trying to stop recorder');
-    }
+    this.setState({ 
+      currentPrompt: this.prompts.FINISHED,
+      drawWave: false
+    });
+
+    // recorder cleanup
+    this.processor.disconnect();
+    
+    // combine audioBuffers
+    const summedBuffer = this._combineBuffers();
+    
+    // draw wave
+    const curriedDrawSample = this._drawSample.bind(this, summedBuffer);
+    requestAnimationFrame(curriedDrawSample);
+
+    // encode mp3
+    encode(summedBuffer, this.bufferSize); 
+    const blob = generateMp3Blob();
+
+    this.setState({ 
+      blob 
+    });
   }
 
   _saveRecording() {
@@ -328,12 +452,13 @@ class Recorder extends React.Component {
 
         // a bufferSize of 0 instructs the browser to choose the best bufferSize
         this.processor = this.context.createScriptProcessor(0, 1, 1);
-        const bufferSize = this.processor.bufferSize;
+        this.bufferSize = this.processor.bufferSize;
 
         this.processor.onaudioprocess = (event) => {
-          const arrayBuffer = event.inputBuffer.getChannelData(0);
-          // @todo move to webworker
-          encode(arrayBuffer, bufferSize);
+          const float32Array = event.inputBuffer.getChannelData(0); 
+          const arrayBuffer = float32Array.buffer.slice();
+
+          audioBuffers.push(arrayBuffer);
         };
 
         // @todo tweak this for best performance
