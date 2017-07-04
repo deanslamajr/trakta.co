@@ -70,6 +70,7 @@ class Recorder extends React.Component {
       SAVE_PENDING: this._renderSaveRecordingPrompt.bind(this),
       SAVE_SUCCESS: this._renderSaveSuccessPrompt.bind(this),
       SAVE_ERROR: this._renderSaveErrorPrompt.bind(this),
+      USER_MEDIA_DENIED: this._renderUserMediaDenied.bind(this)
     };
 
     this.state = {
@@ -101,6 +102,12 @@ class Recorder extends React.Component {
     this._drawWave = this._drawWave.bind(this);
     this._renderUserMediaNotSupported = this._renderUserMediaNotSupported.bind(this);
     this._saveRecording = this._saveRecording.bind(this);
+  }
+
+  _renderUserMediaDenied() {
+      return (
+        <div>Welp, you blew it!</div>
+      );
   }
 
   _openRecorderAndBeginDrawingWaves() {
@@ -336,8 +343,7 @@ class Recorder extends React.Component {
       .catch(err => {
         console.error(err);
         // @todo log and metric
-        // @todo show user a userful view
-        alert('user rejected userMedia request!');
+        this.setState({ currentPrompt: this.prompts.USER_MEDIA_DENIED });
       });
   }
 
