@@ -26,7 +26,7 @@ function HTML(props) {
             : null
         }
       </head>
-      <body style={{ backgroundColor: '#333333' }} >
+      <body style={{ backgroundColor: '#333333', margin: 0 }} >
         <div id="app" dangerouslySetInnerHTML={{ __html: appBodyString }} />
         {bodyElements}
       </body>

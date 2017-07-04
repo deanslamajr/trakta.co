@@ -185,7 +185,9 @@ class Recorder extends React.Component {
   _renderStartRecordingPrompt() {
     return (
       <div className={styles.blueMask} onClick={this._startRecording} >
-        Start
+        <div className={styles.label}>
+          tap to BEGIN recording
+        </div>
       </div>
     );
   }
@@ -193,7 +195,9 @@ class Recorder extends React.Component {
   _renderStopRecordingPrompt() {
     return (
       <div className={styles.redMask} onClick={this._stopRecording}>
-        Stop
+        <div className={styles.label}>
+          tap to END recording
+        </div>
       </div>
     );
   }
