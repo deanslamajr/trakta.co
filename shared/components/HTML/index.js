@@ -25,6 +25,9 @@ function HTML(props) {
             ? addStyles(css)
             : null
         }
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
       </head>
       <body style={{ backgroundColor: '#333333', margin: 0 }} >
         <div id="app" dangerouslySetInnerHTML={{ __html: appBodyString }} />
