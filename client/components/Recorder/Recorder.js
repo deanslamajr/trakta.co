@@ -11,18 +11,19 @@ import styles from './Recorder.css'
 
 const resolution = 256;
 
-const audioBuffers = [];
-
 let dataBuffer;
+let audioBuffers;
+
 let mp3Encoder;
 
 function inititializeEncoder(sampleRate) {
   mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
-  clearBuffer();
+  clearBuffers();
 }
 
-function clearBuffer() {
+function clearBuffers() {
   dataBuffer = [];
+  audioBuffers = [];
 }
 
 function encode(arrayBuffer, bufferSize) {
@@ -124,6 +125,7 @@ class Recorder extends React.Component {
     this._saveRecording = this._saveRecording.bind(this);
     this._drawSample = this._drawSample.bind(this);
     this._combineBuffers = this._combineBuffers.bind(this);
+    this._clickedRetry = this._clickedRetry.bind(this);
   }
 
   _renderUserMediaDenied() {
@@ -139,6 +141,7 @@ class Recorder extends React.Component {
     this.canvasContext.canvas.width = this.canvas.width;
     this.canvasContext.canvas.height = this.canvas.height;
 
+    // draw waves
     this.setState({ drawWave: true })
 
     this._drawWave();
@@ -237,6 +240,17 @@ class Recorder extends React.Component {
     return combinedArrayBuffer;
   }
 
+  _clickedRetry() {
+    clearBuffers();
+
+    this.setState(
+      { 
+        currentPrompt: this.prompts.START,
+        drawWave: true 
+      }, 
+      () => this._drawWave())
+  }
+
   _renderFinishedRecordingPrompt() {
     return (
       <div className={styles.label}>
@@ -244,7 +258,7 @@ class Recorder extends React.Component {
         <div className={styles.playButton}>
           { this._drawBlobs() }
         </div>
-        <div className={styles.retryButton}>Retry</div>
+        <div className={styles.retryButton} onClick={this._clickedRetry} >Retry</div>
         <div className={styles.saveButton}>Save</div>
       </div>
     );
@@ -350,8 +364,6 @@ class Recorder extends React.Component {
   }
 
   _drawBlobs() {
-    console.dir(this.state.blob);
-
     return (
       <div>
         {
@@ -398,6 +410,7 @@ class Recorder extends React.Component {
   _stopRecording() {
     this.setState({ 
       currentPrompt: this.prompts.FINISHED,
+      isRecording: false,
       drawWave: false
     });
 

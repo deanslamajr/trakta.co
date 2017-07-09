@@ -20,10 +20,10 @@
 
 .label {
   position: absolute;
-  top: 50%;
+  top: 20%;
   width: 100%;
   text-align: center;
-  font-size: 4rem;
+  font-size: 3.5rem;
   color: white;
 }
 
