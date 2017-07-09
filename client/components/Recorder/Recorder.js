@@ -273,6 +273,9 @@ class Recorder extends React.Component {
 
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
+    // ctx.beginPath();
+    // ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    // ctx.closePath();
 
 
 
@@ -408,6 +411,18 @@ class Recorder extends React.Component {
   }
 
   _stopRecording() {
+    // clear canvas
+    requestAnimationFrame(() => {
+      const ctx = this.canvasContext;
+
+      const canvasWidth = ctx.canvas.width;
+      const canvasHeight = ctx.canvas.height;
+      
+      ctx.beginPath();
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.closePath();
+    })
+    
     this.setState({ 
       currentPrompt: this.prompts.FINISHED,
       isRecording: false,
@@ -421,8 +436,8 @@ class Recorder extends React.Component {
     const summedBuffer = this._combineBuffers();
     
     // draw wave
-    const curriedDrawSample = this._drawSample.bind(this, summedBuffer);
-    requestAnimationFrame(curriedDrawSample);
+    // const curriedDrawSample = this._drawSample.bind(this, summedBuffer);
+    // requestAnimationFrame(curriedDrawSample);
 
     // encode mp3
     encode(summedBuffer, this.bufferSize); 
