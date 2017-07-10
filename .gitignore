@@ -1,8 +1,14 @@
 # Environment Configuration
 .env
 
+# sequelize migration env config
+config/config.json
+
 # Build output folders
 build/
+
+# Dockerized postgresql persistance
+etc/docker/postgresql/9.6
 
 # Logs
 logs

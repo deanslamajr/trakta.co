@@ -40,6 +40,13 @@ const values = {
   // AWS Secret access key
   AWS_SECRET_ACCESS_KEY: EnvVars.string('AWS_SECRET_ACCESS_KEY'),
 
+  // POSTGRESQL
+  //
+  PGDB_DBNAME: EnvVars.string('PGDB_DBNAME'),
+  PGDB_USERNAME: EnvVars.string('PGDB_USERNAME'),
+  PGDB_PASSWORD: EnvVars.string('PGDB_PASSWORD'),
+  PGDB_HOST: EnvVars.string('PGDB_HOST'),
+
   // The port on which the client bundle development server should run.
   clientDevServerPort: EnvVars.number('CLIENT_DEV_PORT', 7331),
 

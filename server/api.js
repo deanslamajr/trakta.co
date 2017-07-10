@@ -1,9 +1,9 @@
 import express from 'express';
 
-import { add as addSample } from './controllers/samples';
+import { initialize as initializeGame } from './controllers/game';
 
 const router = express.Router();
 
-router.post('/sample', addSample);
+router.post('/initialize', initializeGame);
 
 export default router;

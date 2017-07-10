@@ -258,8 +258,8 @@ class Recorder extends React.Component {
         <div className={styles.playButton}>
           { this._drawBlobs() }
         </div>
-        <div className={styles.retryButton} onClick={this._clickedRetry} >Retry</div>
-        <div className={styles.saveButton}>Save</div>
+        <div className={styles.retryButton} onClick={this._clickedRetry}>Retry</div>
+        <div className={styles.saveButton} onClick={this._saveRecording}>Save</div>
       </div>
     );
   }
@@ -332,7 +332,6 @@ class Recorder extends React.Component {
   }
 
   _renderSaveRecordingPrompt() {
-    this._saveRecording();
     return <div> saving recording... </div>;
   }
 
@@ -449,6 +448,11 @@ class Recorder extends React.Component {
   }
 
   _saveRecording() {
+    // @todo show better save animation
+    this.setState({
+      currentPrompt: this.prompts.SAVE_PENDING
+    })
+
     const data = new FormData();
     data.append('file', new File([this.state.blob], 'sample.mp3'));
 
@@ -461,7 +465,7 @@ class Recorder extends React.Component {
     };
 
     axios
-      .post('/api/sample', data, config)
+      .post('/api/initialize', data, config)
       .then(() => this.setState({ currentPrompt: this.prompts.SAVE_SUCCESS }))
       .catch((err) => {
         // @todo log error
