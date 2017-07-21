@@ -1,12 +1,21 @@
 {
-  "projectName": "react-universally",
-  "projectOwner": "ctrlplusb",
+  "projectName": "trakta.co",
+  "projectOwner": "deanslamajr",
   "files": [
     "README.md"
   ],
   "imageSize": 100,
   "commit": true,
   "contributors": [
+    {
+      "login": "deanslamajr",
+      "name": "Dean Slama Jr",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/7927187?v=3",
+      "profile": "https://github.com/deanslamajr",
+      "contributions": [
+        "code"
+      ]
+    },
     {
       "login": "aoc",
       "name": "Andrés Calabrese",

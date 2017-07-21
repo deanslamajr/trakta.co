@@ -20,7 +20,8 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "migrate": "sequelize db:migrate",
-    "migrate:undo": "sequelize db:migrate:undo"
+    "migrate:undo": "sequelize db:migrate:undo",
+    "generate": "all-contributors generate"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -91,6 +92,7 @@
     "waveform-data": "^2.0.1"
   },
   "devDependencies": {
+    "all-contributors-cli": "^4.3.0",
     "assets-webpack-plugin": "3.5.1",
     "babel-cli": "6.24.1",
     "babel-core": "6.24.1",
