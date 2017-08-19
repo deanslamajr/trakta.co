@@ -4,8 +4,9 @@ import viewportDimensions from 'viewport-dimensions';
 import Tone from 'tone';
 import lamejs from 'lamejs';
 import ReactAudioPlayer from 'react-audio-player';
-import axios from 'axios';
 import WaveformData from 'waveform-data';
+
+import Staging from '../Staging';
 
 import styles from './Recorder.css'
 
@@ -89,13 +90,14 @@ class Recorder extends React.Component {
       STOP: this._renderStopRecordingPrompt.bind(this),
       FINISHED: this._renderFinishedRecordingPrompt.bind(this),
       SAVE_PENDING: this._renderSaveRecordingPrompt.bind(this),
-      SAVE_SUCCESS: this._renderSaveSuccessPrompt.bind(this),
+      STAGING: this._renderStagingPrompt.bind(this),
       SAVE_ERROR: this._renderSaveErrorPrompt.bind(this),
       USER_MEDIA_DENIED: this._renderUserMediaDenied.bind(this)
     };
 
     this.state = {
       isRecording: false,
+      isLoading: true,
       disableRecording: true,
       currentPrompt: this.prompts.START,
       userMediaSupported: Tone.UserMedia.supported,
@@ -122,10 +124,10 @@ class Recorder extends React.Component {
     this._openRecorderAndBeginDrawingWaves = this._openRecorderAndBeginDrawingWaves.bind(this);
     this._drawWave = this._drawWave.bind(this);
     this._renderUserMediaNotSupported = this._renderUserMediaNotSupported.bind(this);
-    this._saveRecording = this._saveRecording.bind(this);
     this._drawSample = this._drawSample.bind(this);
     this._combineBuffers = this._combineBuffers.bind(this);
     this._clickedRetry = this._clickedRetry.bind(this);
+    this._clickUseThisSelection = this._clickUseThisSelection.bind(this);
   }
 
   _renderUserMediaDenied() {
@@ -252,16 +254,30 @@ class Recorder extends React.Component {
   }
 
   _renderFinishedRecordingPrompt() {
+    
+
     return (
-      <div className={styles.label}>
-        <div className={styles.subsetSelector}>Selector</div>
-        <div className={styles.playButton}>
-          { this._drawBlobs() }
-        </div>
-        <div className={styles.retryButton} onClick={this._clickedRetry}>Retry</div>
-        <div className={styles.saveButton} onClick={this._saveRecording}>Save</div>
+      <div>
+        {
+          this.state.isLoading
+            ? (<div>Loading audio</div>)
+            : (
+                <div className={styles.label}>
+                  <div className={styles.subsetSelector}>Selector</div>
+                  { this._drawBlobs() }
+                  <div className={styles.retryButton} onClick={this._clickedRetry}>Do another recording</div>
+                  <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
+                </div>  
+              )
+        }
       </div>
     );
+  }
+
+  _clickUseThisSelection() {
+    this.setState({
+      currentPrompt: this.prompts.STAGING
+    });
   }
 
   _drawSample(buffer) {
@@ -339,8 +355,14 @@ class Recorder extends React.Component {
     return <div>Ice Cream melted :(</div>;
   }
 
-  _renderSaveSuccessPrompt() {
-    return <div>Taco crunchy!</div>;
+  _renderStagingPrompt() {
+    if (this.state.buff) {
+      const duration = this.state.buff.duration;
+      return <Staging blob={this.state.blob} duration={duration} showMainMenu={this.props.showMainMenu}/>;
+    }
+    else {
+      return null;
+    }
   }
 
   _renderUserMediaSupported() {
@@ -367,12 +389,14 @@ class Recorder extends React.Component {
 
   _drawBlobs() {
     return (
-      <div>
+      <div className={styles.playButton}>
+        <div>
         {
           this.state.blob
             ? <ReactAudioPlayer src={window.URL.createObjectURL(this.state.blob)} controls />
             : null
         }
+        </div>
       </div>
     );
   }
@@ -443,34 +467,26 @@ class Recorder extends React.Component {
     const blob = generateMp3Blob();
 
     this.setState({ 
-      blob 
+      blob,
+      isLoading: true
     });
-  }
 
-  _saveRecording() {
-    // @todo show better save animation
-    this.setState({
-      currentPrompt: this.prompts.SAVE_PENDING
-    })
-
-    const data = new FormData();
-    data.append('file', new File([this.state.blob], 'sample.mp3'));
-
-    const config = {
-      onUploadProgress: (progressEvent) => {
-        console.log(
-          `upload progress: ${Math.round(progressEvent.loaded * 100 / progressEvent.total)}`,
-        );
+    const buffer = new Tone.Buffer(window.URL.createObjectURL(blob),
+      // success
+      () => {
+        const buff = buffer.get();
+        this.setState({ 
+          isLoading: false,
+          buff
+        })
       },
-    };
-
-    axios
-      .post('/api/initialize', data, config)
-      .then(() => this.setState({ currentPrompt: this.prompts.SAVE_SUCCESS }))
-      .catch((err) => {
-        // @todo log error
-        this.setState({ currentPrompt: this.prompts.SAVE_ERROR });
-      });
+      // error
+      // @todo log
+      error => {
+        
+        console.error(error);
+      }
+    );
   }
 
   componentDidMount() {

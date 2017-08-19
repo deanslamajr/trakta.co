@@ -4,7 +4,7 @@
 }
 
 .not-supported-message {
-  color: white;
+  color: #000000;
 }
 
 .blue-mask {
@@ -13,9 +13,10 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: #0055B0;
-  opacity: .2;
+  background-color: #008ace;
+  opacity: .5;
   animation: maskFadein .2s;
+  cursor: pointer;
 }
 
 .label {
@@ -24,7 +25,11 @@
   width: 100%;
   text-align: center;
   font-size: 3.5rem;
-  color: white;
+  color: #000000;
+  -webkit-user-select: none; /* Chrome, Opera, Safari */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
 }
 
 .red-mask {
@@ -33,9 +38,34 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: red;
-  opacity: .2;
+  background-color: #f53838;
+  opacity: .5;
   animation: maskFadein .2s;
+  cursor: pointer;
+}
+
+.retry-button {
+  font-size: 3.5rem;
+  color: #000000;
+  opacity: .5;
+  background-color: orangered;
+  -webkit-user-select: none; /* Chrome, Opera, Safari */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+  cursor: pointer;
+}
+
+.save-button {
+  font-size: 3.5rem;
+  color: #000000;
+  opacity: .5;
+  background-color: #e3ff00;
+  -webkit-user-select: none; /* Chrome, Opera, Safari */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+  cursor: pointer;
 }
 
 @keyframes maskFadein {

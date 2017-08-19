@@ -14,6 +14,9 @@ const Player = sequelize.define('players',
       type: Sequelize.INTEGER,
       defaultValue: 0,
       allowNull: false
+    },
+    name: {
+      type: Sequelize.STRING
     }
   },
   {
@@ -23,4 +26,9 @@ const Player = sequelize.define('players',
   }
 );
 
-export default Player
+const ANONYMOUS_PLAYER_ID = '014f476a-6c9c-403c-9b43-c1448a4b29a6'
+
+export {
+  Player as default,
+  ANONYMOUS_PLAYER_ID
+}

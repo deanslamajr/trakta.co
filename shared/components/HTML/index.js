@@ -29,7 +29,7 @@ function HTML(props) {
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
       </head>
-      <body style={{ backgroundColor: '#333333', margin: 0 }} >
+      <body style={{ backgroundColor: '#FDFDFD', margin: 0 }} >
         <div id="app" dangerouslySetInnerHTML={{ __html: appBodyString }} />
         {bodyElements}
       </body>

@@ -46,3 +46,5 @@ class RecorderRoute extends React.Component {
 }
 
 export default withStyles(styles)(RecorderRoute)
+
+export { RecorderRoute }

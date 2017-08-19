@@ -2,22 +2,19 @@
 
 exports[`<RecorderRoute /> renders 1`] = `
 <div
-  style={
-    Object {
-      "textAlign": "center",
-    }
-  }
+  className="container"
 >
   <HelmetWrapper
     encodeSpecialCharacters={true}
   >
     <title>
-      tracta.co - recorder
+      recorder - tracta.co
     </title>
   </HelmetWrapper>
-  <div>
-    Waiting on encoder to initialize
+  <div
+    className="loadingMessage"
+  >
+    !!Loading!!
   </div>
-  <div />
 </div>
 `;

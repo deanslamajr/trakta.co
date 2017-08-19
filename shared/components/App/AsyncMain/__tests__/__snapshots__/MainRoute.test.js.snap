@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<MainRoute /> renders 1`] = `
+<div
+  className="container"
+>
+  <HelmetWrapper
+    encodeSpecialCharacters={true}
+  >
+    <title>
+      recorder - tracta.co
+    </title>
+  </HelmetWrapper>
+  <div
+    className="canvasContainer"
+  >
+    <div
+      className="label"
+    >
+      <div
+        className="playButton"
+      >
+        🔊
+      </div>
+      <div
+        className="contributeButton"
+        onClick={[Function]}
+      >
+        ➕
+      </div>
+    </div>
+  </div>
+</div>
+`;

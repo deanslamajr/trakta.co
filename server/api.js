@@ -1,9 +1,20 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 
-import { initialize as initializeGame } from './controllers/game';
+import { create as createSample } from './controllers/sample';
+import { getAll as getAllSampleInstances } from './controllers/sample-instances';
+
 
 const router = express.Router();
 
-router.post('/initialize', initializeGame);
+/**
+ * Client posts mp3 stream here
+ */
+router.post('/sample', createSample);
+
+/**
+ * Prototype: give me all the samples
+ */
+router.get('/sampleInstances', getAllSampleInstances);
 
 export default router;

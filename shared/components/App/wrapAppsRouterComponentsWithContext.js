@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import AsyncRecorder from './AsyncRecorder';
+import AsyncMain from './AsyncMain';
 
 import App from './App';
 
@@ -33,6 +34,10 @@ export default function wrapAppsRouterComponentsWithContext(insertCssLambda) {
    * isomorphic-style-loader wrapped components
    */
   const ContextWrappedAsyncRecorder = wrapComponentWithContext(AsyncRecorder, insertCssLambda);
+  const ContextWrappedAsyncMain = wrapComponentWithContext(AsyncMain, insertCssLambda);
 
-  return App({ ContextWrappedAsyncRecorder });
+  return App({ 
+    ContextWrappedAsyncRecorder, 
+    ContextWrappedAsyncMain 
+  });
 }

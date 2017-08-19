@@ -13,6 +13,10 @@ const Samples = sequelize.define('samples',
     url: {
       type: Sequelize.STRING,
       allowNull: false
+    },
+    duration: {
+      type: Sequelize.DOUBLE,
+      allowNull: false
     }
   },
   {

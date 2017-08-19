@@ -21,6 +21,7 @@
     "test:coverage": "jest --coverage",
     "migrate": "sequelize db:migrate",
     "migrate:undo": "sequelize db:migrate:undo",
+    "migrate:add": "sequelize migration:create",
     "generate": "all-contributors generate"
   },
   "jest": {
@@ -32,7 +33,11 @@
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/(build|internal|node_modules|flow-typed|public)/"
-    ]
+    ],
+      "moduleNameMapper": {
+        "\\.(css)$": "identity-obj-proxy"
+      }
+
   },
   "repository": {
     "type": "git",
@@ -56,6 +61,7 @@
     "app-root-dir": "1.0.2",
     "aws-sdk": "^2.62.0",
     "axios": "^0.16.1",
+    "body-parser": "^1.17.2",
     "colors": "1.1.2",
     "compression": "1.6.2",
     "cross-env": "4.0.0",
@@ -121,6 +127,7 @@
     "glob": "7.1.1",
     "happypack": "3.0.3",
     "html-webpack-plugin": "2.28.0",
+    "identity-obj-proxy": "^3.0.0",
     "isomorphic-style-loader": "^2.0.0",
     "jest": "19.0.2",
     "md5": "2.2.1",

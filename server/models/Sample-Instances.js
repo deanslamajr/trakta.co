@@ -11,16 +11,19 @@ const SampleInstances = sequelize.define('sample_instances',
       allowNull: false
     },
     start_time: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+      type: Sequelize.DOUBLE,
+      allowNull: false,
+      defaultValue: 0.0
     },
     volume: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+      type: Sequelize.DOUBLE,
+      allowNull: false,
+      defaultValue: -6.0
     },
     panning: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+      type: Sequelize.DOUBLE,
+      allowNull: false,
+      defaultValue: 0.0
     }
   },
   {
