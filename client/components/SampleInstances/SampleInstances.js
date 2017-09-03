@@ -1,6 +1,8 @@
 import React from 'react';
 import viewportDimensions from 'viewport-dimensions';
 
+import calculateInstanceRectangles from './calculateInstanceRectangles';
+
 function drawRectangles(rowsOfRectangles, viewportWidth, viewportHeight) {
   const rowsCount = rowsOfRectangles.length;
   const rowHeight = viewportHeight / rowsCount;
@@ -27,7 +29,11 @@ function drawRectangles(rowsOfRectangles, viewportWidth, viewportHeight) {
   );
 }
 
-const TrackViewport = ({ rowsOfRectangles }) => {
+const SampleInstances = ({ instances, windowStartTime, windowLength }) => {
+  if (instances.length === 0) {
+    return null;
+  }
+
   const width = viewportDimensions 
     ? viewportDimensions.width() && viewportDimensions.width()
     : 300;
@@ -35,7 +41,19 @@ const TrackViewport = ({ rowsOfRectangles }) => {
     ? viewportDimensions.height() && viewportDimensions.height()
     : 300;
 
+  const samples = instances.map(
+    instance => {
+      return {
+        start_time: instance.start_time,
+        duration: instance.sample.duration,
+        id: instance.id
+      }
+    }
+  );
+
+  const rowsOfRectangles = calculateInstanceRectangles(windowStartTime, windowLength, samples);
+
   return drawRectangles(rowsOfRectangles, width, height);
 }
 
-export default TrackViewport;
+export default SampleInstances;

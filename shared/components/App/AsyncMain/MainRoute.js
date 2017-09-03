@@ -6,11 +6,14 @@ import axios from 'axios';
 import config from '../../../../config';
 
 import Recorder from '../../../../client/components/Recorder';
-import TrackViewport from '../../../../client/components/TrackViewport';
-
-import calculateInstanceRectangles from '../../../../client/components/calculateInstanceRectangles';
+import SampleInstances from '../../../../client/components/SampleInstances';
+import InstancePlaylist from '../../../../client/components/InstancePlaylist';
 
 import styles from './styles.css';
+
+// @todo dynamically generate these
+const windowStartTime = 0;
+const windowLength = 5;
 
 class MainRoute extends React.Component {
   constructor(props) {
@@ -19,11 +22,13 @@ class MainRoute extends React.Component {
     this.state = {
       isClient: false,
       subview: null,
-      rowsOfRectangles: [ [] ]
+      instances: []
     };
 
     this._showContribute = this._showContribute.bind(this);
     this._showMainMenu = this._showMainMenu.bind(this);
+    this._renderLoadingComponent = this._renderLoadingComponent.bind(this);
+    this._renderPlayComponent = this._renderPlayComponent.bind(this);
 
     this.views = {
       contribute: Recorder
@@ -36,16 +41,9 @@ class MainRoute extends React.Component {
   _getSampleInstances() {
     axios.get('/api/sampleInstances')
       .then(({ data }) => {
-        const samples = data.map(instance => {
-          return {
-            start_time: instance.start_time,
-            duration: instance.sample.duration,
-            id: instance.id
-          }
-        });
-
-        const rowsOfRectangles = calculateInstanceRectangles(0, 5, samples);
-        this.setState({ rowsOfRectangles })
+        this.setState({
+          instances: data
+        })
       })
       .catch(error => {
         // @todo log
@@ -59,14 +57,36 @@ class MainRoute extends React.Component {
     })
   }
 
+  _renderLoadingComponent() {
+    return (<div className={styles.loadingButton}>Loading</div>);
+  }
+
+  _renderPlayComponent(clickHandler) {
+    return (<div className={styles.playButton} onClick={clickHandler}>&#128266;</div>);
+  }
+
   _renderMainMenu() {
+    // on server, this should only concern itself with displaying a load animation
+    // on top of notched track background, showing the correct time labels related to
+    // the current track viewport
     return (
       <div className={styles.canvasContainer}>
         <div className={styles.label}>
-          <div className={styles.playButton}>&#128266;</div>
+          <InstancePlaylist
+            instances={this.state.instances}
+            renderLoadingComponent={this._renderLoadingComponent}
+            renderPlayButtonComponent={this._renderPlayComponent}
+            windowLength={windowLength} 
+            windowStartTime={windowStartTime} />
           <div className={styles.contributeButton} onClick={this._showContribute}>&#10133;</div>
         </div>
-        { this.state.isClient && <TrackViewport rowsOfRectangles={this.state.rowsOfRectangles} /> }
+        
+        { this.state.isClient &&
+            <SampleInstances 
+              instances={this.state.instances}
+              windowLength={windowLength} 
+              windowStartTime={windowStartTime}/>
+        }
       </div>
     )
   }

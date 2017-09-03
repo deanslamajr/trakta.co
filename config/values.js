@@ -26,7 +26,11 @@ const values = {
     polyfillIO: true,
     // We need to expose all the htmlPage settings.
     htmlPage: true,
+    
+    s3SampleBucket: true
   },
+
+  s3SampleBucket: EnvVars.string('S3_SAMPLE_BUCKET_URL'),
 
   // The host on which the server should run.
   host: EnvVars.string('HOST', '0.0.0.0'),
