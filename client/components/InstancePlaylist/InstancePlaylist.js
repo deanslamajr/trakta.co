@@ -49,7 +49,16 @@ class InstancePlaylist extends React.Component {
           else {
             const url = `${baseUrl}/${instance.sample.url}`;
 
-            samplePlayer = new Tone.Player(url, () => resolve()).toMaster();
+            samplePlayer = new Tone.Player(url, () => resolve());
+
+            // Plugins
+            //
+            const panVol = new Tone.PanVol(instance.panning, instance.volume);
+            const limiter = new Tone.Limiter(-6)
+
+            samplePlayer.chain(panVol, limiter, Tone.Master);
+            // samplePlayer.chain(panVol, Tone.Master);
+
             samplePlayer.sync().start(startTime).stop(windowLength - windowStartTime);
             // cache the player
             samplesCache[instance.sample.id] = samplePlayer;

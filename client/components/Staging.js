@@ -9,8 +9,8 @@ class Staging extends React.Component {
     super(props)
 
     this.state = {
-      volume: -6,
-      panning: .5,
+      volume: 0,
+      panning: 0,
       startTime: 0
     }
 
@@ -54,9 +54,9 @@ class Staging extends React.Component {
       <form className={styles.container} onSubmit={this._saveRecording}>
         <label htmlFor='startTime'>startTime</label>
         <input id='startTime' type='number' value={this.state.startTime} onChange={this.handleChange.bind(this, 'startTime')} placeholder='startTime' className={styles.formInput} />
-        <label htmlFor='volume'>volume</label>
+        <label htmlFor='volume'>volume (-infinity to 0)</label>
         <input id='volume' type='number' value={this.state.volume} onChange={this.handleChange.bind(this, 'volume')} placeholder='volume' className={styles.formInput} />
-        <label htmlFor='panning'>panning</label>
+        <label htmlFor='panning'>panning (-1 to 1)</label>
         <input id='panning' type='number' value={this.state.panning} onChange={this.handleChange.bind(this, 'panning')} placeholder='panning' className={styles.formInput} />
         <input type='submit' value='Create Instance' className={styles.formInput} />
       </form>
