@@ -8,3 +8,27 @@
   width: 20%;
   margin: 0.75rem auto;
 }
+
+.form-saving {
+  opacity: 0.25; 
+  cursor: not-allowed;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  border: .25rem solid #171717;
+  border-top-color: white;
+  animation: spin 1s infinite linear;
+  margin: 0 auto;
+}

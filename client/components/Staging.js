@@ -1,6 +1,7 @@
-import React from 'react'
+import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import axios from 'axios'
+import axios from 'axios';
+import classnames from 'classnames';
 
 import styles from './staging.css'
 
@@ -11,7 +12,8 @@ class Staging extends React.Component {
     this.state = {
       volume: 0,
       panning: 0,
-      startTime: 0
+      startTime: 0,
+      isSaving: false
     }
 
     this._saveRecording = this._saveRecording.bind(this)
@@ -27,6 +29,7 @@ class Staging extends React.Component {
     event.preventDefault();
 
     // show save animation
+    this.setState({ isSaving: true })
 
     const data = new FormData();
     data.append('file', new File([this.props.blob], 'sample.mp3'));
@@ -58,7 +61,8 @@ class Staging extends React.Component {
         <input id='volume' type='number' value={this.state.volume} onChange={this.handleChange.bind(this, 'volume')} placeholder='volume' className={styles.formInput} />
         <label htmlFor='panning'>panning (-1 to 1)</label>
         <input id='panning' type='number' value={this.state.panning} onChange={this.handleChange.bind(this, 'panning')} placeholder='panning' className={styles.formInput} />
-        <input type='submit' value='Create Instance' className={styles.formInput} />
+        <input type='submit' value='Create Instance' className={classnames(styles.formInput, { [styles.formSaving]: this.state.isSaving })} />
+        <div className={classnames({ [styles.loading]: this.state.isSaving })} />
       </form>
     )
   }

@@ -34,10 +34,9 @@
     "testPathIgnorePatterns": [
       "<rootDir>/(build|internal|node_modules|flow-typed|public)/"
     ],
-      "moduleNameMapper": {
-        "\\.(css)$": "identity-obj-proxy"
-      }
-
+    "moduleNameMapper": {
+      "\\.(css)$": "identity-obj-proxy"
+    }
   },
   "repository": {
     "type": "git",
@@ -62,6 +61,7 @@
     "aws-sdk": "^2.62.0",
     "axios": "^0.16.1",
     "body-parser": "^1.17.2",
+    "classnames": "^2.2.5",
     "colors": "1.1.2",
     "compression": "1.6.2",
     "cross-env": "4.0.0",

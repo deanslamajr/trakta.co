@@ -54,10 +54,9 @@ class InstancePlaylist extends React.Component {
             // Plugins
             //
             const panVol = new Tone.PanVol(instance.panning, instance.volume);
-            const limiter = new Tone.Limiter(-6)
+            //const limiter = new Tone.Limiter(-6)
 
-            samplePlayer.chain(panVol, limiter, Tone.Master);
-            // samplePlayer.chain(panVol, Tone.Master);
+            samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
 
             samplePlayer.sync().start(startTime).stop(windowLength - windowStartTime);
             // cache the player
