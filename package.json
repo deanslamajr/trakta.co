@@ -58,6 +58,7 @@
   "homepage": "https://github.com/ctrlplusb/react-universally#readme",
   "dependencies": {
     "app-root-dir": "1.0.2",
+    "autoprefixer": "^7.1.4",
     "aws-sdk": "^2.62.0",
     "axios": "^0.16.1",
     "body-parser": "^1.17.2",

@@ -3,6 +3,8 @@ import viewportDimensions from 'viewport-dimensions';
 
 import calculateInstanceRectangles from './calculateInstanceRectangles';
 
+const padding = 5;
+
 function drawRectangles(rowsOfRectangles, viewportWidth, viewportHeight) {
   const rowsCount = rowsOfRectangles.length;
   const rowHeight = viewportHeight / rowsCount;
@@ -14,11 +16,14 @@ function drawRectangles(rowsOfRectangles, viewportWidth, viewportHeight) {
         const newRectangles = rowOfRectangles.map(({ scaledStartPos, scaledDuration, id }) => (
           <rect
             key={id}
-            x={scaledStartPos * viewportWidth}
-            y={index * rowHeight}
-            width={scaledDuration * viewportWidth}
-            height={rowHeight}
-            fill={'#000000'}
+            x={(scaledStartPos * viewportWidth) + padding}
+            y={(index * rowHeight) + padding}
+            width={(scaledDuration * viewportWidth) - padding}
+            height={rowHeight - padding}
+            fill='#cfcfcf'
+            stroke='black'
+            strokeWidth='.15'
+            strokeLinecap="round"
           />
         ))
 

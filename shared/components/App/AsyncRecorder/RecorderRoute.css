@@ -1,8 +1,10 @@
+@import "../../../colors.css";
+
 .container {
   text-align: center;
 }
 
 .loading-message {
-  color: white;
+  color: var(--white);
   font-size: 40px;
 }

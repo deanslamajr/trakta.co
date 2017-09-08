@@ -407,7 +407,17 @@ export default function webpackConfigFactory(buildOptions) {
                 camelCase: true
               }
             },
-            { path: 'postcss-loader' },
+            { 
+              path: 'postcss-loader',
+              query: {
+                plugins: (loader) => [
+                  require('postcss-import')({ root: loader.resourcePath }),
+                  // require('postcss-cssnext')(),
+                  require('autoprefixer')(),
+                  // require('cssnano')()
+                ]
+              } 
+            },
           ],
         }),
       ),
@@ -460,7 +470,17 @@ export default function webpackConfigFactory(buildOptions) {
                     camelCase: true
                   }
                 },
-                'postcss-loader',
+                { 
+                  loader: 'postcss-loader',
+                  query: {
+                    plugins: (loader) => [
+                      require('postcss-import')({ root: loader.resourcePath }),
+                      // require('postcss-cssnext')(),
+                      require('autoprefixer')(),
+                      // require('cssnano')()
+                    ]
+                  } 
+                }
               ],
             })),
             ifNode({
@@ -476,7 +496,17 @@ export default function webpackConfigFactory(buildOptions) {
                     camelCase: true
                   }
                 },
-                'postcss-loader'
+                { 
+                  loader: 'postcss-loader',
+                  query: {
+                    plugins: (loader) => [
+                      require('postcss-import')({ root: loader.resourcePath }),
+                      // require('postcss-cssnext')(),
+                      require('autoprefixer')(),
+                      // require('cssnano')()
+                    ]
+                  }
+                }
               ],
             }),
           ),

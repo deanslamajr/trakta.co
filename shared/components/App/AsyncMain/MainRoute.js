@@ -2,6 +2,7 @@ import React from 'react';
 import Helmet from 'react-helmet';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import axios from 'axios';
+import classnames from 'classnames';
 
 import config from '../../../../config';
 
@@ -11,9 +12,13 @@ import InstancePlaylist from '../../../../client/components/InstancePlaylist';
 
 import styles from './styles.css';
 
-// @todo dynamically generate these
-const windowStartTime = 0;
-const windowLength = 5;
+/**
+ * This mock simulates the movement of the windowStartTime
+ * according to which turn the player is currently on
+ */
+function simulateServerPing() {
+  return Promise.resolve(5);
+}
 
 class MainRoute extends React.Component {
   constructor(props) {
@@ -22,7 +27,9 @@ class MainRoute extends React.Component {
     this.state = {
       isClient: false,
       subview: null,
-      instances: []
+      instances: [],
+      windowLength: 10,
+      windowStartTime: 0
     };
 
     this._showContribute = this._showContribute.bind(this);
@@ -58,11 +65,17 @@ class MainRoute extends React.Component {
   }
 
   _renderLoadingComponent() {
-    return (<div className={styles.loadingButton}>Loading</div>);
+    return (<div className={styles.loading}>
+      <span className={styles.icon}>&#9200;</span>
+    </div>);
   }
 
   _renderPlayComponent(clickHandler) {
-    return (<div className={styles.playButton} onClick={clickHandler}>&#128266;</div>);
+    return (
+      <div className={classnames(styles.play, styles.button)} onClick={clickHandler}>
+        <span className={styles.icon}>&#128266;</span>
+      </div>
+    );
   }
 
   _renderMainMenu() {
@@ -76,27 +89,34 @@ class MainRoute extends React.Component {
             instances={this.state.instances}
             renderLoadingComponent={this._renderLoadingComponent}
             renderPlayButtonComponent={this._renderPlayComponent}
-            windowLength={windowLength} 
-            windowStartTime={windowStartTime} />
-          <div className={styles.contributeButton} onClick={this._showContribute}>&#10133;</div>
+            windowLength={this.state.windowLength} 
+            windowStartTime={this.state.windowStartTime} />
+          <div className={classnames(styles.contribute, styles.button)} onClick={this._showContribute}>
+            <span className={styles.icon}>&#10133;</span>
+          </div>
         </div>
         
         { this.state.isClient &&
             <SampleInstances 
               instances={this.state.instances}
-              windowLength={windowLength} 
-              windowStartTime={windowStartTime}/>
+              windowLength={this.state.windowLength} 
+              windowStartTime={this.state.windowStartTime}/>
         }
       </div>
     )
   }
 
   _showMainMenu() {
-    this._getSampleInstances();
+    // @todo ping server to determine where this player belongs next i.e. what is my next windowStartTime according to my cookies?
+    simulateServerPing()
+      .then(windowStartTime => {
+        this.setState({ 
+          windowStartTime,
+          subview: null
+        });
 
-    this.setState({
-      subview: null
-    })
+        this._getSampleInstances();
+      })
   }
 
   componentDidMount() {

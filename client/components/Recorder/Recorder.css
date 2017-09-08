@@ -1,10 +1,12 @@
+@import "../../../shared/colors.css";
+
 .container {
   text-align: center;
   animation: fadein .5s;
 }
 
 .not-supported-message {
-  color: #000000;
+  color: var(--black);
 }
 
 .blue-mask {
@@ -13,7 +15,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: #008ace;
+  background-color: var(--clearBlue);
   opacity: .5;
   animation: maskFadein .2s;
   cursor: pointer;
@@ -25,11 +27,8 @@
   width: 100%;
   text-align: center;
   font-size: 3.5rem;
-  color: #000000;
-  -webkit-user-select: none; /* Chrome, Opera, Safari */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+  color: var(--black);
+  user-select: none;
 }
 
 .red-mask {
@@ -38,7 +37,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: #f53838;
+  background-color: var(--clearRed);
   opacity: .5;
   animation: maskFadein .2s;
   cursor: pointer;
@@ -46,25 +45,19 @@
 
 .retry-button {
   font-size: 3.5rem;
-  color: #000000;
+  color: var(--black);
   opacity: .5;
-  background-color: orangered;
-  -webkit-user-select: none; /* Chrome, Opera, Safari */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+  background-color: var(--clearBlue);
+  user-select: none;
   cursor: pointer;
 }
 
 .save-button {
   font-size: 3.5rem;
-  color: #000000;
+  color: var(--black);
   opacity: .5;
-  background-color: #e3ff00;
-  -webkit-user-select: none; /* Chrome, Opera, Safari */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+  background-color: var(--clearGreen);
+  user-select: none;
   cursor: pointer;
 }
 

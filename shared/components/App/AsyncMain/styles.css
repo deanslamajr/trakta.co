@@ -1,3 +1,5 @@
+@import "../../../colors.css";
+
 .container {
   text-align: center;
 }
@@ -17,50 +19,45 @@
   z-index: 9999
 }
 
-.play-button {
+.loading {
+  top: 0;
+  bottom: 50%;
+  background-color: var(--clearRed);
   position: absolute;
-  top: 20%;
-  width: 100%;
-  text-align: center;
-  font-size: 3.5rem;
-  color: #000000;
-  opacity: .5;
-  background-color: #34fe10;
-  -webkit-user-select: none; /* Chrome, Opera, Safari */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  cursor: pointer;
-}
-
-.loading-button {
-  position: absolute;
-  top: 20%;
-  width: 100%;
-  text-align: center;
-  font-size: 3.5rem;
-  color: #000000;
-  opacity: .5;
-  background-color: #f53838;
-  -webkit-user-select: none; /* Chrome, Opera, Safari */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+  user-select: none;
   cursor: not-allowed;
-}
-
-.contribute-button {
-  position: absolute;
-  top: 40%;
-  width: 100%;
+  display: flex;
+  align-items: center;
   text-align: center;
   font-size: 3.5rem;
-  opacity: .5;
-  background-color: #008ace;
-  color: #000000;
-  -webkit-user-select: none; /* Chrome, Opera, Safari */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+  color: var(--black);
+  width: 100%;
+}
+
+.contribute {
+  top: 50%;
+  bottom: 0;
+  background-color: var(--clearBlue);
+}
+
+.play {
+  top: 0;
+  bottom: 50%;
+  background-color: var(--clearGreen);
+}
+
+.button {
+  position: absolute; 
+  user-select: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: 3.5rem;
+  color: var(--black);
+  width: 100%;
+}
+
+.icon {
+  margin: auto;
 }
