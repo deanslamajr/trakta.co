@@ -16,9 +16,9 @@ function drawRectangles(rowsOfRectangles, viewportWidth, viewportHeight) {
         const newRectangles = rowOfRectangles.map(({ scaledStartPos, scaledDuration, id }) => (
           <rect
             key={id}
-            x={(scaledStartPos * viewportWidth) + padding}
+            x={(scaledStartPos * viewportWidth)}
             y={(index * rowHeight) + padding}
-            width={(scaledDuration * viewportWidth) - padding}
+            width={(scaledDuration * viewportWidth)}
             height={rowHeight - padding}
             fill='#cfcfcf'
             stroke='black'
