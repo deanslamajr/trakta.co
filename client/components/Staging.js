@@ -62,7 +62,7 @@ class Staging extends React.Component {
         <label htmlFor='panning'>panning (-1 to 1)</label>
         <input id='panning' type='number' value={this.state.panning} onChange={this.handleChange.bind(this, 'panning')} placeholder='panning' className={styles.formInput} />
         <input type='submit' value='Create Instance' className={classnames(styles.formInput, { [styles.formSaving]: this.state.isSaving })} />
-        <div className={classnames({ [styles.loading]: this.state.isSaving })} />
+        <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} /> 
       </form>
     )
   }

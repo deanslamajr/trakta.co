@@ -64,9 +64,10 @@ class MainRoute extends React.Component {
     })
   }
 
-  _renderLoadingComponent() {
-    return (<div className={styles.loading}>
-      <span className={styles.icon}>&#9200;</span>
+  _renderLoadingComponent(clickHandler) {
+    return (
+    <div onClick={clickHandler} className={styles.loading}>
+      <div className={classnames(styles.icon, styles.loadSpinner)}></div>
     </div>);
   }
 

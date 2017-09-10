@@ -11,7 +11,13 @@ const loadState = {
   ERROR: 3
 };
 
-const samplesCache = {};
+const playersCache = {};
+const bufferCache = {};
+
+function loadInstanceOntoTransport(instance, samplePlayer, windowStartTime, windowLength) {
+  const startTime = instance.start_time - windowStartTime;
+  samplePlayer.sync().start(startTime).stop(windowLength - windowStartTime);
+}
 
 class InstancePlaylist extends React.Component {
   constructor(props) {
@@ -22,6 +28,31 @@ class InstancePlaylist extends React.Component {
     };
 
     this._playArrangement = this._playArrangement.bind(this);
+    this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this);
+  }
+
+  onerror(instance, reject, error) {
+    // @todo log error
+    bufferCache[instance.sample.id] = undefined;
+    reject();
+  }
+
+  onload(instance, windowStartTime, windowLength, resolve) {
+    const buffer = bufferCache[instance.sample.id];
+    const samplePlayer = new Tone.Player(buffer);
+
+    // Plugins
+    //
+    const panVol = new Tone.PanVol(instance.panning, instance.volume);
+    //const limiter = new Tone.Limiter(-6)
+
+    samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
+
+    loadInstanceOntoTransport(instance, samplePlayer, windowStartTime, windowLength);
+
+    // cache the player
+    playersCache[instance.sample.id] = samplePlayer;
+    resolve();
   }
 
   _downloadAndArrangeSampleInstances(instances) {
@@ -39,28 +70,21 @@ class InstancePlaylist extends React.Component {
       // Load the samples
       const tasks = instances.map(instance => {
         return new Promise((resolve, reject) => {
-          const startTime = instance.start_time - windowStartTime;
+          let sampleBuffer = bufferCache[instance.sample.id];
 
-          let samplePlayer = samplesCache[instance.sample.id];
-          if (samplePlayer) {
-            samplePlayer.sync().start(startTime).stop(windowLength);
+          if (sampleBuffer) {
+            let samplePlayer = playersCache[instance.sample.id];
+            if (!samplePlayer) {
+              return samplePlayer = playersCache[instance.sample.id] = new Tone.Player(sampleBuffer, () => resolve());
+            }
+
+            loadInstanceOntoTransport(instance, samplePlayer, windowStartTime, windowLength)
+
             resolve();
           }
           else {
             const url = `${baseUrl}/${instance.sample.url}`;
-
-            samplePlayer = new Tone.Player(url, () => resolve());
-
-            // Plugins
-            //
-            const panVol = new Tone.PanVol(instance.panning, instance.volume);
-            //const limiter = new Tone.Limiter(-6)
-
-            samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
-
-            samplePlayer.sync().start(startTime).stop(windowLength - windowStartTime);
-            // cache the player
-            samplesCache[instance.sample.id] = samplePlayer;
+            bufferCache[instance.sample.id] = new Tone.Buffer(url, this.onload.bind(this, instance, windowStartTime, windowLength, resolve), this.onerror.bind(this, instance, reject))
           }
         });
       });
@@ -70,15 +94,16 @@ class InstancePlaylist extends React.Component {
         .then(() => {
           this.setState({ loadState: loadState.SUCCESS })
         })
-        .catch(error => {
+        .catch(errors => {
+          errors.forEach(console.error);
           this.setState({ loadState: loadState.ERROR })
         });
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    this._downloadAndArrangeSampleInstances(Array.from(nextProps.instances));
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   this._downloadAndArrangeSampleInstances(Array.from(nextProps.instances));
+  // }
 
   componentDidMount() {
     this._downloadAndArrangeSampleInstances(this.props.instances);
@@ -109,7 +134,7 @@ class InstancePlaylist extends React.Component {
       return null;
     }
     else if (this.state.loadState === loadState.LOADING) {
-      return renderLoadingComponent();
+      return renderLoadingComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
     }
     else {
       return (<div>Error!!!</div>);
