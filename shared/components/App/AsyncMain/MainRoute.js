@@ -12,12 +12,21 @@ import InstancePlaylist from '../../../../client/components/InstancePlaylist';
 
 import styles from './styles.css';
 
-/**
- * This mock simulates the movement of the windowStartTime
- * according to which turn the player is currently on
- */
-function simulateServerPing() {
-  return Promise.resolve(5);
+const WINDOW_LENGTH = 10;
+const WINDOW_START_TIME = 0;
+
+function getNextWindowStartTime() {
+  return axios.get('/api/next')
+    .then(({ data }) => {
+      console.log('success!')
+      console.dir(data);
+      return data.nextEndTime - WINDOW_LENGTH;
+    })
+    .catch(error => {
+      // @todo log
+      console.error(error);
+      return WINDOW_START_TIME;
+    });
 }
 
 class MainRoute extends React.Component {
@@ -28,8 +37,8 @@ class MainRoute extends React.Component {
       isClient: false,
       subview: null,
       instances: [],
-      windowLength: 10,
-      windowStartTime: 0
+      windowLength: WINDOW_LENGTH,
+      windowStartTime: WINDOW_START_TIME
     };
 
     this._showContribute = this._showContribute.bind(this);
@@ -85,6 +94,10 @@ class MainRoute extends React.Component {
     // the current track viewport
     return (
       <div className={styles.canvasContainer}>
+        <div className={styles.meter}>
+          <span className={styles.startTime}>{this.state.windowStartTime}</span>
+          <span className={styles.endTime}>{this.state.windowStartTime + this.state.windowLength}</span>
+        </div>
         <div className={styles.label}>
           <InstancePlaylist
             instances={this.state.instances}
@@ -109,7 +122,7 @@ class MainRoute extends React.Component {
 
   _showMainMenu() {
     // @todo ping server to determine where this player belongs next i.e. what is my next windowStartTime according to my cookies?
-    simulateServerPing()
+    getNextWindowStartTime()
       .then(windowStartTime => {
         this.setState({ 
           windowStartTime,
