@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 
 import { create as createSample } from './controllers/sample';
 import { getAll as getAllSampleInstances } from './controllers/sample-instances';
-import getNextWindowEndTime from './controllers/getNextWindowEndTime'
+import { getNextWindowEndTime } from './controllers/getNextWindowEndTime'
 
 
 const router = express.Router();

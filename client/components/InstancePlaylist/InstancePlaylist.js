@@ -101,9 +101,9 @@ class InstancePlaylist extends React.Component {
     }
   }
 
-  // componentWillReceiveProps(nextProps) {
-  //   this._downloadAndArrangeSampleInstances(Array.from(nextProps.instances));
-  // }
+  componentWillReceiveProps(nextProps) {
+    this._downloadAndArrangeSampleInstances(nextProps.instances);
+  }
 
   componentDidMount() {
     this._downloadAndArrangeSampleInstances(this.props.instances);

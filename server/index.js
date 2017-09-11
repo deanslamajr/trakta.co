@@ -12,6 +12,8 @@ import clientBundle from './middleware/clientBundle';
 import serviceWorker from './middleware/serviceWorker';
 import offlinePage from './middleware/offlinePage';
 import errorHandlers from './middleware/errorHandlers';
+
+import { resetSession } from './controllers/getNextWindowEndTime'
 import api from './api';
 
 import config from '../config';
@@ -47,6 +49,12 @@ app.use(config('bundles.client.webPath'), clientBundle);
 app.use(express.static(pathResolve(appRootDir.get(), config('publicAssetsPath'))));
 
 app.use('/api', api);
+
+/**
+ * Reset the mock session
+ * @todo remove this after proper sessions are implemented
+ */
+app.get('/reset', resetSession);
 
 // The React application middleware.
 app.get('*', nocache(), reactApplication);

@@ -18,8 +18,6 @@ const WINDOW_START_TIME = 0;
 function getNextWindowStartTime() {
   return axios.get('/api/next')
     .then(({ data }) => {
-      console.log('success!')
-      console.dir(data);
       return data.nextEndTime - WINDOW_LENGTH;
     })
     .catch(error => {
@@ -38,7 +36,7 @@ class MainRoute extends React.Component {
       subview: null,
       instances: [],
       windowLength: WINDOW_LENGTH,
-      windowStartTime: WINDOW_START_TIME
+      windowStartTime: undefined
     };
 
     this._showContribute = this._showContribute.bind(this);
@@ -89,6 +87,7 @@ class MainRoute extends React.Component {
   }
 
   _renderMainMenu() {
+    const showInstances = Number.isInteger(this.state.windowStartTime);
     // on server, this should only concern itself with displaying a load animation
     // on top of notched track background, showing the correct time labels related to
     // the current track viewport
@@ -98,19 +97,24 @@ class MainRoute extends React.Component {
           <span className={styles.startTime}>{this.state.windowStartTime}</span>
           <span className={styles.endTime}>{this.state.windowStartTime + this.state.windowLength}</span>
         </div>
-        <div className={styles.label}>
-          <InstancePlaylist
-            instances={this.state.instances}
-            renderLoadingComponent={this._renderLoadingComponent}
-            renderPlayButtonComponent={this._renderPlayComponent}
-            windowLength={this.state.windowLength} 
-            windowStartTime={this.state.windowStartTime} />
-          <div className={classnames(styles.contribute, styles.button)} onClick={this._showContribute}>
-            <span className={styles.icon}>&#10133;</span>
-          </div>
-        </div>
+
+        {
+          showInstances &&
+            <div className={styles.label}>
+              <InstancePlaylist
+                instances={this.state.instances}
+                renderLoadingComponent={this._renderLoadingComponent}
+                renderPlayButtonComponent={this._renderPlayComponent}
+                windowLength={this.state.windowLength} 
+                windowStartTime={this.state.windowStartTime} />
+              <div className={classnames(styles.contribute, styles.button)} onClick={this._showContribute}>
+                <span className={styles.icon}>&#10133;</span>
+              </div>
+            </div>
+        }
         
-        { this.state.isClient &&
+        { 
+          this.state.isClient && showInstances &&
             <SampleInstances 
               instances={this.state.instances}
               windowLength={this.state.windowLength} 
@@ -135,7 +139,13 @@ class MainRoute extends React.Component {
 
   componentDidMount() {
     this.setState({ isClient: true });
-    this._getSampleInstances();
+    getNextWindowStartTime()
+      .then(windowStartTime => {
+        this.setState({ 
+          windowStartTime
+        });
+        this._getSampleInstances();
+      });
   }
 
   render() {
