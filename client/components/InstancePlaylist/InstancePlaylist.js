@@ -14,9 +14,74 @@ const loadState = {
 const playersCache = {};
 const bufferCache = {};
 
-function loadInstanceOntoTransport(instance, samplePlayer, windowStartTime, windowLength) {
-  const startTime = instance.start_time - windowStartTime;
-  samplePlayer.sync().start(startTime).stop(windowLength - windowStartTime);
+function loadInstanceOntoTransport(instance, samplePlayer, startTime, endTime, windowStartTime, windowLength) {
+  // sample starts before the window
+  if (startTime < 0) {
+    startTime = 0;
+  }
+
+  // sample extends past window
+  if(endTime > windowLength) {
+    endTime = windowLength;
+  }
+
+  samplePlayer.sync().start(startTime).stop(endTime);
+}
+
+function onInstanceLoadError(instance, reject, error) {
+  // @todo log error
+  bufferCache[instance.sample.id] = undefined;
+  reject();
+}
+
+function onInstanceLoadSuccess(instance, windowStartTime, windowLength, resolve) {
+  const buffer = bufferCache[instance.sample.id];
+
+  let samplePlayer;
+
+  let startTime = instance.start_time - windowStartTime;
+  let endTime = startTime + instance.sample.duration;
+
+  // discard if sampleInstance is outside of the current window
+  if (endTime <= 0 || startTime >= windowLength) {
+    return resolve();
+  }
+
+  // if sample starts before the window
+  // slice the sample buffer to start at the proper time
+  if (startTime < 0) {
+    const sampleSeekTime = windowStartTime - instance.start_time;
+    const shortenedBuffer = buffer.slice(sampleSeekTime);
+    samplePlayer = new Tone.Player(shortenedBuffer);
+  }
+  else {
+    samplePlayer = new Tone.Player(buffer);
+  }
+
+  // Plugins
+  //
+  const panVol = new Tone.PanVol(instance.panning, instance.volume);
+  //const limiter = new Tone.Limiter(-6)
+  samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
+
+  loadInstanceOntoTransport(instance, samplePlayer, startTime, endTime, windowStartTime, windowLength);
+
+  // cache the player
+  playersCache[instance.sample.id] = samplePlayer;
+  resolve();
+}
+
+function playArrangement(windowLength) {
+  if (Tone.Transport.state === 'started') {
+    Tone.Transport.stop()
+  }
+  else {
+    Tone.Transport.schedule((time) => {
+      Tone.Transport.stop()
+    }, windowLength);
+
+    Tone.Transport.start();
+  }
 }
 
 class InstancePlaylist extends React.Component {
@@ -27,32 +92,7 @@ class InstancePlaylist extends React.Component {
       loadState: loadState.LOADING
     };
 
-    this._playArrangement = this._playArrangement.bind(this);
     this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this);
-  }
-
-  onerror(instance, reject, error) {
-    // @todo log error
-    bufferCache[instance.sample.id] = undefined;
-    reject();
-  }
-
-  onload(instance, windowStartTime, windowLength, resolve) {
-    const buffer = bufferCache[instance.sample.id];
-    const samplePlayer = new Tone.Player(buffer);
-
-    // Plugins
-    //
-    const panVol = new Tone.PanVol(instance.panning, instance.volume);
-    //const limiter = new Tone.Limiter(-6)
-
-    samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
-
-    loadInstanceOntoTransport(instance, samplePlayer, windowStartTime, windowLength);
-
-    // cache the player
-    playersCache[instance.sample.id] = samplePlayer;
-    resolve();
   }
 
   _downloadAndArrangeSampleInstances(instances) {
@@ -83,8 +123,20 @@ class InstancePlaylist extends React.Component {
             resolve();
           }
           else {
+            const startTime = instance.start_time - windowStartTime;
+            const endTime = startTime + instance.sample.duration;
+
+            // discard if sample instance is outside of the current window
+            if (endTime <= 0 || startTime >= windowLength) {
+              return resolve();
+            }
+
             const url = `${baseUrl}/${instance.sample.url}`;
-            bufferCache[instance.sample.id] = new Tone.Buffer(url, this.onload.bind(this, instance, windowStartTime, windowLength, resolve), this.onerror.bind(this, instance, reject))
+            bufferCache[instance.sample.id] = new Tone.Buffer(
+              url, 
+              onInstanceLoadSuccess.bind(this, instance, windowStartTime, windowLength, resolve),
+              onInstanceLoadError.bind(this, instance, reject)
+            );
           }
         });
       });
@@ -109,26 +161,13 @@ class InstancePlaylist extends React.Component {
     this._downloadAndArrangeSampleInstances(this.props.instances);
   }
 
-  _playArrangement() {
-    if (Tone.Transport.state === 'started') {
-      Tone.Transport.stop()
-    }
-    else {
-      Tone.Transport.schedule((time) => {
-        Tone.Transport.stop()
-      }, this.props.windowLength);
-
-      Tone.Transport.start();
-    }
-  }
-
   render () {
     const { 
       renderLoadingComponent, 
       renderPlayButtonComponent } = this.props;
 
     if (this.state.loadState === loadState.SUCCESS) {
-      return renderPlayButtonComponent(this._playArrangement);
+      return renderPlayButtonComponent(playArrangement.bind(null, this.props.windowLength));
     }
     else if (this.props.instances && this.props.instances.length === 0) {
       return null;
