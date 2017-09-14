@@ -20,8 +20,6 @@
 }
 
 .loading {
-  top: 0;
-  bottom: 50%;
   background-color: var(--clearRed);
   position: absolute;
   user-select: none;
@@ -35,14 +33,10 @@
 }
 
 .contribute {
-  top: 50%;
-  bottom: 0;
   background-color: var(--clearBlue);
 }
 
 .play {
-  top: 0;
-  bottom: 50%;
   background-color: var(--clearGreen);
 }
 
@@ -56,6 +50,21 @@
   font-size: 3.5rem;
   color: var(--black);
   width: 100%;
+}
+
+.top-button {
+  top: 5%;
+  bottom: 75%;
+}
+
+.center-button {
+  top: 35%;
+  bottom: 35%
+}
+
+.bottom-button {
+  top: 75%;
+  bottom: 5%;
 }
 
 .icon {

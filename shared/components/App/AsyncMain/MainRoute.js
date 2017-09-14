@@ -73,14 +73,14 @@ class MainRoute extends React.Component {
 
   _renderLoadingComponent(clickHandler) {
     return (
-    <div onClick={clickHandler} className={styles.loading}>
+    <div onClick={clickHandler} className={classnames(styles.loading, styles.centerButton)}>
       <div className={classnames(styles.icon, styles.loadSpinner)}></div>
     </div>);
   }
 
   _renderPlayComponent(clickHandler) {
     return (
-      <div className={classnames(styles.play, styles.button)} onClick={clickHandler}>
+      <div className={classnames(styles.play, styles.button, styles.topButton)} onClick={clickHandler}>
         <span className={styles.icon}>&#128266;</span>
       </div>
     );
@@ -101,13 +101,15 @@ class MainRoute extends React.Component {
         {
           showInstances &&
             <div className={styles.label}>
+              {/* Play button  */}
               <InstancePlaylist
                 instances={this.state.instances}
                 renderLoadingComponent={this._renderLoadingComponent}
                 renderPlayButtonComponent={this._renderPlayComponent}
                 windowLength={this.state.windowLength} 
                 windowStartTime={this.state.windowStartTime} />
-              <div className={classnames(styles.contribute, styles.button)} onClick={this._showContribute}>
+              {/* Contribute button  */}
+              <div className={classnames(styles.contribute, styles.button, styles.bottomButton)} onClick={this._showContribute}>
                 <span className={styles.icon}>&#10133;</span>
               </div>
             </div>
