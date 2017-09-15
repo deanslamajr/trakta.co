@@ -1,4 +1,5 @@
 @import "../../../colors.css";
+@import "../../../common.css";
 
 .container {
   text-align: center;
@@ -36,27 +37,6 @@
   background-color: var(--clearBlue);
 }
 
-.play {
-  background-color: var(--clearGreen);
-}
-
-.button {
-  position: absolute; 
-  user-select: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  text-align: center;
-  font-size: 3.5rem;
-  color: var(--black);
-  width: 100%;
-}
-
-.top-button {
-  top: 5%;
-  bottom: 75%;
-}
-
 .center-button {
   top: 35%;
   bottom: 35%
@@ -65,10 +45,6 @@
 .bottom-button {
   top: 75%;
   bottom: 5%;
-}
-
-.icon {
-  margin: auto;
 }
 
 @keyframes spin {

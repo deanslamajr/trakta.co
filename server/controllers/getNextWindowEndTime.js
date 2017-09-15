@@ -1,9 +1,12 @@
+const INITIAL_CURRENT_ENDTIME = 10;
+const INITIAL_FARTHEST_TIME = 5;
+const ORIGIN_END_TIME = 10;
+const ROUND_PROGRESS_LENGTH = 5;
+
 /**
  * This mock simulates the movement of the windowStartTime
  * @todo have cookie-based-session own this
  */
-const INITIAL_CURRENT_ENDTIME = 10;
-const INITIAL_FARTHEST_TIME = 5;
 const mockSession = {
   // 10 & 5 so that first request will initialize these to 10 & 10
   currentEndtime: INITIAL_CURRENT_ENDTIME,
@@ -19,9 +22,6 @@ function getNextWindowEndTime(req, res) {
   const nextEndTime = processNext(mockSession);
   res.json({ nextEndTime });
 }
-
-const ORIGIN_END_TIME = 10;
-const ROUND_PROGRESS_LENGTH = 5;
 
 function processNext(session) {
   if (session.currentEndtime > session.farthestTime) {

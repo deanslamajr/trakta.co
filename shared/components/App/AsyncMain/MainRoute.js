@@ -42,7 +42,6 @@ class MainRoute extends React.Component {
     this._showContribute = this._showContribute.bind(this);
     this._showMainMenu = this._showMainMenu.bind(this);
     this._renderLoadingComponent = this._renderLoadingComponent.bind(this);
-    this._renderPlayComponent = this._renderPlayComponent.bind(this);
 
     this.views = {
       contribute: Recorder
@@ -78,16 +77,9 @@ class MainRoute extends React.Component {
     </div>);
   }
 
-  _renderPlayComponent(clickHandler) {
-    return (
-      <div className={classnames(styles.play, styles.button, styles.topButton)} onClick={clickHandler}>
-        <span className={styles.icon}>&#128266;</span>
-      </div>
-    );
-  }
-
   _renderMainMenu() {
     const showInstances = Number.isInteger(this.state.windowStartTime);
+    // @todo
     // on server, this should only concern itself with displaying a load animation
     // on top of notched track background, showing the correct time labels related to
     // the current track viewport
@@ -105,7 +97,6 @@ class MainRoute extends React.Component {
               <InstancePlaylist
                 instances={this.state.instances}
                 renderLoadingComponent={this._renderLoadingComponent}
-                renderPlayButtonComponent={this._renderPlayComponent}
                 windowLength={this.state.windowLength} 
                 windowStartTime={this.state.windowStartTime} />
               {/* Contribute button  */}

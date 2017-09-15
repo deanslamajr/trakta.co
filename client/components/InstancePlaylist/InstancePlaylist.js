@@ -1,7 +1,11 @@
 import React from 'react';
 import Tone from 'tone';
+import classnames from 'classnames';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import config from '../../../config';
+
+import styles from './InstancePlaylist.css';
 
 const baseUrl = config('s3SampleBucket');
 
@@ -14,7 +18,7 @@ const loadState = {
 const playersCache = {};
 const bufferCache = {};
 
-function loadInstanceOntoTransport(instance, samplePlayer, startTime, endTime, windowStartTime, windowLength) {
+function loadInstanceOntoTransport(samplePlayer, startTime, endTime, windowLength) {
   // sample starts before the window
   if (startTime < 0) {
     startTime = 0;
@@ -64,7 +68,7 @@ function onInstanceLoadSuccess(instance, windowStartTime, windowLength, resolve)
   //const limiter = new Tone.Limiter(-6)
   samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
 
-  loadInstanceOntoTransport(instance, samplePlayer, startTime, endTime, windowStartTime, windowLength);
+  loadInstanceOntoTransport(samplePlayer, startTime, endTime, windowLength);
 
   // cache the player
   playersCache[instance.sample.id] = samplePlayer;
@@ -82,6 +86,14 @@ function playArrangement(windowLength) {
 
     Tone.Transport.start();
   }
+}
+
+function renderPlayComponent(windowLength) {
+  return (
+    <div className={classnames(styles.play, styles.button, styles.topButton)} onClick={playArrangement.bind(null, windowLength)}>
+      <span className={styles.icon}>&#128266;</span>
+    </div>
+  );
 }
 
 class InstancePlaylist extends React.Component {
@@ -110,27 +122,29 @@ class InstancePlaylist extends React.Component {
       // Load the samples
       const tasks = instances.map(instance => {
         return new Promise((resolve, reject) => {
+          const startTime = instance.start_time - windowStartTime;
+          const endTime = startTime + instance.sample.duration;
+
+          // discard if sample instance is outside of the current window
+          if (endTime <= 0 || startTime >= windowLength) {
+            return resolve();
+          }
+
           let sampleBuffer = bufferCache[instance.sample.id];
 
           if (sampleBuffer) {
             let samplePlayer = playersCache[instance.sample.id];
             if (!samplePlayer) {
-              return samplePlayer = playersCache[instance.sample.id] = new Tone.Player(sampleBuffer, () => resolve());
+              // @todo can this path be reached??
+              throw new Error('samplePlayer doesnt exist in playersCache!');
+              //onInstanceLoadSuccess(instance, windowStartTime, windowLength, resolve);
             }
 
-            loadInstanceOntoTransport(instance, samplePlayer, windowStartTime, windowLength)
+            loadInstanceOntoTransport(samplePlayer, startTime, endTime, windowLength)
 
             resolve();
           }
           else {
-            const startTime = instance.start_time - windowStartTime;
-            const endTime = startTime + instance.sample.duration;
-
-            // discard if sample instance is outside of the current window
-            if (endTime <= 0 || startTime >= windowLength) {
-              return resolve();
-            }
-
             const url = `${baseUrl}/${instance.sample.url}`;
             bufferCache[instance.sample.id] = new Tone.Buffer(
               url, 
@@ -146,8 +160,9 @@ class InstancePlaylist extends React.Component {
         .then(() => {
           this.setState({ loadState: loadState.SUCCESS })
         })
-        .catch(errors => {
-          errors.forEach(console.error);
+        .catch(error => {
+          // @todo log error
+          console.error(error)
           this.setState({ loadState: loadState.ERROR })
         });
     }
@@ -162,12 +177,10 @@ class InstancePlaylist extends React.Component {
   }
 
   render () {
-    const { 
-      renderLoadingComponent, 
-      renderPlayButtonComponent } = this.props;
+    const { renderLoadingComponent, windowLength } = this.props;
 
     if (this.state.loadState === loadState.SUCCESS) {
-      return renderPlayButtonComponent(playArrangement.bind(null, this.props.windowLength));
+      return renderPlayComponent(windowLength);
     }
     else if (this.props.instances && this.props.instances.length === 0) {
       return null;
@@ -181,4 +194,4 @@ class InstancePlaylist extends React.Component {
   }
 }
 
-export default InstancePlaylist;
+export default withStyles(styles)(InstancePlaylist)

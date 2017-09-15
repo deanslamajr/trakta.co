@@ -1,0 +1,11 @@
+@import "../../../shared/colors.css";
+@import "../../../shared/common.css";
+
+.play {
+  background-color: var(--clearGreen);
+}
+
+.top-button {
+  top: 5%;
+  bottom: 75%;
+}

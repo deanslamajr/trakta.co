@@ -1,0 +1,17 @@
+@import "./colors.css";
+
+.button {
+  position: absolute; 
+  user-select: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: 3.5rem;
+  color: var(--black);
+  width: 100%;
+}
+
+.icon {
+  margin: auto;
+}
