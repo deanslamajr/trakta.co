@@ -1,7 +1,7 @@
 {
-  "name": "react-universally",
-  "version": "13.0.0",
-  "description": "A starter kit for universal react applications.",
+  "name": "trakta.co",
+  "version": "0.13.0",
+  "description": "Make a sound!",
   "main": "build/server/index.js",
   "engines": {
     "node": ">=6"
@@ -40,22 +40,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ctrlplusb/react-universally.git"
+    "url": "git+https://github.com/deanslamajr/trakta.co.git"
   },
   "keywords": [
     "react",
-    "boilerplate",
-    "starter kit",
     "universal",
-    "javascript",
     "express",
-    "webpack"
+    "webpack",
+    "tone.js",
+    "web audio"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ctrlplusb/react-universally/issues"
+    "url": "https://github.com/deanslamajr/trakta.co/issues"
   },
-  "homepage": "https://github.com/ctrlplusb/react-universally#readme",
+  "homepage": "https://github.com/deanslamajr/trakta.co#readme",
   "dependencies": {
     "app-root-dir": "1.0.2",
     "autoprefixer": "^7.1.4",
