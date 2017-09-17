@@ -177,7 +177,10 @@ class InstancePlaylist extends React.Component {
   }
 
   render () {
-    const { renderLoadingComponent, windowLength } = this.props;
+    const { 
+      renderLoadingComponent, 
+      renderErrorComponent,
+      windowLength } = this.props;
 
     if (this.state.loadState === loadState.SUCCESS) {
       return renderPlayComponent(windowLength);
@@ -189,7 +192,7 @@ class InstancePlaylist extends React.Component {
       return renderLoadingComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
     }
     else {
-      return (<div>Error!!!</div>);
+      return renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
     }
   }
 }

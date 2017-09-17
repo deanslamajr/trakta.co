@@ -12,36 +12,24 @@ import InstancePlaylist from '../../../../client/components/InstancePlaylist';
 
 import styles from './styles.css';
 
-const WINDOW_LENGTH = 10;
+const WINDOW_LENGTH = 20;
 const WINDOW_START_TIME = 0;
-
-function getNextWindowStartTime() {
-  return axios.get('/api/next')
-    .then(({ data }) => {
-      return data.nextEndTime - WINDOW_LENGTH;
-    })
-    .catch(error => {
-      // @todo log
-      console.error(error);
-      return WINDOW_START_TIME;
-    });
-}
 
 class MainRoute extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      isClient: false,
       subview: null,
       instances: [],
       windowLength: WINDOW_LENGTH,
-      windowStartTime: undefined
+      windowStartTime: WINDOW_START_TIME
     };
 
     this._showContribute = this._showContribute.bind(this);
     this._showMainMenu = this._showMainMenu.bind(this);
     this._renderLoadingComponent = this._renderLoadingComponent.bind(this);
+    this._renderErrorComponent = this._renderErrorComponent.bind(this);
 
     this.views = {
       contribute: Recorder
@@ -72,13 +60,21 @@ class MainRoute extends React.Component {
 
   _renderLoadingComponent(clickHandler) {
     return (
-    <div onClick={clickHandler} className={classnames(styles.loading, styles.centerButton)}>
-      <div className={classnames(styles.icon, styles.loadSpinner)}></div>
-    </div>);
+      <div onClick={clickHandler} className={classnames(styles.loading, styles.button, styles.centerButton)}>
+        <div className={classnames(styles.icon, styles.loadSpinner)}></div>
+      </div>
+    );
+  }
+
+  _renderErrorComponent(clickHandler) {
+    return (
+      <div onClick={clickHandler} className={classnames(styles.error, styles.button, styles.centerButton)}>
+        <div className={classnames(styles.icon)}>&#9888;</div>
+      </div>
+    );
   }
 
   _renderMainMenu() {
-    const showInstances = Number.isInteger(this.state.windowStartTime);
     // @todo
     // on server, this should only concern itself with displaying a load animation
     // on top of notched track background, showing the correct time labels related to
@@ -91,12 +87,13 @@ class MainRoute extends React.Component {
         </div>
 
         {
-          showInstances &&
+          this.state.instances &&
             <div className={styles.label}>
               {/* Play button  */}
               <InstancePlaylist
                 instances={this.state.instances}
                 renderLoadingComponent={this._renderLoadingComponent}
+                renderErrorComponent={this._renderErrorComponent}
                 windowLength={this.state.windowLength} 
                 windowStartTime={this.state.windowStartTime} />
               {/* Contribute button  */}
@@ -107,7 +104,7 @@ class MainRoute extends React.Component {
         }
         
         { 
-          this.state.isClient && showInstances &&
+          this.state.instances &&
             <SampleInstances 
               instances={this.state.instances}
               windowLength={this.state.windowLength} 
@@ -118,27 +115,12 @@ class MainRoute extends React.Component {
   }
 
   _showMainMenu() {
-    // @todo ping server to determine where this player belongs next i.e. what is my next windowStartTime according to my cookies?
-    getNextWindowStartTime()
-      .then(windowStartTime => {
-        this.setState({ 
-          windowStartTime,
-          subview: null
-        });
-
-        this._getSampleInstances();
-      })
+    this.setState({ subview: null })
+    this._getSampleInstances();
   }
 
   componentDidMount() {
-    this.setState({ isClient: true });
-    getNextWindowStartTime()
-      .then(windowStartTime => {
-        this.setState({ 
-          windowStartTime
-        });
-        this._getSampleInstances();
-      });
+    this._getSampleInstances();
   }
 
   render() {
