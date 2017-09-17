@@ -124,6 +124,15 @@ class MainRoute extends React.Component {
   }
 
   render() {
+    const {
+      instances,
+      windowLength,
+      windowStartTime
+    } = this.state;
+
+    console.log('MainRoute: this.state.instances:')
+    console.dir(this.state.instances)
+
     const Subview = this.state.subview;
 
     return (
@@ -132,7 +141,13 @@ class MainRoute extends React.Component {
           <title>{`recorder - ${config('appTitle')}`}</title>
         </Helmet>
         { Subview
-            ? <Subview showMainMenu={this._showMainMenu} />
+            ? <Subview 
+                showMainMenu={this._showMainMenu}
+                taco={6}
+                instances={instances}
+                windowLength={windowLength} 
+                windowStartTime={windowStartTime}
+                />
             : this._renderMainMenu()
         }
       </div>
