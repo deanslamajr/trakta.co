@@ -4,6 +4,7 @@ import { renderToString, renderToStaticMarkup } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom';
 import { AsyncComponentProvider, createAsyncContext } from 'react-async-component';
 import asyncBootstrapper from 'react-async-bootstrapper';
+import { Provider } from 'react-redux';
 
 import config from '../../../config';
 
@@ -60,7 +61,9 @@ export default function reactApplicationMiddleware(request, response) {
   const app = (
     <AsyncComponentProvider asyncContext={asyncComponentsContext}>
       <StaticRouter location={request.url} context={reactRouterContext}>
-        <App />
+        <Provider store={store}>
+          <App />
+        </Provider>
       </StaticRouter>
     </AsyncComponentProvider>
   );
@@ -77,6 +80,7 @@ export default function reactApplicationMiddleware(request, response) {
         reactAppString={appString}
         nonce={nonce}
         helmet={Helmet.rewind()}
+        storeState={store.getState()}
         asyncComponentsState={asyncComponentsContext.getState()}
       />,
     );

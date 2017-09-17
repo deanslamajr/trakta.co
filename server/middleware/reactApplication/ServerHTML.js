@@ -40,7 +40,14 @@ function scriptTag(jsFilePath) {
 // COMPONENT
 
 function ServerHTML(props) {
-  const { asyncComponentsState, helmet, nonce, reactAppString, css } = props;
+  const { 
+    asyncComponentsState,
+    helmet,
+    nonce,
+    reactAppString,
+    storeState,
+    css
+  } = props;
 
   // Creates an inline script definition that is protected by the nonce.
   const inlineScript = body => (
@@ -57,6 +64,8 @@ function ServerHTML(props) {
   ]);
 
   const bodyElements = removeNil([
+    // Bind our redux store state so the client knows how to hydrate his one
+    ifElse(storeState)(() => inlineScript(`window.__APP_STATE__=${serialize(storeState)};`)),
     // Binds the client configuration object to the window object so
     // that we can safely expose some configuration values to the
     // client bundle that gets executed in the browser.
@@ -102,15 +111,6 @@ function ServerHTML(props) {
     />
   );
 }
-
-ServerHTML.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  asyncComponentsState: PropTypes.object,
-  // eslint-disable-next-line react/forbid-prop-types
-  helmet: PropTypes.object,
-  nonce: PropTypes.string,
-  reactAppString: PropTypes.string,
-};
 
 // EXPORT
 

@@ -1,10 +1,17 @@
 import React from 'react';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import axios from 'axios';
 import classnames from 'classnames';
 
+// import Switch from 'react-router-dom/Switch';
+// import Route from 'react-router-dom/Route';
+
 import config from '../../../../config';
+
+import * as selectors from '../../../reducers';
 
 import Recorder from '../../../../client/components/Recorder';
 import SampleInstances from '../../../../client/components/SampleInstances';
@@ -30,6 +37,9 @@ class MainRoute extends React.Component {
     this._showMainMenu = this._showMainMenu.bind(this);
     this._renderLoadingComponent = this._renderLoadingComponent.bind(this);
     this._renderErrorComponent = this._renderErrorComponent.bind(this);
+
+    // this._componentTester = this._componentTester.bind(this);
+    // this._componentTester2 = this._componentTester2.bind(this);
 
     this.views = {
       contribute: Recorder
@@ -92,7 +102,6 @@ class MainRoute extends React.Component {
               {/* Play button  */}
               <InstancePlaylist
                 instances={this.state.instances}
-                renderLoadingComponent={this._renderLoadingComponent}
                 renderErrorComponent={this._renderErrorComponent}
                 windowLength={this.state.windowLength} 
                 windowStartTime={this.state.windowStartTime} />
@@ -123,15 +132,20 @@ class MainRoute extends React.Component {
     this._getSampleInstances();
   }
 
+  // _componentTester() {
+  //   return <div>/</div>
+  // }
+
+  // _componentTester2() {
+  //   return <div>taco</div>
+  // }
+
   render() {
     const {
       instances,
       windowLength,
       windowStartTime
     } = this.state;
-
-    console.log('MainRoute: this.state.instances:')
-    console.dir(this.state.instances)
 
     const Subview = this.state.subview;
 
@@ -140,6 +154,15 @@ class MainRoute extends React.Component {
         <Helmet>
           <title>{`recorder - ${config('appTitle')}`}</title>
         </Helmet>
+
+         {/* <Switch>
+          <Route exact path="/" component={this._componentTester} />
+          <Route path="/track" component={this._componentTester2} />
+          <Route path="/recorder" component={Recorder} />
+          <Route path="/cleanup" component={this._componentTester2} />
+          <Route path="/stage" component={this._componentTester2} />
+        </Switch> */}
+
         { Subview
             ? <Subview 
                 showMainMenu={this._showMainMenu}
@@ -150,11 +173,21 @@ class MainRoute extends React.Component {
                 />
             : this._renderMainMenu()
         }
+        { this.props.isLoading && this._renderLoadingComponent() }
       </div>
     );
   }
 }
 
-export default withStyles(styles)(MainRoute)
+function mapStateToProps(state, ownProps) {
+  return {
+    isLoading: selectors.isLoading(state),
+  };
+}
+
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps)
+)(MainRoute);
 
 export { MainRoute }

@@ -96,8 +96,11 @@ function App({ ContextWrappedAsyncRecorder, ContextWrappedAsyncMain }) {
       <div>
         <Switch>
           <Route exact path="/" component={ContextWrappedAsyncMain} />
-          <Route path="/recorder" component={ContextWrappedAsyncRecorder} />
-          <Route path="/main" component={ContextWrappedAsyncMain} />
+          <Route path="/track" component={ContextWrappedAsyncMain} />
+          <Route path="/recorder" component={ContextWrappedAsyncMain} />
+          <Route path="/cleanup" component={ContextWrappedAsyncMain} />
+          <Route path="/stage" component={ContextWrappedAsyncMain} />
+          {/* <Route path="/recorder" component={ContextWrappedAsyncRecorder} /> */}
           <Route component={Error404} />
         </Switch>
       </div>

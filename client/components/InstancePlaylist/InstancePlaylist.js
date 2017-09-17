@@ -1,19 +1,18 @@
 import React from 'react';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import Tone from 'tone';
 import classnames from 'classnames';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 
 import config from '../../../config';
 
+import * as selectors from '../../../shared/reducers';
+import { startLoadingState, endLoadingState } from '../../../shared/actions/ui';
+
 import styles from './InstancePlaylist.css';
 
 const baseUrl = config('s3SampleBucket');
-
-const loadState = {
-  LOADING: 1,
-  SUCCESS: 2,
-  ERROR: 3
-};
 
 const playersCache = {};
 const bufferCache = {};
@@ -101,8 +100,8 @@ class InstancePlaylist extends React.Component {
     super(props);
 
     this.state = {
-      loadState: loadState.LOADING
-    };
+      error: null
+    }
 
     this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this);
   }
@@ -114,8 +113,6 @@ class InstancePlaylist extends React.Component {
     } = this.props;
 
     if (instances && instances.length) {
-      this.setState({ loadState: loadState.LOADING })
-
       // clear the transport
       Tone.Transport.cancel();
 
@@ -158,12 +155,13 @@ class InstancePlaylist extends React.Component {
       // The result of loading the sample will determine the look of this component
       Promise.all(tasks)
         .then(() => {
-          this.setState({ loadState: loadState.SUCCESS })
+          this.setState({ error: null })
+          this.props.endLoadingState();
         })
         .catch(error => {
           // @todo log error
           console.error(error)
-          this.setState({ loadState: loadState.ERROR })
+          this.setState({ error })
         });
     }
   }
@@ -178,23 +176,33 @@ class InstancePlaylist extends React.Component {
 
   render () {
     const { 
-      renderLoadingComponent, 
       renderErrorComponent,
       windowLength } = this.props;
 
-    if (this.state.loadState === loadState.SUCCESS) {
+    if (this.state.error) {
+      return renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
+    }
+    else if (!this.props.isLoading) {
       return renderPlayComponent(windowLength);
     }
-    else if (this.props.instances && this.props.instances.length === 0) {
-      return null;
-    }
-    else if (this.state.loadState === loadState.LOADING) {
-      return renderLoadingComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
-    }
     else {
-      return renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
+      return null;
     }
   }
 }
 
-export default withStyles(styles)(InstancePlaylist)
+const mapActionsToProps = {
+  startLoadingState,
+  endLoadingState
+};
+
+function mapStateToProps(state, ownProps) {
+  return {
+    isLoading: selectors.isLoading(state),
+  };
+}
+
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps, mapActionsToProps)
+)(InstancePlaylist);
