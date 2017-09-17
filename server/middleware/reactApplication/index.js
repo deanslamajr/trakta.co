@@ -7,6 +7,8 @@ import asyncBootstrapper from 'react-async-bootstrapper';
 
 import config from '../../../config';
 
+import configureStore from '../../../shared/redux/configureStore';
+
 import ServerHTML from './ServerHTML';
 import wrapAppsRouterComponentsWithContext from '../../../shared/components/App/wrapAppsRouterComponentsWithContext';
 
@@ -47,6 +49,12 @@ export default function reactApplicationMiddleware(request, response) {
   // Create a context for <StaticRouter>, which will allow us to
   // query for the results of the render.
   const reactRouterContext = {};
+
+  // Create the redux store.
+  const store = configureStore();
+
+  console.log('store.getState()');
+  console.dir(store.getState());
 
   // Declare our React application.
   const app = (
