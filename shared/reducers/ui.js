@@ -1,4 +1,4 @@
-import { START_LOADING_STATE, END_LOADING_STATE } from '../../actions/ui';
+import { UI_START_LOADING_STATE, UI_END_LOADING_STATE } from '../actions/ui';
 
 const defaultState = { isLoading: true };
 
@@ -6,12 +6,12 @@ const defaultState = { isLoading: true };
 // REDUCER
 
 function ui (state = defaultState, action) {
-  if (action.type === START_LOADING_STATE) {
+  if (action.type === UI_START_LOADING_STATE) {
     return Object.assign({}, state,
       { isLoading: true },
     );
   }
-  else if (action.type === END_LOADING_STATE) {
+  else if (action.type === UI_END_LOADING_STATE) {
     return Object.assign({}, state,
       {  isLoading: false },
     );
