@@ -51,11 +51,14 @@ export default function reactApplicationMiddleware(request, response) {
   // query for the results of the render.
   const reactRouterContext = {};
 
+  /**
+   * @todo use request.url to initialize the store
+   * via appropriate data fetches
+   */
+  // const initialState = initializeReduxState(request.url)
+
   // Create the redux store.
   const store = configureStore();
-
-  console.log('store.getState()');
-  console.dir(store.getState());
 
   // Declare our React application.
   const app = (
