@@ -24,7 +24,7 @@ function failed(error) {
 
 export function fetchAll() {
   return (dispatch, getState, { axios }) => {
-    dispatch(fetching(id));
+    dispatch(fetching());
 
     return axios
       .get('/api/sampleInstances')

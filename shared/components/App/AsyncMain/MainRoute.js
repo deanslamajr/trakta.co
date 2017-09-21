@@ -12,6 +12,7 @@ import classnames from 'classnames';
 import config from '../../../../config';
 
 import * as selectors from '../../../reducers';
+import { fetchAll } from '../../../actions/instances';
 
 import Recorder from '../../../../client/components/Recorder';
 import SampleInstances from '../../../../client/components/SampleInstances';
@@ -50,16 +51,7 @@ class MainRoute extends React.Component {
    * Retrieve sample instances for current viewport
    */
   _getSampleInstances() {
-    axios.get('/api/sampleInstances')
-      .then(({ data }) => {
-        this.setState({
-          instances: data
-        })
-      })
-      .catch(error => {
-        // @todo log
-        console.error(error);
-      });
+    this.props.fetchAll();
   }
 
   _showContribute() {
@@ -101,7 +93,7 @@ class MainRoute extends React.Component {
             <div className={styles.label}>
               {/* Play button  */}
               <InstancePlaylist
-                instances={this.state.instances}
+                instances={this.props.instances}
                 renderErrorComponent={this._renderErrorComponent}
                 windowLength={this.state.windowLength} 
                 windowStartTime={this.state.windowStartTime} />
@@ -115,7 +107,7 @@ class MainRoute extends React.Component {
         { 
           this.state.instances &&
             <SampleInstances 
-              instances={this.state.instances}
+              instances={this.props.instances}
               windowLength={this.state.windowLength} 
               windowStartTime={this.state.windowStartTime}/>
         }
@@ -142,7 +134,6 @@ class MainRoute extends React.Component {
 
   render() {
     const {
-      instances,
       windowLength,
       windowStartTime
     } = this.state;
@@ -167,7 +158,7 @@ class MainRoute extends React.Component {
             ? <Subview 
                 showMainMenu={this._showMainMenu}
                 taco={6}
-                instances={instances}
+                instances={this.props.instances}
                 windowLength={windowLength} 
                 windowStartTime={windowStartTime}
                 />
@@ -182,12 +173,17 @@ class MainRoute extends React.Component {
 function mapStateToProps(state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
+    instances: selectors.getInstances(state)
   };
-}
+};
+
+const mapActionsToProps = {
+  fetchAll
+};
 
 export default compose(
   withStyles(styles),
-  connect(mapStateToProps)
+  connect(mapStateToProps, mapActionsToProps)
 )(MainRoute);
 
 export { MainRoute }
