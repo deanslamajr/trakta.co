@@ -11,12 +11,12 @@ import config from '../../../config';
 import configureStore from '../../../shared/redux/configureStore';
 
 import ServerHTML from './ServerHTML';
-import wrapAppsRouterComponentsWithContext from '../../../shared/components/App/wrapAppsRouterComponentsWithContext';
+import App from '../../../shared/components/App';
 
 // We're using this outer context to store all server-rendered css for injection in server rendered header style tag
 // necessary configuration to support isomorphic-style-loader
 const css = new Set();
-const App = wrapAppsRouterComponentsWithContext((styles) => css.add(styles._getCss()));
+const insertCssLambda = (styles) => css.add(styles._getCss());
 
 /**
  * React application middleware, supports server side rendering.
@@ -65,7 +65,7 @@ export default function reactApplicationMiddleware(request, response) {
     <AsyncComponentProvider asyncContext={asyncComponentsContext}>
       <StaticRouter location={request.url} context={reactRouterContext}>
         <Provider store={store}>
-          <App />
+           <App insertCssLambda={insertCssLambda} /> 
         </Provider>
       </StaticRouter>
     </AsyncComponentProvider>
