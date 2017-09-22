@@ -199,6 +199,7 @@ const mapActionsToProps = {
 function mapStateToProps(state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
+    instances: selectors.getInstances(state)
   };
 }
 

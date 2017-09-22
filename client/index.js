@@ -12,7 +12,7 @@ import './polyfills';
 
 import ReactHotLoader from './components/ReactHotLoader';
 
-import App from './App';
+import App from '../shared/components/App'
 
 // Get the DOM Element that will host our React application.
 const container = document.querySelector('#app');
@@ -32,10 +32,14 @@ const supportsHistory = 'pushState' in window.history;
 // eslint-disable-next-line no-underscore-dangle
 const asyncComponentsRehydrateState = window.__ASYNC_COMPONENTS_REHYDRATE_STATE__;
 
+// This lambda will add all css properly on client-side
+// necessary configuration to support isomorphic-style-loader
+const insertCssLambda = (styles) => styles._insertCss();
+
 /**
  * Renders the given React Application component.
  */
-function renderApp(TheApp) {
+function renderApp() {
   // Firstly, define our full application component, wrapping the given
   // component app with a browser based version of react router.
   const app = (
@@ -43,7 +47,7 @@ function renderApp(TheApp) {
       <AsyncComponentProvider rehydrateState={asyncComponentsRehydrateState}>
         <Provider store={store}>
           <BrowserRouter forceRefresh={!supportsHistory}>
-            <TheApp />
+            <App insertCssLambda={insertCssLambda} />
           </BrowserRouter>
         </Provider>
       </AsyncComponentProvider>
@@ -57,7 +61,7 @@ function renderApp(TheApp) {
 }
 
 // Execute the first render of our app.
-renderApp(App);
+renderApp();
 
 // This registers our service worker for asset caching and offline support.
 // Keep this as the last item, just in case the code execution failed (thanks
@@ -66,6 +70,7 @@ renderApp(App);
 
 // The following is needed so that we can support hot reloading our application.
 if (process.env.BUILD_FLAG_IS_DEV === 'true' && module.hot) {
+  // codes from redux branch... do we need these?
   // module.hot.dispose((data) => {
   //   // Deserialize store and keep in hot module data for next replacement
   //   data.store = stringify(toJS(store)); // eslint-disable-line
@@ -74,7 +79,7 @@ if (process.env.BUILD_FLAG_IS_DEV === 'true' && module.hot) {
   // Accept changes to this file for hot reloading.
   module.hot.accept('./index.js');
   // Any changes to our App will cause a hotload re-render.
-  module.hot.accept('../shared/components/App/App', () => {
-    renderApp(require('./App').default);
+  module.hot.accept('../shared/components/App', () => {
+    renderApp();
   });
 }

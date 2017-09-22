@@ -1,6 +1,8 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import viewportDimensions from 'viewport-dimensions';
 
+import * as selectors from '../../../shared/reducers';
 import calculateInstanceRectangles from './calculateInstanceRectangles';
 
 const padding = 5;
@@ -61,4 +63,10 @@ const SampleInstances = ({ instances, windowStartTime, windowLength }) => {
   return drawRectangles(rowsOfRectangles, width, height);
 }
 
-export default SampleInstances;
+function mapStateToProps(state) {
+  return {
+    instances: selectors.getInstances(state)
+  };
+}
+
+export default connect(mapStateToProps)(SampleInstances);
