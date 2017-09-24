@@ -29,22 +29,13 @@ class MainRoute extends React.Component {
 
     this.state = {
       subview: null,
-      instances: [],
       windowLength: WINDOW_LENGTH,
       windowStartTime: WINDOW_START_TIME
     };
 
     this._showContribute = this._showContribute.bind(this);
-    this._showMainMenu = this._showMainMenu.bind(this);
     this._renderLoadingComponent = this._renderLoadingComponent.bind(this);
     this._renderErrorComponent = this._renderErrorComponent.bind(this);
-
-    // this._componentTester = this._componentTester.bind(this);
-    // this._componentTester2 = this._componentTester2.bind(this);
-
-    this.views = {
-      contribute: Recorder
-    }
   }
 
   /**
@@ -55,9 +46,8 @@ class MainRoute extends React.Component {
   }
 
   _showContribute() {
-    this.setState({
-      subview: this.views.contribute
-    })
+    //@todo have this show a menu of contribution options, which would include <Recorder> among others
+    this.props.history.push('/recorder');
   }
 
   _renderLoadingComponent(clickHandler) {
@@ -76,61 +66,9 @@ class MainRoute extends React.Component {
     );
   }
 
-  _renderMainMenu() {
-    // @todo
-    // on server, this should only concern itself with displaying a load animation
-    // on top of notched track background, showing the correct time labels related to
-    // the current track viewport
-    return (
-      <div className={styles.canvasContainer}>
-        <div className={styles.meter}>
-          <span className={styles.startTime}>{this.state.windowStartTime}</span>
-          <span className={styles.endTime}>{this.state.windowStartTime + this.state.windowLength}</span>
-        </div>
-
-        {
-          this.state.instances &&
-            <div className={styles.label}>
-              {/* Play button  */}
-              <InstancePlaylist
-                instances={this.props.instances}
-                renderErrorComponent={this._renderErrorComponent}
-                windowLength={this.state.windowLength} 
-                windowStartTime={this.state.windowStartTime} />
-              {/* Contribute button  */}
-              <div className={classnames(styles.contribute, styles.button, styles.bottomButton)} onClick={this._showContribute}>
-                <span className={styles.icon}>&#10133;</span>
-              </div>
-            </div>
-        }
-        
-        { 
-          this.state.instances &&
-            <SampleInstances 
-              instances={this.props.instances}
-              windowLength={this.state.windowLength} 
-              windowStartTime={this.state.windowStartTime}/>
-        }
-      </div>
-    )
-  }
-
-  _showMainMenu() {
-    this.setState({ subview: null })
-    this._getSampleInstances();
-  }
-
   componentDidMount() {
     this._getSampleInstances();
   }
-
-  // _componentTester() {
-  //   return <div>/</div>
-  // }
-
-  // _componentTester2() {
-  //   return <div>taco</div>
-  // }
 
   render() {
     const {
@@ -146,24 +84,36 @@ class MainRoute extends React.Component {
           <title>{`recorder - ${config('appTitle')}`}</title>
         </Helmet>
 
-         {/* <Switch>
-          <Route exact path="/" component={this._componentTester} />
-          <Route path="/track" component={this._componentTester2} />
-          <Route path="/recorder" component={Recorder} />
-          <Route path="/cleanup" component={this._componentTester2} />
-          <Route path="/stage" component={this._componentTester2} />
-        </Switch> */}
+        {/* 
+            // @todo
+            // on server, this should only concern itself with displaying a load animation
+            // on top of notched track background, showing the correct time labels related to
+            // the current track viewport 
+        */}
 
-        { Subview
-            ? <Subview 
-                showMainMenu={this._showMainMenu}
-                taco={6}
-                instances={this.props.instances}
-                windowLength={windowLength} 
-                windowStartTime={windowStartTime}
-                />
-            : this._renderMainMenu()
-        }
+        <div className={styles.canvasContainer}>
+          <div className={styles.meter}>
+            <span className={styles.startTime}>{this.state.windowStartTime}</span>
+            <span className={styles.endTime}>{this.state.windowStartTime + this.state.windowLength}</span>
+          </div>
+
+          <div className={styles.label}>
+            {/* Play button  */}
+            <InstancePlaylist
+              renderErrorComponent={this._renderErrorComponent}
+              windowLength={this.state.windowLength} 
+              windowStartTime={this.state.windowStartTime} />
+            {/* Contribute button  */}
+            <div className={classnames(styles.contribute, styles.button, styles.bottomButton)} onClick={this._showContribute}>
+              <span className={styles.icon}>&#10133;</span>
+            </div>
+          </div>
+          
+          <SampleInstances
+            windowLength={this.state.windowLength} 
+            windowStartTime={this.state.windowStartTime}/>
+        </div>
+
         { this.props.isLoading && this._renderLoadingComponent() }
       </div>
     );

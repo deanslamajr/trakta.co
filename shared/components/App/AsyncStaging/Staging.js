@@ -3,10 +3,13 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import axios from 'axios';
 import classnames from 'classnames';
 
-import InstancePlaylist from './InstancePlaylist';
-import SampleInstances from './SampleInstances';
+import InstancePlaylist from '../../../../client/components/InstancePlaylist';
+import SampleInstances from '../../../../client/components/SampleInstances';
 
 import styles from './staging.css'
+
+const windowLength = 20;
+const windowStartTime = 0;
 
 class Staging extends React.Component {
   constructor (props) {
@@ -16,7 +19,9 @@ class Staging extends React.Component {
       volume: 0,
       panning: 0,
       startTime: 0,
-      isSaving: false
+      isSaving: false,
+      windowLength,
+      windowStartTime
     }
 
     this._saveRecording = this._saveRecording.bind(this)
@@ -35,7 +40,8 @@ class Staging extends React.Component {
     this.setState({ isSaving: true })
 
     const data = new FormData();
-    data.append('file', new File([this.props.blob], 'sample.mp3'));
+    // @todo
+    //data.append('file', new File([this.props.blob], 'sample.mp3'));
 
     const config = {
       onUploadProgress: (progressEvent) => {
@@ -47,20 +53,12 @@ class Staging extends React.Component {
 
     axios
       .post(`/api/sample?startTime=${this.state.startTime}&duration=${this.props.duration}&volume=${this.state.volume}&panning=${this.state.panning}`, data, config)
-      .then(() => this.props.showMainMenu())
+      .then(() => this.props.history.push('/staging'))
       .catch((err) => {
         // @todo log error
         console.error(err);
         // this.props.failureCB
       });
-  }
-
-  _renderLoadingComponent(clickHandler) {
-    return (
-      <div onClick={clickHandler} className={classnames()}>
-        <div className={classnames(styles.icon, styles.loadSpinner)}></div>
-      </div>
-    );
   }
 
   _renderErrorComponent(clickHandler) {
@@ -71,17 +69,19 @@ class Staging extends React.Component {
     );
   }
 
+  componentWillMount() {
+    console.log('componentWillMount()');
+  }
+
+  componentDidMount() {
+    console.log('componentDidMount()')
+  }
+
   render () {
     const {
-      instances,
       windowLength,
-      windowStartTime,
-      taco
-    } = this.props;
-
-    console.log('staging: this.props.instances')
-    console.dir(instances)
-    console.log(`taco:${taco}`)
+      windowStartTime
+    } = this.state;
 
     return (
       <div>
@@ -95,26 +95,19 @@ class Staging extends React.Component {
           <input type='submit' value='Create Instance' className={classnames(styles.formInput, { [styles.formSaving]: this.state.isSaving })} />
           <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} /> 
         </form>
-        {
-          instances &&
-            <div className={styles.label}>
-              {/* Play button  */}
-              <InstancePlaylist
-                instances={instances}
-                renderLoadingComponent={this._renderLoadingComponent}
-                renderErrorComponent={this._renderErrorComponent}
-                windowLength={windowLength} 
-                windowStartTime={windowStartTime} />
-            </div>
-        }
-        
-        { 
-          instances &&
-            <SampleInstances 
-              instances={instances}
-              windowLength={windowLength} 
-              windowStartTime={windowStartTime}/>
-        }
+
+         <div className={styles.label}>
+          {/* Play button  */}
+          {/* @todo  */}
+          <InstancePlaylist
+            renderErrorComponent={this._renderErrorComponent}
+            windowLength={windowLength} 
+            windowStartTime={windowStartTime} />
+        </div>
+
+        <SampleInstances 
+          windowLength={windowLength} 
+          windowStartTime={windowStartTime}/> 
       </div>
     )
   }

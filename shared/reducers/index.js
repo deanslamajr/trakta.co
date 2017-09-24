@@ -1,13 +1,15 @@
 import { combineReducers } from 'redux';
 import ui, * as FromUi from './ui';
 import instances, * as FromInstances from './instances';
+import recorder, * as FromRecorder from './recorder';
 
 // -----------------------------------------------------------------------------
 // REDUCER
 
 const rootReducer = combineReducers({
   ui,
-  instances
+  instances,
+  recorder
 });
 
 // -----------------------------------------------------------------------------
@@ -23,7 +25,11 @@ export function getInstances(state) {
 
 export function isFetchingInstances(state) {
   return FromInstances.isFetching(state.instances);
-} 
+}
+
+export function getStagedSample(state) {
+  return FromRecorder.getStagedSample(state.recorder);
+}
 
 // -----------------------------------------------------------------------------
 // REDUCER EXPORT

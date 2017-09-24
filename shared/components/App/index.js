@@ -11,6 +11,8 @@ import config from '../../../config';
 import './globals.css';
 
 import AsyncMain from './AsyncMain';
+import AsyncStaging from './AsyncStaging';
+import AsyncRecorder from './AsyncRecorder';
 import Error404 from './Error404';
 
 class App extends React.Component {
@@ -104,10 +106,11 @@ class App extends React.Component {
         <div>
           <Switch>
             <Route exact path="/" component={AsyncMain} />
-            {/* <Route path="/track" component={ContextWrappedAsyncMain} />
-            <Route path="/recorder" component={ContextWrappedAsyncMain} />
-            <Route path="/cleanup" component={ContextWrappedAsyncMain} />
-            <Route path="/staging" component={ContextWrappedAsyncMain} /> */}
+            <Route path="/track" component={AsyncMain} />
+            <Route path="/recorder" component={AsyncRecorder} />
+            <Route path="/staging" component={AsyncStaging} />
+            {/* 
+            <Route path="/cleanup" component={ContextWrappedAsyncMain} /> */ }
 
             <Route component={Error404} />
           </Switch>

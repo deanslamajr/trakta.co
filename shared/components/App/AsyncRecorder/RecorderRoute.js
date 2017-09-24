@@ -37,7 +37,7 @@ class RecorderRoute extends React.Component {
         </Helmet>
         { 
           this.state.isClient 
-            ? <Recorder /> 
+            ? <Recorder history={this.props.history}/> 
             : this._renderLoading()
         }
       </div>

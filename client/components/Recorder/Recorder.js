@@ -1,4 +1,6 @@
 import React from 'react';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import viewportDimensions from 'viewport-dimensions';
 import Tone from 'tone';
@@ -6,7 +8,8 @@ import lamejs from 'lamejs';
 import ReactAudioPlayer from 'react-audio-player';
 import WaveformData from 'waveform-data';
 
-import Staging from '../Staging';
+import * as selectors from '../../../shared/reducers';
+import { setStagedSample } from '../../../shared/actions/recorder';
 
 import styles from './Recorder.css'
 
@@ -14,6 +17,7 @@ const resolution = 256;
 
 let dataBuffer;
 let audioBuffers;
+let blob;
 
 let mp3Encoder;
 
@@ -90,19 +94,17 @@ class Recorder extends React.Component {
       STOP: this._renderStopRecordingPrompt.bind(this),
       FINISHED: this._renderFinishedRecordingPrompt.bind(this),
       SAVE_PENDING: this._renderSaveRecordingPrompt.bind(this),
-      STAGING: this._renderStagingPrompt.bind(this),
       SAVE_ERROR: this._renderSaveErrorPrompt.bind(this),
       USER_MEDIA_DENIED: this._renderUserMediaDenied.bind(this)
     };
 
     this.state = {
       isRecording: false,
-      isLoading: true,
       disableRecording: true,
       currentPrompt: this.prompts.START,
       userMediaSupported: Tone.UserMedia.supported,
       drawWave: false,
-      blob: undefined
+      duration: undefined
     };
 
     if (Tone.UserMedia.supported) {
@@ -120,7 +122,6 @@ class Recorder extends React.Component {
     this._renderStartRecordingPrompt = this._renderStartRecordingPrompt.bind(this);
     this._startRecording = this._startRecording.bind(this);
     this._stopRecording = this._stopRecording.bind(this);
-    this._drawBlobs = this._drawBlobs.bind(this);
     this._openRecorderAndBeginDrawingWaves = this._openRecorderAndBeginDrawingWaves.bind(this);
     this._drawWave = this._drawWave.bind(this);
     this._renderUserMediaNotSupported = this._renderUserMediaNotSupported.bind(this);
@@ -259,25 +260,25 @@ class Recorder extends React.Component {
     return (
       <div>
         {
-          this.state.isLoading
-            ? (<div>Loading audio</div>)
-            : (
+          this.props.stagedSample
+            ? (
                 <div className={styles.label}>
                   <div className={styles.subsetSelector}>Selector</div>
-                  { this._drawBlobs() }
+                  <div className={styles.playButton}>
+                    <ReactAudioPlayer src={this.props.stagedSample.objectUrl} controls />
+                  </div>
                   <div className={styles.retryButton} onClick={this._clickedRetry}>Do another recording</div>
                   <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
                 </div>  
               )
+            : (<div>Loading audio</div>)
         }
       </div>
     );
   }
 
   _clickUseThisSelection() {
-    this.setState({
-      currentPrompt: this.prompts.STAGING
-    });
+    this.props.history.push('/staging')
   }
 
   _drawSample(buffer) {
@@ -355,16 +356,6 @@ class Recorder extends React.Component {
     return <div>Ice Cream melted :(</div>;
   }
 
-  _renderStagingPrompt() {
-    if (this.state.buff) {
-      const duration = this.state.buff.duration;
-      return <Staging blob={this.state.blob} duration={duration} showMainMenu={this.props.showMainMenu}/>;
-    }
-    else {
-      return null;
-    }
-  }
-
   _renderUserMediaSupported() {
     // "- 5" to keep canvas within viewport i.e. no scrollbars
     const width = viewportDimensions 
@@ -387,23 +378,8 @@ class Recorder extends React.Component {
     );
   }
 
-  _drawBlobs() {
-    return (
-      <div className={styles.playButton}>
-        <div>
-        {
-          this.state.blob
-            ? <ReactAudioPlayer src={window.URL.createObjectURL(this.state.blob)} controls />
-            : null
-        }
-        </div>
-      </div>
-    );
-  }
-
   _renderUserMediaNotSupported() {
     return (
-      // @todo replace with imported css
       <div className={styles.notSupportedMessage}>
         WebAudio is not supported by this browser.
         <br/>
@@ -464,26 +440,24 @@ class Recorder extends React.Component {
 
     // encode mp3
     encode(summedBuffer, this.bufferSize); 
-    const blob = generateMp3Blob();
+    blob = generateMp3Blob();
 
-    this.setState({ 
-      blob,
-      isLoading: true
-    });
+    const objectUrl = window.URL.createObjectURL(blob)
 
-    const buffer = new Tone.Buffer(window.URL.createObjectURL(blob),
+    // get duration of recording and add to store
+    const buffer = new Tone.Buffer(objectUrl,
       // success
       () => {
         const buff = buffer.get();
-        this.setState({ 
-          isLoading: false,
-          buff
-        })
+        const sampleData = {
+          objectUrl,
+          duration: buff.duration
+        }
+        this.props.setStagedSample(sampleData)
       },
       // error
-      // @todo log
+      // @todo log, set error view state (w/ try again functionality)
       error => {
-        
         console.error(error);
       }
     );
@@ -538,4 +512,17 @@ class Recorder extends React.Component {
   }
 }
 
-export default withStyles(styles)(Recorder)
+const mapActionsToProps = {
+  setStagedSample
+};
+
+function mapStateToProps(state) {
+  return {
+    stagedSample: selectors.getStagedSample(state)
+  };
+}
+
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps, mapActionsToProps)
+)(Recorder);
