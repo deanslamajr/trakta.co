@@ -10,6 +10,7 @@ import InstancePlaylist from '../InstancePlaylist';
 import SampleInstances from '../SampleInstances';
 
 import * as selectors from '../../../shared/reducers';
+import { setStagedSample } from '../../../shared/actions/recorder';
 
 import styles from './staging.css'
 
@@ -21,20 +22,32 @@ class Staging extends React.Component {
     super(props)
 
     this.state = {
-      volume: 0,
-      panning: 0,
-      startTime: 0,
       isSaving: false,
       windowLength,
       windowStartTime
     }
 
-    this._saveRecording = this._saveRecording.bind(this)
+    this._saveRecording = this._saveRecording.bind(this);
+    this._renderTrackPlayer = this._renderTrackPlayer.bind(this);
   }
 
   handleChange (type, event) {
-    const parsedValue = parseFloat(event.target.value);
-    this.setState({ [type]: parsedValue })
+    let parsedValue = parseFloat(event.target.value);
+    if (Number.isNaN(parsedValue)) {
+      parsedValue = 0;
+    }
+
+    console.log('handleChange, { [type]: parsedValue }:');
+    console.dir({ [type]: parsedValue });
+    //this.setState({ [type]: parsedValue })
+    // const stagedSample = Object.assign({}, {
+    //     startTime: this.props.startTime,
+    //     volume: this.props.volume,
+    //     panning: this.props.panning
+    //   },
+    //   { [type]: parsedValue }
+    // )
+    this.props.setStagedSample({ [type]: parsedValue });
   }
 
   _saveRecording(event) {
@@ -79,59 +92,97 @@ class Staging extends React.Component {
     // 
     //
     // get duration of recording and add to store
-    // const buffer = new Tone.Buffer(this.props.objectUrl,
-    //   // success
-    //   () => {
-    //     const buff = buffer.get();
-    //     const sampleData = {
-    //       objectUrl,
-    //       duration: buff.duration
-    //     }
-    //     this.props.setStagedSample(sampleData)
-    //   },
-    //   // error
-    //   // @todo log, set error view state (w/ try again functionality)
-    //   error => {
-    //     console.error(error);
-    //   }
-    // );
+    const buffer = new Tone.Buffer(this.props.objectUrl,
+      // success
+      () => {
+        this.setState({ buffer })
+      },
+      // error
+      // @todo log, set error view state (w/ try again functionality)
+      error => {
+        console.error(error);
+      }
+    );
+  }
+
+  _renderTrackPlayer() {
+    const {
+      windowLength,
+      windowStartTime,
+      buffer
+    } = this.state;
+
+    return (
+      <div>
+        <div className={styles.label}>
+          {/* Play button  */}
+          <InstancePlaylist
+            renderErrorComponent={this._renderErrorComponent}
+            windowLength={windowLength} 
+            windowStartTime={windowStartTime}
+            buffer={buffer}
+              />
+        </div>
+
+        <SampleInstances 
+          windowLength={windowLength} 
+          windowStartTime={windowStartTime}/>
+      </div>
+    );
   }
 
   render () {
     const {
-      windowLength,
-      windowStartTime
+      buffer,
+      startTime,
+      volume,
+      panning
     } = this.state;
 
     return (
       <div>
         <form className={styles.container} onSubmit={this._saveRecording}>
           <label htmlFor='startTime'>startTime</label>
-          <input id='startTime' type='number' value={this.state.startTime} onChange={this.handleChange.bind(this, 'startTime')} placeholder='startTime' className={styles.formInput} />
+          <input 
+            id='startTime'
+            value={startTime}
+            onChange={this.handleChange.bind(this, 'startTime')}
+            placeholder='startTime'
+            className={styles.formInput} />
+          
           <label htmlFor='volume'>volume (-infinity to 0)</label>
-          <input id='volume' type='number' value={this.state.volume} onChange={this.handleChange.bind(this, 'volume')} placeholder='volume' className={styles.formInput} />
+          <input id='volume'
+            value={volume}
+            onChange={this.handleChange.bind(this, 'volume')}
+            placeholder='volume'
+            className={styles.formInput} />
+          
           <label htmlFor='panning'>panning (-1 to 1)</label>
-          <input id='panning' type='number' value={this.state.panning} onChange={this.handleChange.bind(this, 'panning')} placeholder='panning' className={styles.formInput} />
+          <input id='panning'
+            value={panning}
+            onChange={this.handleChange.bind(this, 'panning')}
+            placeholder='panning'
+            className={styles.formInput} />
+          
           <input type='submit' value='Create Instance' className={classnames(styles.formInput, { [styles.formSaving]: this.state.isSaving })} />
+          
           <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} /> 
         </form>
 
-         <div className={styles.label}>
-          {/* Play button  */}
-          {/* @todo  */}
-          <InstancePlaylist
-            renderErrorComponent={this._renderErrorComponent}
-            windowLength={windowLength} 
-            windowStartTime={windowStartTime} />
-        </div>
-
-        <SampleInstances 
-          windowLength={windowLength} 
-          windowStartTime={windowStartTime}/> 
+        {
+          buffer
+            ? this._renderTrackPlayer()
+            : null
+        }
+         
       </div>
     )
   }
 }
+
+const mapActionsToProps = {
+  setStagedSample
+};
 
 function mapStateToProps(state) {
   return { objectUrl: selectors.getStagedObjectUrl(state) }
@@ -141,5 +192,5 @@ export { Staging }
 
 export default compose(
   withStyles(styles),
-  connect(mapStateToProps)
+  connect(mapStateToProps, mapActionsToProps)
 )(Staging);

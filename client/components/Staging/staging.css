@@ -5,6 +5,12 @@
   display: flex;
   flex-direction: column;
   margin-top: 5.5rem;
+  position: absolute;
+  background: var(--clearBlue);
+  left: 35%;
+  right: 35%;
+  top: 20%;
+  z-index: 999;
 }
 
 .form-input {

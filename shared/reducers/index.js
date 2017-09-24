@@ -31,6 +31,10 @@ export function getStagedObjectUrl(state) {
   return FromRecorder.getStagedObjectUrl(state.recorder);
 }
 
+export function getStagedSample(state) {
+  return FromRecorder.getStagedSample(state.recorder);
+}
+
 // -----------------------------------------------------------------------------
 // REDUCER EXPORT
 
