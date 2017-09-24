@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import Tone from 'tone';
 import classnames from 'classnames';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import debounce from 'debounce';
 
 import config from '../../../config';
 
@@ -17,7 +18,16 @@ const baseUrl = config('s3SampleBucket');
 const playersCache = {};
 const bufferCache = {};
 
-function loadInstanceOntoTransport(samplePlayer, startTime, endTime, windowLength) {
+function addPluginsToPlayer(samplePlayer, volume, panning) {
+  // Plugins
+  //
+  const panVol = new Tone.PanVol(panning, volume);
+  //const limiter = new Tone.Limiter(-6)
+
+  samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
+}
+
+function syncPlayerToTransport(samplePlayer, startTime, endTime, windowLength) {
   // sample starts before the window
   if (startTime < 0) {
     startTime = 0;
@@ -61,13 +71,8 @@ function onInstanceLoadSuccess(instance, windowStartTime, windowLength, resolve)
     samplePlayer = new Tone.Player(buffer);
   }
 
-  // Plugins
-  //
-  const panVol = new Tone.PanVol(instance.panning, instance.volume);
-  //const limiter = new Tone.Limiter(-6)
-  samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
-
-  loadInstanceOntoTransport(samplePlayer, startTime, endTime, windowLength);
+  addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
+  syncPlayerToTransport(samplePlayer, startTime, endTime, windowLength);
 
   // cache the player
   playersCache[instance.sample.id] = samplePlayer;
@@ -103,7 +108,8 @@ class InstancePlaylist extends React.Component {
       error: null
     }
 
-    this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this);
+    // this debounce slows down invocation just enough so that redux store can be updated properly from form
+    this._downloadAndArrangeSampleInstances = debounce(this._downloadAndArrangeSampleInstances.bind(this), 1000);
   }
 
   _downloadAndArrangeSampleInstances(instances) {
@@ -137,7 +143,7 @@ class InstancePlaylist extends React.Component {
               //onInstanceLoadSuccess(instance, windowStartTime, windowLength, resolve);
             }
 
-            loadInstanceOntoTransport(samplePlayer, startTime, endTime, windowLength)
+            syncPlayerToTransport(samplePlayer, startTime, endTime, windowLength)
 
             resolve();
           }
@@ -151,6 +157,18 @@ class InstancePlaylist extends React.Component {
           }
         });
       });
+
+      // if buffer exists, add the staged sample to the track
+      if (this.props.buffer) {
+        const addBufferToTrack = new Promise((resolve, reject) => {
+          const samplePlayer = new Tone.Player(this.props.buffer);
+
+          addPluginsToPlayer(samplePlayer, this.props.stagedSample.volume, this.props.stagedSample.panning)
+          syncPlayerToTransport(samplePlayer, this.props.stagedSample.startTime, windowStartTime+windowLength, windowLength);
+        });
+
+        tasks.push(addBufferToTrack);
+      }
 
       // The result of loading the sample will determine the look of this component
       Promise.all(tasks)
@@ -199,7 +217,8 @@ const mapActionsToProps = {
 function mapStateToProps(state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
-    instances: selectors.getInstances(state)
+    instances: selectors.getInstances(state),
+    stagedSample: selectors.getStagedSample(state)
   };
 }
 

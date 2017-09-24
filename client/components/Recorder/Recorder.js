@@ -1,4 +1,6 @@
 import React from 'react';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import viewportDimensions from 'viewport-dimensions';
 import Tone from 'tone';
@@ -6,7 +8,8 @@ import lamejs from 'lamejs';
 import ReactAudioPlayer from 'react-audio-player';
 import WaveformData from 'waveform-data';
 
-import Staging from '../Staging';
+import { setStagedObjectUrl } from '../../../shared/actions/recorder';
+import * as selectors from '../../../shared/reducers';
 
 import styles from './Recorder.css'
 
@@ -14,6 +17,7 @@ const resolution = 256;
 
 let dataBuffer;
 let audioBuffers;
+let blob;
 
 let mp3Encoder;
 
@@ -90,19 +94,17 @@ class Recorder extends React.Component {
       STOP: this._renderStopRecordingPrompt.bind(this),
       FINISHED: this._renderFinishedRecordingPrompt.bind(this),
       SAVE_PENDING: this._renderSaveRecordingPrompt.bind(this),
-      STAGING: this._renderStagingPrompt.bind(this),
       SAVE_ERROR: this._renderSaveErrorPrompt.bind(this),
       USER_MEDIA_DENIED: this._renderUserMediaDenied.bind(this)
     };
 
     this.state = {
       isRecording: false,
-      isLoading: true,
       disableRecording: true,
       currentPrompt: this.prompts.START,
       userMediaSupported: Tone.UserMedia.supported,
       drawWave: false,
-      blob: undefined
+      duration: undefined
     };
 
     if (Tone.UserMedia.supported) {
@@ -116,14 +118,11 @@ class Recorder extends React.Component {
       this.userMedia.connect(this.analyser);
     }
 
-    this._renderUserMediaSupported = this._renderUserMediaSupported.bind(this);
     this._renderStartRecordingPrompt = this._renderStartRecordingPrompt.bind(this);
     this._startRecording = this._startRecording.bind(this);
     this._stopRecording = this._stopRecording.bind(this);
-    this._drawBlobs = this._drawBlobs.bind(this);
     this._openRecorderAndBeginDrawingWaves = this._openRecorderAndBeginDrawingWaves.bind(this);
     this._drawWave = this._drawWave.bind(this);
-    this._renderUserMediaNotSupported = this._renderUserMediaNotSupported.bind(this);
     this._drawSample = this._drawSample.bind(this);
     this._combineBuffers = this._combineBuffers.bind(this);
     this._clickedRetry = this._clickedRetry.bind(this);
@@ -254,81 +253,45 @@ class Recorder extends React.Component {
   }
 
   _renderFinishedRecordingPrompt() {
-    
-
     return (
       <div>
-        {
-          this.state.isLoading
-            ? (<div>Loading audio</div>)
-            : (
-                <div className={styles.label}>
-                  <div className={styles.subsetSelector}>Selector</div>
-                  { this._drawBlobs() }
-                  <div className={styles.retryButton} onClick={this._clickedRetry}>Do another recording</div>
-                  <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
-                </div>  
-              )
-        }
+        <div className={styles.label}>
+          <div className={styles.subsetSelector}>Selector</div>
+          <div className={styles.retryButton} onClick={this._clickedRetry}>Do another recording</div>
+          {
+            this.props.objectUrl && 
+            (
+              <div>
+                <div className={styles.playButton}>
+                  <ReactAudioPlayer src={this.props.objectUrl} controls />
+                </div>
+                <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
+              </div>
+            )
+          }
+        </div>
       </div>
     );
   }
 
   _clickUseThisSelection() {
-    this.setState({
-      currentPrompt: this.prompts.STAGING
-    });
+    this.props.history.push(`${this.props.match.url}/staging`);
   }
 
   _drawSample(buffer) {
     const waveFormData = WaveformData.create(buffer);
     waveFormData.offset(0, buffer.byteLength/4);
 
-
     const ctx = this.canvasContext;
 
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
-    // ctx.beginPath();
-    // ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    // ctx.closePath();
-
-
-
 
     const interpolateHeight = (total_height) => {
       const amplitude = 256;
       return (size) => total_height - ((size + 128) * total_height) / amplitude;
     };
     const y = interpolateHeight(canvasHeight);
-
-
-
-
-
-    // ctx.beginPath();
-    // ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    // ctx.closePath();
-    
-    // ctx.lineJoin = 'round';
-    // ctx.lineWidth = 2;
-    // ctx.strokeStyle = 'white';
-
-    // // from 0 to 100 
-    // ctx.beginPath();
-    // ctx.moveTo(0, canvasHeight/2);
-    // waveFormData.min.forEach((val, x) => ctx.lineTo(x + 0.5, y(val) + 0.5));
-    // ctx.stroke();
-    // ctx.closePath();
-
-    // // then looping back from 100 to 0
-    // ctx.beginPath();
-    // ctx.moveTo(canvasWidth, canvasHeight/2);
-    // waveFormData.max.reverse().forEach((val, x) => {
-    //   ctx.lineTo((waveFormData.offset_length - x) + 0.5, y(val) + 0.5);
-    // });
-    // ctx.stroke();
-    // ctx.closePath();
 
     ctx.beginPath();
 
@@ -342,9 +305,6 @@ class Recorder extends React.Component {
 
     ctx.closePath();
     ctx.stroke();
-    //this.canvas.fillStroke();
-
-
   }
 
   _renderSaveRecordingPrompt() {
@@ -355,77 +315,17 @@ class Recorder extends React.Component {
     return <div>Ice Cream melted :(</div>;
   }
 
-  _renderStagingPrompt() {
-    if (this.state.buff) {
-      const duration = this.state.buff.duration;
-      return <Staging blob={this.state.blob} duration={duration} showMainMenu={this.props.showMainMenu}/>;
-    }
-    else {
-      return null;
-    }
-  }
-
-  _renderUserMediaSupported() {
-    // "- 5" to keep canvas within viewport i.e. no scrollbars
-    const width = viewportDimensions 
-      ? viewportDimensions.width() && viewportDimensions.width() - 5
-      : 300;
-    const height = viewportDimensions
-      ? viewportDimensions.height() && viewportDimensions.height() - 5
-      : 300;
-
-    return (
-      <div>
-        {this.state.currentPrompt()}
-        <canvas 
-          className={styles.container}
-          width={width} 
-          height={height}
-          ref={(canvas) => { this.canvas = canvas; }}
-        />
-      </div>
-    );
-  }
-
-  _drawBlobs() {
-    return (
-      <div className={styles.playButton}>
-        <div>
-        {
-          this.state.blob
-            ? <ReactAudioPlayer src={window.URL.createObjectURL(this.state.blob)} controls />
-            : null
-        }
-        </div>
-      </div>
-    );
-  }
-
-  _renderUserMediaNotSupported() {
-    return (
-      // @todo replace with imported css
-      <div className={styles.notSupportedMessage}>
-        WebAudio is not supported by this browser.
-        <br/>
-        Please upgrade this browser's version or switch to a browser that supports this technology.
-        <br/>
-        i.e. internet explorer, safari, and all iOS-based browsers will not be able to run this application
-      </div>
-    );
-  }
-
   _startRecording() {
     if (this.processor) {
       this.userMedia.connect(this.processor);
       // if the ScriptProcessorNode is not connected to an output the "onaudioprocess" event is not triggered in chrome
-      this.processor.connect(this.context.destination);
+      this.processor.connect(this.userMedia.context._context.destination);
 
       this.setState({ 
         recordingStartTime: Date.now(),
-        isRecording: true 
+        isRecording: true,
+        currentPrompt: this.prompts.STOP
       });
-
-      this.setState({ currentPrompt: this.prompts.STOP });
     }
     else {
       // @todo log and metric
@@ -434,6 +334,12 @@ class Recorder extends React.Component {
   }
 
   _stopRecording() {
+    this.setState({ 
+      currentPrompt: this.prompts.FINISHED,
+      isRecording: false,
+      drawWave: false
+    });
+
     // clear canvas
     requestAnimationFrame(() => {
       const ctx = this.canvasContext;
@@ -445,12 +351,6 @@ class Recorder extends React.Component {
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.closePath();
     })
-    
-    this.setState({ 
-      currentPrompt: this.prompts.FINISHED,
-      isRecording: false,
-      drawWave: false
-    });
 
     // recorder cleanup
     this.processor.disconnect();
@@ -464,29 +364,10 @@ class Recorder extends React.Component {
 
     // encode mp3
     encode(summedBuffer, this.bufferSize); 
-    const blob = generateMp3Blob();
+    blob = generateMp3Blob();
 
-    this.setState({ 
-      blob,
-      isLoading: true
-    });
-
-    const buffer = new Tone.Buffer(window.URL.createObjectURL(blob),
-      // success
-      () => {
-        const buff = buffer.get();
-        this.setState({ 
-          isLoading: false,
-          buff
-        })
-      },
-      // error
-      // @todo log
-      error => {
-        
-        console.error(error);
-      }
-    );
+    const objectUrl = window.URL.createObjectURL(blob);
+    this.props.setStagedObjectUrl(objectUrl);
   }
 
   componentDidMount() {
@@ -494,12 +375,12 @@ class Recorder extends React.Component {
     this.userMedia.open()
       .then(() => {
         // save a reference to the AudioContext
-        this.context = this.userMedia.context._context;
+        const context = this.userMedia.context._context;
 
-        inititializeEncoder(this.context.sampleRate)
+        inititializeEncoder(context.sampleRate)
 
         // a bufferSize of 0 instructs the browser to choose the best bufferSize
-        this.processor = this.context.createScriptProcessor(0, 1, 1);
+        this.processor = context.createScriptProcessor(0, 1, 1);
         this.bufferSize = this.processor.bufferSize;
 
         this.processor.onaudioprocess = (event) => {
@@ -525,17 +406,54 @@ class Recorder extends React.Component {
   }
 
   render() {
+    // "- 5" to keep canvas within viewport i.e. no scrollbars
+    const width = viewportDimensions 
+      ? viewportDimensions.width() && viewportDimensions.width() - 5
+      : 300;
+    const height = viewportDimensions
+      ? viewportDimensions.height() && viewportDimensions.height() - 5
+      : 300;
+
     return (
       // @todo replace with imported css
       <div>
         { 
           this.state.userMediaSupported 
-            ? this._renderUserMediaSupported() 
-            : this._renderUserMediaNotSupported() 
+            ? (
+              <div>
+                {this.state.currentPrompt()}
+                <canvas 
+                  className={styles.container}
+                  width={width} 
+                  height={height}
+                  ref={(canvas) => { this.canvas = canvas; }}
+                />
+              </div>
+            )
+            : (
+              <div className={styles.notSupportedMessage}>
+                WebAudio is not supported by this browser.
+                <br/>
+                Please upgrade this browser's version or switch to a browser that supports this technology.
+                <br/>
+                i.e. internet explorer, safari, and all iOS-based browsers will not be able to run this application
+              </div>
+            )
         }
       </div>
     );
   }
 }
 
-export default withStyles(styles)(Recorder)
+const mapActionsToProps = {
+  setStagedObjectUrl
+};
+
+function mapStateToProps(state) {
+  return { objectUrl: selectors.getStagedObjectUrl(state) }
+}
+
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps, mapActionsToProps)
+)(Recorder);
