@@ -1,5 +1,5 @@
-@import "../../../colors.css";
-@import "../../../common.css";
+@import "../../../shared/colors.css";
+@import "../../../shared/common.css";
 
 .container {
   display: flex;

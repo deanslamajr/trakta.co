@@ -14,7 +14,6 @@ import config from '../../../../config';
 import * as selectors from '../../../reducers';
 import { fetchAll } from '../../../actions/instances';
 
-import Recorder from '../../../../client/components/Recorder';
 import SampleInstances from '../../../../client/components/SampleInstances';
 import InstancePlaylist from '../../../../client/components/InstancePlaylist';
 

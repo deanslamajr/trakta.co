@@ -1,10 +1,15 @@
 import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import axios from 'axios';
 import classnames from 'classnames';
+import Tone from 'tone';
 
-import InstancePlaylist from '../../../../client/components/InstancePlaylist';
-import SampleInstances from '../../../../client/components/SampleInstances';
+import InstancePlaylist from '../InstancePlaylist';
+import SampleInstances from '../SampleInstances';
+
+import * as selectors from '../../../shared/reducers';
 
 import styles from './staging.css'
 
@@ -69,12 +74,27 @@ class Staging extends React.Component {
     );
   }
 
-  componentWillMount() {
-    console.log('componentWillMount()');
-  }
-
   componentDidMount() {
-    console.log('componentDidMount()')
+    // @todo probably don't need this here...
+    // 
+    //
+    // get duration of recording and add to store
+    // const buffer = new Tone.Buffer(this.props.objectUrl,
+    //   // success
+    //   () => {
+    //     const buff = buffer.get();
+    //     const sampleData = {
+    //       objectUrl,
+    //       duration: buff.duration
+    //     }
+    //     this.props.setStagedSample(sampleData)
+    //   },
+    //   // error
+    //   // @todo log, set error view state (w/ try again functionality)
+    //   error => {
+    //     console.error(error);
+    //   }
+    // );
   }
 
   render () {
@@ -113,4 +133,13 @@ class Staging extends React.Component {
   }
 }
 
-export default withStyles(styles)(Staging)
+function mapStateToProps(state) {
+  return { objectUrl: selectors.getStagedObjectUrl(state) }
+}
+
+export { Staging }
+
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps)
+)(Staging);

@@ -3,11 +3,11 @@
 // -----------------------------------------------------------------------------
 // ACTION NAME CONSTANTS
 
-export const RECORDER_STAGE_SAMPLE = 'RECORDER_STAGE_SAMPLE';
+export const RECORDER_STAGE_OBJECT_URL = 'RECORDER_STAGE_SAMPLE';
 
 // -----------------------------------------------------------------------------
 // ACTIONS
 
-export function setStagedSample(payload) {
-  return { type: RECORDER_STAGE_SAMPLE, payload };
+export function setStagedObjectUrl(objectUrl) {
+  return { type: RECORDER_STAGE_OBJECT_URL, objectUrl };
 }

@@ -27,8 +27,8 @@ export function isFetchingInstances(state) {
   return FromInstances.isFetching(state.instances);
 }
 
-export function getStagedSample(state) {
-  return FromRecorder.getStagedSample(state.recorder);
+export function getStagedObjectUrl(state) {
+  return FromRecorder.getStagedObjectUrl(state.recorder);
 }
 
 // -----------------------------------------------------------------------------
