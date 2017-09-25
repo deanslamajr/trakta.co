@@ -37,16 +37,6 @@ class Staging extends React.Component {
       parsedValue = 0;
     }
 
-    console.log('handleChange, { [type]: parsedValue }:');
-    console.dir({ [type]: parsedValue });
-    //this.setState({ [type]: parsedValue })
-    // const stagedSample = Object.assign({}, {
-    //     startTime: this.props.startTime,
-    //     volume: this.props.volume,
-    //     panning: this.props.panning
-    //   },
-    //   { [type]: parsedValue }
-    // )
     this.props.setStagedSample({ [type]: parsedValue });
   }
 
@@ -88,10 +78,6 @@ class Staging extends React.Component {
   }
 
   componentDidMount() {
-    // @todo probably don't need this here...
-    // 
-    //
-    // get duration of recording and add to store
     const buffer = new Tone.Buffer(this.props.objectUrl,
       // success
       () => {
@@ -133,11 +119,10 @@ class Staging extends React.Component {
 
   render () {
     const {
-      buffer,
       startTime,
       volume,
       panning
-    } = this.state;
+    } = this.props.stagedSample;
 
     return (
       <div>
@@ -170,7 +155,7 @@ class Staging extends React.Component {
         </form>
 
         {
-          buffer
+          this.state.buffer
             ? this._renderTrackPlayer()
             : null
         }
@@ -185,7 +170,10 @@ const mapActionsToProps = {
 };
 
 function mapStateToProps(state) {
-  return { objectUrl: selectors.getStagedObjectUrl(state) }
+  return { 
+    objectUrl: selectors.getStagedObjectUrl(state),
+    stagedSample: selectors.getStagedSample(state)
+  }
 }
 
 export { Staging }

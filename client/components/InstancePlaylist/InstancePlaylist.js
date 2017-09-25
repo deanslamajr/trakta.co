@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import Tone from 'tone';
 import classnames from 'classnames';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import debounce from 'debounce';
 
 import config from '../../../config';
 
@@ -103,13 +104,12 @@ class InstancePlaylist extends React.Component {
   constructor(props) {
     super(props);
 
-    console.log('instancePlaylist constructor')
-
     this.state = {
       error: null
     }
 
-    this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this);
+    // this debounce slows down invocation just enough so that redux store can be updated properly from form
+    this._downloadAndArrangeSampleInstances = debounce(this._downloadAndArrangeSampleInstances.bind(this), 1000);
   }
 
   _downloadAndArrangeSampleInstances(instances) {
@@ -160,9 +160,6 @@ class InstancePlaylist extends React.Component {
 
       // if buffer exists, add the staged sample to the track
       if (this.props.buffer) {
-        console.log('stagedSample exists, this.props.stagedSample:')
-        console.dir(this.props.stagedSample);
-
         const addBufferToTrack = new Promise((resolve, reject) => {
           const samplePlayer = new Tone.Player(this.props.buffer);
 
