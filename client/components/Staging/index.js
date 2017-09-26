@@ -29,6 +29,7 @@ class Staging extends React.Component {
 
     this._saveRecording = this._saveRecording.bind(this);
     this._renderTrackPlayer = this._renderTrackPlayer.bind(this);
+    this._getBlobFromObjectUrl = this._getBlobFromObjectUrl.bind(this);
   }
 
   handleChange (type, event) {
@@ -41,6 +42,12 @@ class Staging extends React.Component {
   }
 
   _saveRecording(event) {
+    const {
+      startTime,
+      volume,
+      panning
+    } = this.props.stagedSample;
+
     // prevent page refresh
     event.preventDefault();
 
@@ -59,14 +66,27 @@ class Staging extends React.Component {
       },
     };
 
-    axios
-      .post(`/api/sample?startTime=${this.state.startTime}&duration=${this.props.duration}&volume=${this.state.volume}&panning=${this.state.panning}`, data, config)
-      .then(() => this.props.history.push('/staging'))
+    const duration = this.state.buffer.get().duration;
+
+    const queryString = `?startTime=${startTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
+
+    this._getBlobFromObjectUrl()
+      .then(data => axios.post(`/api/sample${queryString}`, data, config))
+      .then(() => this.props.history.push('/track'))
       .catch((err) => {
         // @todo log error
         console.error(err);
         // this.props.failureCB
       });
+  }
+
+  /**
+   * getting a blob from an objectUrl is tricky :)
+   * this method contains the trick
+   */
+  _getBlobFromObjectUrl() {
+    return axios.get(this.props.objectUrl, { responseType: 'blob' })
+      .then(({ data }) => data)
   }
 
   _renderErrorComponent(clickHandler) {
