@@ -1,6 +1,7 @@
-import calculateInstanceRectangles,
-  { generateRectangles, 
-    arrangeRectanglesIntoRows } from './calculateInstanceRectangles';
+import {
+  calculateInstanceRectangles,
+  generateRectangles, 
+  arrangeRectanglesIntoRows } from './calculateInstanceRectangles';
 
 const windowStartAtOrigin = 0;
 const unitLengthWindow = 1;

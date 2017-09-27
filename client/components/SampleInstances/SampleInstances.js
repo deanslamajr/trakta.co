@@ -3,40 +3,61 @@ import { connect } from 'react-redux';
 import viewportDimensions from 'viewport-dimensions';
 
 import * as selectors from '../../../shared/reducers';
-import calculateInstanceRectangles from './calculateInstanceRectangles';
+
+import {
+  calculateInstanceRectangles,
+  generateRectangle } from './calculateInstanceRectangles';
 
 const padding = 5;
 
-function drawRectangles(rowsOfRectangles, viewportWidth, viewportHeight) {
+function drawRectangles(rowsOfRectangles, stagedSampleRectangle, viewportWidth, viewportHeight) {
   const rowsCount = rowsOfRectangles.length;
   const rowHeight = viewportHeight / rowsCount;
 
+  const svgRectangles = rowsOfRectangles.reduce((rectangles, rowOfRectangles, index) => {
+    const newRectangles = rowOfRectangles.map(({ scaledStartPos, scaledDuration, id }) => (
+      <rect
+        key={id}
+        x={(scaledStartPos * viewportWidth)}
+        y={(index * rowHeight) + padding}
+        width={(scaledDuration * viewportWidth)}
+        height={rowHeight - padding}
+        fill='#cfcfcf'
+        stroke='black'
+        strokeWidth='.15'
+        strokeLinecap='round'
+      />
+    ))
+
+    return [...rectangles, ...newRectangles]
+  }, []);
+
+  // staged rectangle
+  if (stagedSampleRectangle) {
+    svgRectangles.push((
+      <rect
+        key={stagedSampleRectangle.id}
+        x={(stagedSampleRectangle.scaledStartPos * viewportWidth)}
+        y={padding}
+        width={(stagedSampleRectangle.scaledDuration * viewportWidth)}
+        height={viewportHeight - padding}
+        fill='rgb(226,132,19)'
+        stroke='black'
+        strokeWidth='.15'
+        strokeLinecap='round'
+        fillOpacity='.25'
+      />
+    ))
+  }
+
   return (
     <svg style={{ display: 'block' }} width={viewportWidth} height={viewportHeight}>
-    {
-      rowsOfRectangles.reduce((rectangles, rowOfRectangles, index) => {
-        const newRectangles = rowOfRectangles.map(({ scaledStartPos, scaledDuration, id }) => (
-          <rect
-            key={id}
-            x={(scaledStartPos * viewportWidth)}
-            y={(index * rowHeight) + padding}
-            width={(scaledDuration * viewportWidth)}
-            height={rowHeight - padding}
-            fill='#cfcfcf'
-            stroke='black'
-            strokeWidth='.15'
-            strokeLinecap="round"
-          />
-        ))
-
-        return [...rectangles, ...newRectangles]
-      }, [])
-    }
+    { svgRectangles }
     </svg>
   );
 }
 
-const SampleInstances = ({ instances, windowStartTime, windowLength }) => {
+const SampleInstances = ({ instances, windowStartTime, windowLength, stagedSample }) => {
   if (instances.length === 0) {
     return null;
   }
@@ -58,9 +79,19 @@ const SampleInstances = ({ instances, windowStartTime, windowLength }) => {
     }
   );
 
+  let stagedSampleRectangle;
+  if (stagedSample) {
+    const stagedSampleRectangleIngredients = {
+      start_time: stagedSample.startTime,
+      duration: stagedSample.buffer.get().duration,
+      id: 'staged-sample'
+    };
+    stagedSampleRectangle = generateRectangle(windowStartTime, windowLength, stagedSampleRectangleIngredients);
+  }
+
   const rowsOfRectangles = calculateInstanceRectangles(windowStartTime, windowLength, samples);
 
-  return drawRectangles(rowsOfRectangles, width, height);
+  return drawRectangles(rowsOfRectangles, stagedSampleRectangle, width, height);
 }
 
 function mapStateToProps(state) {

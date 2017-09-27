@@ -15,20 +15,42 @@ exports[`<MainRoute /> renders 1`] = `
     className="canvasContainer"
   >
     <div
+      className="meter"
+    >
+      <span
+        className="startTime"
+      >
+        0
+      </span>
+      <span
+        className="endTime"
+      >
+        20
+      </span>
+    </div>
+    <div
       className="label"
     >
+      <AsyncComponent
+        renderErrorComponent={[Function]}
+        windowLength={20}
+        windowStartTime={0}
+      />
       <div
-        className="playButton"
-      >
-        🔊
-      </div>
-      <div
-        className="contributeButton"
+        className="contribute button bottomButton"
         onClick={[Function]}
       >
-        ➕
+        <span
+          className="icon"
+        >
+          ➕
+        </span>
       </div>
     </div>
+    <AsyncComponent
+      windowLength={20}
+      windowStartTime={0}
+    />
   </div>
 </div>
 `;
