@@ -118,6 +118,11 @@ class Staging extends React.Component {
       buffer
     } = this.state;
 
+    const stagedSample = {
+      buffer,
+      startTime: this.props.stagedSample.startTime
+    };
+
     return (
       <div>
         <div className={styles.label}>
@@ -127,12 +132,14 @@ class Staging extends React.Component {
             windowLength={windowLength} 
             windowStartTime={windowStartTime}
             buffer={buffer}
-              />
+            />
         </div>
 
         <SampleInstances 
           windowLength={windowLength} 
-          windowStartTime={windowStartTime}/>
+          windowStartTime={windowStartTime}
+          stagedSample={stagedSample}
+          />
       </div>
     );
   }

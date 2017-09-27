@@ -1,3 +1,24 @@
+function generateRectangle (trackWindowStart, trackWindowLength, { start_time, duration, id }) {
+  // Calculate start position as fraction of total width
+  const scaledStartPos = start_time > trackWindowStart
+    ? (start_time - trackWindowStart) / trackWindowLength
+    : 0;
+
+  const durationBeforeTrackWindow = start_time < trackWindowStart
+    ? trackWindowStart - start_time
+    : 0
+
+  const durationAfterTrackWindow = start_time + duration > trackWindowStart + trackWindowLength
+    ? (start_time + duration) - (trackWindowStart + trackWindowLength)
+    : 0
+
+  const durationInTrackWindow = duration - durationBeforeTrackWindow - durationAfterTrackWindow
+
+  const scaledDuration = durationInTrackWindow / trackWindowLength
+
+  return { scaledStartPos, scaledDuration, id }
+}
+
 /**
  * Convert absolute instance values to the fractional values in the given track window
  * @param {Number} trackWindowStart
@@ -10,26 +31,7 @@ function generateRectangles (trackWindowStart, trackWindowLength, instances) {
       return start_time + duration > trackWindowStart 
         && start_time < trackWindowStart + trackWindowLength
     })
-    .map(({ start_time, duration, id }) => {
-      // Calculate start position as fraction of total width
-      const scaledStartPos = start_time > trackWindowStart
-        ? (start_time - trackWindowStart) / trackWindowLength
-        : 0;
-
-      const durationBeforeTrackWindow = start_time < trackWindowStart
-        ? trackWindowStart - start_time
-        : 0
-
-      const durationAfterTrackWindow = start_time + duration > trackWindowStart + trackWindowLength
-        ? (start_time + duration) - (trackWindowStart + trackWindowLength)
-        : 0
-
-      const durationInTrackWindow = duration - durationBeforeTrackWindow - durationAfterTrackWindow
-
-      const scaledDuration = durationInTrackWindow / trackWindowLength
-
-      return { scaledStartPos, scaledDuration, id }
-    });
+    .map(generateRectangle.bind(null, trackWindowStart, trackWindowLength));
 }
 
 /**
@@ -78,9 +80,9 @@ function calculateInstanceRectangles (trackWindowStart, trackWindowLength, insta
   return arrangeRectanglesIntoRows(rectangles);
 }
 
-export default calculateInstanceRectangles;
-
-export { 
+export {
+  calculateInstanceRectangles,
   arrangeRectanglesIntoRows,
-  generateRectangles
+  generateRectangles,
+  generateRectangle
 }
