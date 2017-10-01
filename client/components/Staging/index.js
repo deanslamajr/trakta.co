@@ -11,41 +11,68 @@ import SampleInstances from '../SampleInstances';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedSample } from '../../../shared/actions/recorder';
+import { updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/instances';
 
 import styles from './staging.css'
 
-const windowLength = 20;
-const windowStartTime = 0;
+function isNotANumber(unknown) {
+  return isNaN(parseFloat(unknown))
+}
+
+function validateData(absoluteStartTime, duration, volume, panning) {
+  if (isNotANumber(absoluteStartTime) || isNotANumber(duration) || isNotANumber(volume) || isNotANumber(panning)) {
+    throw new Error('Malformed submit data')
+  }
+}
 
 class Staging extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      isSaving: false,
-      windowLength,
-      windowStartTime
+      isSaving: false
     }
 
     this._saveRecording = this._saveRecording.bind(this);
     this._renderTrackPlayer = this._renderTrackPlayer.bind(this);
+    this._renderSubmitButton = this._renderSubmitButton.bind(this);
     this._getBlobFromObjectUrl = this._getBlobFromObjectUrl.bind(this);
+    this._updateTrack = this._updateTrack.bind(this);
   }
 
-  handleChange (type, event) {
+  _updateTrack(stagedSample) {
+    const latestStagedSample = stagedSample || this.props.stagedSample
+
+    this.props.updateTrackDimensionsWithAdditionalSample({
+      // weird shape that mocks the shape returned from DB query for sampleInstances
+      start_time: latestStagedSample.startTime,
+      sample: { duration: latestStagedSample.duration }
+    })
+  }
+
+  _handleChange (type, event) {
     let parsedValue = parseFloat(event.target.value);
     if (Number.isNaN(parsedValue)) {
-      parsedValue = 0;
+      return;
     }
 
-    this.props.setStagedSample({ [type]: parsedValue });
+    if (type === 'startTime') {
+      this.setState({
+        updateTrack: true
+      }, () => {
+        this.props.setStagedSample({ [type]: parsedValue })
+      })
+    }
+
+    this.props.setStagedSample({ [type]: parsedValue })
   }
 
   _saveRecording(event) {
     const {
-      startTime,
+      startTime: stagedSampleStartTime,
       volume,
-      panning
+      panning,
+      duration
     } = this.props.stagedSample;
 
     // prevent page refresh
@@ -66,15 +93,28 @@ class Staging extends React.Component {
       },
     };
 
-    const duration = this.state.buffer.get().duration;
+    const absoluteStartTime = this.props.trackDimensions.startTime + stagedSampleStartTime
 
-    const queryString = `?startTime=${startTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
+    // validate that data is properly formatted
+    // @todo handle invalid data state gracefully
+    validateData(absoluteStartTime, duration, volume, panning)
+
+    const queryString = `?startTime=${absoluteStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
 
     this._getBlobFromObjectUrl()
       .then(data => axios.post(`/api/sample${queryString}`, data, config))
-      .then(() => this.props.history.push('/track'))
+      .then(() => {
+        this.props.setStagedSample({
+          startTime: 0,
+          volume: 0,
+          panning: 0,
+          duration: 0
+        });
+        this.props.history.push('/track');
+      })
       .catch((err) => {
         // @todo log error
+        // @todo handle this gracefully
         console.error(err);
         // this.props.failureCB
       });
@@ -97,11 +137,17 @@ class Staging extends React.Component {
     );
   }
 
+  // initialize the buffer everytime the user navigates to this page
   componentDidMount() {
     const buffer = new Tone.Buffer(this.props.objectUrl,
       // success
       () => {
         this.setState({ buffer })
+        
+        const duration = buffer.get().duration;
+        this.props.setStagedSample({ duration });
+
+        this._updateTrack()
       },
       // error
       // @todo log, set error view state (w/ try again functionality)
@@ -111,17 +157,20 @@ class Staging extends React.Component {
     );
   }
 
-  _renderTrackPlayer() {
-    const {
-      windowLength,
-      windowStartTime,
-      buffer
-    } = this.state;
+  _renderSubmitButton() {
+    return (
+      <div>
+        <input
+            type='submit'
+            value='Create Instance'
+            className={classnames(styles.formInput, { [styles.formSaving]: this.state.isSaving })}
+            />
+      </div>
+    )
+  }
 
-    const stagedSample = {
-      buffer,
-      startTime: this.props.stagedSample.startTime
-    };
+  _renderTrackPlayer() {
+    const { buffer } = this.state;
 
     return (
       <div>
@@ -129,19 +178,24 @@ class Staging extends React.Component {
           {/* Play button  */}
           <InstancePlaylist
             renderErrorComponent={this._renderErrorComponent}
-            windowLength={windowLength} 
-            windowStartTime={windowStartTime}
             buffer={buffer}
             />
         </div>
 
-        <SampleInstances 
-          windowLength={windowLength} 
-          windowStartTime={windowStartTime}
-          stagedSample={stagedSample}
-          />
+        <SampleInstances />
+        
       </div>
     );
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.state.updateTrack) {
+      this._updateTrack(nextProps.stagedSample);
+    }
+    
+    this.setState({
+      updateTrack: false
+    })
   }
 
   render () {
@@ -158,26 +212,30 @@ class Staging extends React.Component {
           <input 
             id='startTime'
             value={startTime}
-            onChange={this.handleChange.bind(this, 'startTime')}
+            onChange={this._handleChange.bind(this, 'startTime')}
             placeholder='startTime'
             className={styles.formInput} />
           
-          <label htmlFor='volume'>volume (-infinity to 0)</label>
+          <label htmlFor='volume'>volume (-infinity to +infinity)</label>
           <input id='volume'
             value={volume}
-            onChange={this.handleChange.bind(this, 'volume')}
+            onChange={this._handleChange.bind(this, 'volume')}
             placeholder='volume'
             className={styles.formInput} />
           
           <label htmlFor='panning'>panning (-1 to 1)</label>
           <input id='panning'
             value={panning}
-            onChange={this.handleChange.bind(this, 'panning')}
+            onChange={this._handleChange.bind(this, 'panning')}
             placeholder='panning'
             className={styles.formInput} />
           
-          <input type='submit' value='Create Instance' className={classnames(styles.formInput, { [styles.formSaving]: this.state.isSaving })} />
-          
+          {
+            this.state.buffer
+              ? this._renderSubmitButton()
+              : null
+          }
+
           <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} /> 
         </form>
 
@@ -193,13 +251,15 @@ class Staging extends React.Component {
 }
 
 const mapActionsToProps = {
-  setStagedSample
+  setStagedSample,
+  updateTrackDimensionsWithAdditionalSample
 };
 
 function mapStateToProps(state) {
   return { 
     objectUrl: selectors.getStagedObjectUrl(state),
-    stagedSample: selectors.getStagedSample(state)
+    stagedSample: selectors.getStagedSample(state),
+    trackDimensions: selectors.getTrackDimensions(state)
   }
 }
 

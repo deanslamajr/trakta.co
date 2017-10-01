@@ -2,11 +2,11 @@ import { RECORDER_STAGE_OBJECT_URL, RECORDER_SET_STAGED_SAMPLE } from '../action
 
 const defaultState = { 
   objectUrl: '',
-  duration: 0,
   stagedSample: {
     startTime: 0,
     volume: 0,
-    panning: 0
+    panning: 0,
+    duration: 0
   }
 };
 
@@ -18,12 +18,9 @@ function recorder (state = defaultState, action) {
     return Object.assign({}, state, { objectUrl: action.objectUrl });
   }
   else if (action.type === RECORDER_SET_STAGED_SAMPLE) {
-    console.log('reducer, state before')
-    console.dir(state)
-    console.log('after, state:')
-    console.dir(Object.assign({}, state, { stagedSample: Object.assign({}, state.stagedSample, action.payload) }))
-
-    return Object.assign({}, state, { stagedSample: Object.assign({}, state.stagedSample, action.payload) });
+    return Object.assign({}, state,
+      { stagedSample: Object.assign({}, state.stagedSample, action.payload) }
+    );
   }
 
   return state;
@@ -37,8 +34,6 @@ export function getStagedObjectUrl(state) {
 }
 
 export function getStagedSample(state) {
-  console.log('getStagedSample, state.stagedSample')
-  console.dir(state.stagedSample)
   return state.stagedSample;
 }
 

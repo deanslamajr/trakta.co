@@ -6,6 +6,7 @@
 export const INSTANCES_FETCH_PENDING = 'INSTANCES_FETCH_PENDING';
 export const INSTANCES_FETCH_FULFILLED = 'INSTANCES_FETCH_FULFILLED';
 export const INSTANCES_FETCH_REJECTED = 'INSTANCES_FETCH_REJECTED';
+export const INSTANCES_UPDATE_TRACK_DIMENSIONS_BY_ADDING_SAMPLE = 'INSTANCES_UPDATE_TRACK_DIMENSIONS_BY_ADDING_SAMPLE';
 
 // -----------------------------------------------------------------------------
 // ACTIONS
@@ -20,6 +21,10 @@ function fetched(data) {
 
 function failed(error) {
   return { type: INSTANCES_FETCH_REJECTED, payload: error };
+}
+
+export function updateTrackDimensionsWithAdditionalSample(newSampleInstance) {
+  return { type: INSTANCES_UPDATE_TRACK_DIMENSIONS_BY_ADDING_SAMPLE, payload: newSampleInstance }
 }
 
 export function fetchAll() {

@@ -8,7 +8,7 @@ import lamejs from 'lamejs';
 import ReactAudioPlayer from 'react-audio-player';
 import WaveformData from 'waveform-data';
 
-import { setStagedObjectUrl } from '../../../shared/actions/recorder';
+import { setStagedObjectUrl, setStagedSample } from '../../../shared/actions/recorder';
 import * as selectors from '../../../shared/reducers';
 
 import styles from './Recorder.css'
@@ -367,6 +367,13 @@ class Recorder extends React.Component {
     blob = generateMp3Blob();
 
     const objectUrl = window.URL.createObjectURL(blob);
+
+    this.props.setStagedSample({
+      startTime: 0,
+      volume: 0,
+      panning: 0,
+      duration: 0
+    });
     this.props.setStagedObjectUrl(objectUrl);
   }
 
@@ -446,7 +453,8 @@ class Recorder extends React.Component {
 }
 
 const mapActionsToProps = {
-  setStagedObjectUrl
+  setStagedObjectUrl,
+  setStagedSample
 };
 
 function mapStateToProps(state) {
