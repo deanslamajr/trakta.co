@@ -6,9 +6,6 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import axios from 'axios';
 import classnames from 'classnames';
 
-// import Switch from 'react-router-dom/Switch';
-// import Route from 'react-router-dom/Route';
-
 import config from '../../../../config';
 
 import * as selectors from '../../../reducers';
@@ -19,18 +16,9 @@ import InstancePlaylist from '../../../../client/components/InstancePlaylist';
 
 import styles from './styles.css';
 
-const WINDOW_LENGTH = 10;
-const WINDOW_START_TIME = 0;
-
 class MainRoute extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      subview: null,
-      windowLength: WINDOW_LENGTH,
-      windowStartTime: WINDOW_START_TIME
-    };
 
     this._showContribute = this._showContribute.bind(this);
     this._renderLoadingComponent = this._renderLoadingComponent.bind(this);
@@ -70,13 +58,6 @@ class MainRoute extends React.Component {
   }
 
   render() {
-    const {
-      windowLength,
-      windowStartTime
-    } = this.state;
-
-    const Subview = this.state.subview;
-
     return (
       <div className={styles.container}>
         <Helmet>
@@ -92,25 +73,20 @@ class MainRoute extends React.Component {
 
         <div className={styles.canvasContainer}>
           <div className={styles.meter}>
-            <span className={styles.startTime}>{this.state.windowStartTime}</span>
-            <span className={styles.endTime}>{this.state.windowStartTime + this.state.windowLength}</span>
+            <span className={styles.startTime}>0</span>
+            <span className={styles.endTime}>{this.props.trackDimensions.length}</span>
           </div>
 
           <div className={styles.label}>
             {/* Play button  */}
-            <InstancePlaylist
-              renderErrorComponent={this._renderErrorComponent}
-              windowLength={this.state.windowLength} 
-              windowStartTime={this.state.windowStartTime} />
+            <InstancePlaylist renderErrorComponent={this._renderErrorComponent} />
             {/* Contribute button  */}
             <div className={classnames(styles.contribute, styles.button, styles.bottomButton)} onClick={this._showContribute}>
               <span className={styles.icon}>&#10133;</span>
             </div>
           </div>
           
-          <SampleInstances
-            windowLength={this.state.windowLength} 
-            windowStartTime={this.state.windowStartTime}/>
+          <SampleInstances />
         </div>
 
         { this.props.isLoading && this._renderLoadingComponent() }
@@ -122,7 +98,8 @@ class MainRoute extends React.Component {
 function mapStateToProps(state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
-    instances: selectors.getInstances(state)
+    instances: selectors.getInstances(state),
+    trackDimensions: selectors.getTrackDimensions(state)
   };
 };
 

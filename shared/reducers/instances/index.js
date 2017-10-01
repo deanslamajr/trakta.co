@@ -1,12 +1,19 @@
 import { 
   INSTANCES_FETCH_PENDING, 
   INSTANCES_FETCH_FULFILLED,
-  INSTANCES_FETCH_REJECTED
- } from '../actions/instances';
+  INSTANCES_FETCH_REJECTED,
+  INSTANCES_SET_TRACK_DIMENSIONS
+ } from '../../actions/instances';
+
+import { calculateTrackDimensions } from './trackDimensions'
 
 const defaultState = { 
   instances: [],
   isFetching: false,
+  trackDimensions: {
+    startTime: 0,
+    length: 0
+  },
   error: null
 };
 
@@ -20,15 +27,19 @@ function instances (state = defaultState, action) {
     );
   }
   else if (action.type === INSTANCES_FETCH_FULFILLED) {
+    const instances = action.payload;
+    const trackDimensions = calculateTrackDimensions(instances);
+
     return Object.assign({}, state,
       { 
         isFetching: false,
-        instances: action.payload,
+        instances,
+        trackDimensions,
         error: null
       }
     );
   }
-  else if (action.type === INSTANCES_FETCH_FULFILLED) {
+  else if (action.type === INSTANCES_FETCH_REJECTED) {
     return Object.assign({}, state,
       { 
         isFetching: false,
@@ -36,6 +47,9 @@ function instances (state = defaultState, action) {
         error: action.payload
       }
     );
+  }
+  else if (action.type === INSTANCES_SET_TRACK_DIMENSIONS) {
+    return Object.assign({} , state, { trackDimensions: action.payload });
   }
 
   return state;
@@ -50,6 +64,10 @@ export function getInstances(state) {
 
 export function isFetching(state) {
   return state.isFetching;
+}
+
+export function getTrackDimensions(state) {
+  return state.trackDimensions;
 }
 
 // -----------------------------------------------------------------------------
