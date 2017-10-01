@@ -15,18 +15,25 @@ const rootReducer = combineReducers({
 // -----------------------------------------------------------------------------
 // EXPORTED SELECTORS
 
+// UI
 export function isLoading(state) {
   return FromUi.isLoading(state.ui);
 }
 
+// INSTANCES
 export function getInstances(state) {
   return FromInstances.getInstances(state.instances);
+}
+
+export function getTrackDimensions(state) {
+  return FromInstances.getTrackDimensions(state.instances);
 }
 
 export function isFetchingInstances(state) {
   return FromInstances.isFetching(state.instances);
 }
 
+// RECORDER
 export function getStagedObjectUrl(state) {
   return FromRecorder.getStagedObjectUrl(state.recorder);
 }

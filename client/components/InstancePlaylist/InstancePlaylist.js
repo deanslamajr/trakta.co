@@ -27,18 +27,8 @@ function addPluginsToPlayer(samplePlayer, volume, panning) {
   samplePlayer.chain(panVol, /*limiter,*/ Tone.Master);
 }
 
-function syncPlayerToTransport(samplePlayer, startTime, endTime, windowLength) {
-  // sample starts before the window
-  if (startTime < 0) {
-    startTime = 0;
-  }
-
-  // sample extends past window
-  if(endTime > windowLength) {
-    endTime = windowLength;
-  }
-
-  samplePlayer.sync().start(startTime).stop(endTime);
+function syncPlayerToTransport(samplePlayer, playerStartTime) {
+  samplePlayer.sync().start(playerStartTime)
 }
 
 function onInstanceLoadError(instance, reject, error) {
@@ -47,54 +37,33 @@ function onInstanceLoadError(instance, reject, error) {
   reject();
 }
 
-function onInstanceLoadSuccess(instance, windowStartTime, windowLength, resolve) {
+function onInstanceLoadSuccess(instance, trackStartTime, trackLength, resolve) {
   const buffer = bufferCache[instance.sample.id];
 
-  let samplePlayer;
+  const samplePlayer = new Tone.Player(buffer);
 
-  let startTime = instance.start_time - windowStartTime;
-  let endTime = startTime + instance.sample.duration;
-
-  // discard if sampleInstance is outside of the current window
-  if (endTime <= 0 || startTime >= windowLength) {
-    return resolve();
-  }
-
-  // if sample starts before the window
-  // slice the sample buffer to start at the proper time
-  if (startTime < 0) {
-    const sampleSeekTime = windowStartTime - instance.start_time;
-    const shortenedBuffer = buffer.slice(sampleSeekTime);
-    samplePlayer = new Tone.Player(shortenedBuffer);
-  }
-  else {
-    samplePlayer = new Tone.Player(buffer);
-  }
+  let playerStartTime = instance.start_time - trackStartTime;
 
   addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
-  syncPlayerToTransport(samplePlayer, startTime, endTime, windowLength);
+  syncPlayerToTransport(samplePlayer, playerStartTime);
 
   // cache the player
   playersCache[instance.sample.id] = samplePlayer;
   resolve();
 }
 
-function playArrangement(windowLength) {
+function playArrangement() {
   if (Tone.Transport.state === 'started') {
     Tone.Transport.stop()
   }
   else {
-    Tone.Transport.schedule((time) => {
-      Tone.Transport.stop()
-    }, windowLength);
-
     Tone.Transport.start();
   }
 }
 
-function renderPlayComponent(windowLength) {
+function renderPlayComponent() {
   return (
-    <div className={classnames(styles.play, styles.button, styles.topButton)} onClick={playArrangement.bind(null, windowLength)}>
+    <div className={classnames(styles.play, styles.button, styles.topButton)} onClick={playArrangement}>
       <span className={styles.icon}>&#128266;</span>
     </div>
   );
@@ -114,9 +83,18 @@ class InstancePlaylist extends React.Component {
 
   _downloadAndArrangeSampleInstances(instances) {
     const {
-      windowStartTime, 
-      windowLength
-    } = this.props;
+      startTime: trackStartTime, 
+      length: trackLength
+    } = this.props.trackDimensions;
+
+    // prep global transport
+    Tone.Transport.loop = true;
+    Tone.Transport.position = Tone.Transport.loopStart = trackStartTime >= 0
+      ? trackStartTime
+      : 0;
+    Tone.Transport.loopEnd = trackStartTime >= 0
+      ? trackLength + trackStartTime
+      : trackLength;
 
     if (instances && instances.length) {
       // clear the transport
@@ -125,14 +103,6 @@ class InstancePlaylist extends React.Component {
       // Load the samples
       const tasks = instances.map(instance => {
         return new Promise((resolve, reject) => {
-          const startTime = instance.start_time - windowStartTime;
-          const endTime = startTime + instance.sample.duration;
-
-          // discard if sample instance is outside of the current window
-          if (endTime <= 0 || startTime >= windowLength) {
-            return resolve();
-          }
-
           let sampleBuffer = bufferCache[instance.sample.id];
 
           if (sampleBuffer) {
@@ -140,10 +110,12 @@ class InstancePlaylist extends React.Component {
             if (!samplePlayer) {
               // @todo can this path be reached??
               throw new Error('samplePlayer doesnt exist in playersCache!');
-              //onInstanceLoadSuccess(instance, windowStartTime, windowLength, resolve);
+              //onInstanceLoadSuccess(instance, trackStartTime, trackLength, resolve);
             }
 
-            syncPlayerToTransport(samplePlayer, startTime, endTime, windowLength)
+            const startTime = instance.start_time - trackStartTime;
+
+            syncPlayerToTransport(samplePlayer, startTime);
 
             resolve();
           }
@@ -151,7 +123,7 @@ class InstancePlaylist extends React.Component {
             const url = `${baseUrl}/${instance.sample.url}`;
             bufferCache[instance.sample.id] = new Tone.Buffer(
               url, 
-              onInstanceLoadSuccess.bind(this, instance, windowStartTime, windowLength, resolve),
+              onInstanceLoadSuccess.bind(this, instance, trackStartTime, trackLength, resolve),
               onInstanceLoadError.bind(this, instance, reject)
             );
           }
@@ -163,8 +135,10 @@ class InstancePlaylist extends React.Component {
         const addBufferToTrack = new Promise((resolve, reject) => {
           const samplePlayer = new Tone.Player(this.props.buffer);
 
+          const playerStartTime = this.props.stagedSample.startTime - trackStartTime;
+
           addPluginsToPlayer(samplePlayer, this.props.stagedSample.volume, this.props.stagedSample.panning)
-          syncPlayerToTransport(samplePlayer, this.props.stagedSample.startTime, windowStartTime+windowLength, windowLength);
+          syncPlayerToTransport(samplePlayer, playerStartTime);
         });
 
         tasks.push(addBufferToTrack);
@@ -193,15 +167,11 @@ class InstancePlaylist extends React.Component {
   }
 
   render () {
-    const { 
-      renderErrorComponent,
-      windowLength } = this.props;
-
     if (this.state.error) {
-      return renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
+      return this.props.renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
     }
     else if (!this.props.isLoading) {
-      return renderPlayComponent(windowLength);
+      return renderPlayComponent();
     }
     else {
       return null;
@@ -218,7 +188,8 @@ function mapStateToProps(state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
     instances: selectors.getInstances(state),
-    stagedSample: selectors.getStagedSample(state)
+    stagedSample: selectors.getStagedSample(state),
+    trackDimensions: selectors.getTrackDimensions(state)
   };
 }
 

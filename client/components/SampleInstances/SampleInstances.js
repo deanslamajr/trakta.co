@@ -57,10 +57,15 @@ function drawRectangles(rowsOfRectangles, stagedSampleRectangle, viewportWidth, 
   );
 }
 
-const SampleInstances = ({ instances, windowStartTime, windowLength, stagedSample }) => {
+const SampleInstances = ({ instances, trackDimensions, stagedSample }) => {
   if (instances.length === 0) {
     return null;
   }
+
+  const {
+    startTime,
+    length
+  } = trackDimensions
 
   const width = viewportDimensions 
     ? viewportDimensions.width() && viewportDimensions.width()
@@ -83,20 +88,22 @@ const SampleInstances = ({ instances, windowStartTime, windowLength, stagedSampl
   if (stagedSample) {
     const stagedSampleRectangleIngredients = {
       start_time: stagedSample.startTime,
-      duration: stagedSample.buffer.get().duration,
+      duration: stagedSample.duration,
       id: 'staged-sample'
     };
-    stagedSampleRectangle = generateRectangle(windowStartTime, windowLength, stagedSampleRectangleIngredients);
+    stagedSampleRectangle = generateRectangle(startTime, length, stagedSampleRectangleIngredients);
   }
 
-  const rowsOfRectangles = calculateInstanceRectangles(windowStartTime, windowLength, samples);
+  const rowsOfRectangles = calculateInstanceRectangles(startTime, length, samples);
 
   return drawRectangles(rowsOfRectangles, stagedSampleRectangle, width, height);
 }
 
 function mapStateToProps(state) {
   return {
-    instances: selectors.getInstances(state)
+    instances: selectors.getInstances(state),
+    trackDimensions: selectors.getTrackDimensions(state),
+    stagedSample: selectors.getStagedSample(state)
   };
 }
 
