@@ -19,7 +19,7 @@ import InstancePlaylist from '../../../../client/components/InstancePlaylist';
 
 import styles from './styles.css';
 
-const WINDOW_LENGTH = 20;
+const WINDOW_LENGTH = 10;
 const WINDOW_START_TIME = 0;
 
 class MainRoute extends React.Component {

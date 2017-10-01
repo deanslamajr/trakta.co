@@ -14,7 +14,7 @@ import { setStagedSample } from '../../../shared/actions/recorder';
 
 import styles from './staging.css'
 
-const windowLength = 20;
+const windowLength = 10;
 const windowStartTime = 0;
 
 class Staging extends React.Component {

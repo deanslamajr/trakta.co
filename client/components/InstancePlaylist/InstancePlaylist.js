@@ -79,22 +79,18 @@ function onInstanceLoadSuccess(instance, windowStartTime, windowLength, resolve)
   resolve();
 }
 
-function playArrangement(windowLength) {
+function playArrangement() {
   if (Tone.Transport.state === 'started') {
     Tone.Transport.stop()
   }
   else {
-    Tone.Transport.schedule((time) => {
-      Tone.Transport.stop()
-    }, windowLength);
-
     Tone.Transport.start();
   }
 }
 
-function renderPlayComponent(windowLength) {
+function renderPlayComponent() {
   return (
-    <div className={classnames(styles.play, styles.button, styles.topButton)} onClick={playArrangement.bind(null, windowLength)}>
+    <div className={classnames(styles.play, styles.button, styles.topButton)} onClick={playArrangement}>
       <span className={styles.icon}>&#128266;</span>
     </div>
   );
@@ -117,6 +113,11 @@ class InstancePlaylist extends React.Component {
       windowStartTime, 
       windowLength
     } = this.props;
+
+    // prep global transport
+    Tone.Transport.loop = true;
+    Tone.Transport.loopStart = windowStartTime;
+    Tone.Transport.loopEnd = windowLength;
 
     if (instances && instances.length) {
       // clear the transport
@@ -195,13 +196,14 @@ class InstancePlaylist extends React.Component {
   render () {
     const { 
       renderErrorComponent,
+      windowStartTime, 
       windowLength } = this.props;
 
     if (this.state.error) {
       return renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
     }
     else if (!this.props.isLoading) {
-      return renderPlayComponent(windowLength);
+      return renderPlayComponent();
     }
     else {
       return null;
