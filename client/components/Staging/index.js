@@ -93,13 +93,13 @@ class Staging extends React.Component {
       },
     };
 
-    const absoluteStartTime = this.props.trackDimensions.startTime + stagedSampleStartTime
+    //const absoluteStartTime = this.props.trackDimensions.startTime + stagedSampleStartTime
 
     // validate that data is properly formatted
     // @todo handle invalid data state gracefully
-    validateData(absoluteStartTime, duration, volume, panning)
+    validateData(/*absoluteStartTime*/stagedSampleStartTime, duration, volume, panning)
 
-    const queryString = `?startTime=${absoluteStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
+    const queryString = `?startTime=${stagedSampleStartTime/*absoluteStartTime*/}&duration=${duration}&volume=${volume}&panning=${panning}`;
 
     this._getBlobFromObjectUrl()
       .then(data => axios.post(`/api/sample${queryString}`, data, config))
@@ -191,11 +191,11 @@ class Staging extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.state.updateTrack) {
       this._updateTrack(nextProps.stagedSample);
+
+      this.setState({
+        updateTrack: false
+      })
     }
-    
-    this.setState({
-      updateTrack: false
-    })
   }
 
   render () {

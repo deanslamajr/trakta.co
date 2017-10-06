@@ -89,8 +89,12 @@ class InstancePlaylist extends React.Component {
 
     // prep global transport
     Tone.Transport.loop = true;
-    Tone.Transport.loopStart = trackStartTime;
-    Tone.Transport.loopEnd = trackLength;
+    Tone.Transport.position = Tone.Transport.loopStart = trackStartTime >= 0
+      ? trackStartTime
+      : 0;
+    Tone.Transport.loopEnd = trackStartTime >= 0
+      ? trackLength + trackStartTime
+      : trackLength;
 
     if (instances && instances.length) {
       // clear the transport
@@ -134,7 +138,7 @@ class InstancePlaylist extends React.Component {
           const playerStartTime = this.props.stagedSample.startTime - trackStartTime;
 
           addPluginsToPlayer(samplePlayer, this.props.stagedSample.volume, this.props.stagedSample.panning)
-          syncPlayerToTransport(samplePlayer, this.props.stagedSample.startTime);
+          syncPlayerToTransport(samplePlayer, playerStartTime);
         });
 
         tasks.push(addBufferToTrack);

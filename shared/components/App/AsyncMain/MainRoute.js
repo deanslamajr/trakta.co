@@ -73,7 +73,7 @@ class MainRoute extends React.Component {
 
         <div className={styles.canvasContainer}>
           <div className={styles.meter}>
-            <span className={styles.startTime}>0</span>
+            <span className={styles.startTime}>{this.props.trackDimensions.startTime}</span>
             <span className={styles.endTime}>{this.props.trackDimensions.length}</span>
           </div>
 
