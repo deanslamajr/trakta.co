@@ -211,6 +211,8 @@ class Staging extends React.Component {
           <label htmlFor='startTime'>startTime</label>
           <input 
             id='startTime'
+            type='number'
+            step='0.01'
             value={startTime}
             onChange={this._handleChange.bind(this, 'startTime')}
             placeholder='startTime'
@@ -218,6 +220,8 @@ class Staging extends React.Component {
           
           <label htmlFor='volume'>volume (-infinity to +infinity)</label>
           <input id='volume'
+            type='number'
+            step='0.01'
             value={volume}
             onChange={this._handleChange.bind(this, 'volume')}
             placeholder='volume'
@@ -225,6 +229,8 @@ class Staging extends React.Component {
           
           <label htmlFor='panning'>panning (-1 to 1)</label>
           <input id='panning'
+            type='number'
+            step='0.01'
             value={panning}
             onChange={this._handleChange.bind(this, 'panning')}
             placeholder='panning'
