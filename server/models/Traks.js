@@ -9,21 +9,6 @@ const Traks = sequelize.define('traks',
       defaultValue: Sequelize.UUIDV4,
       primaryKey: true,
       allowNull: false
-    },
-    is_vacant: {
-      type: Sequelize.BOOLEAN,
-      defaultValue: true,
-      allowNull: false
-    },
-    contributions_count: {
-      type: Sequelize.INTEGER,
-      defaultValue: 0,
-      allowNull: false
-    },
-    skips_count: {
-      type: Sequelize.INTEGER,
-      defaultValue: 0,
-      allowNull: false
     }
   },
   {
