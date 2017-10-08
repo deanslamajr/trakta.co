@@ -25,13 +25,6 @@ class MainRoute extends React.Component {
     this._renderErrorComponent = this._renderErrorComponent.bind(this);
   }
 
-  /**
-   * Retrieve sample instances for current viewport
-   */
-  _getSampleInstances() {
-    this.props.fetchAll();
-  }
-
   _showContribute() {
     //@todo have this show a menu of contribution options, which would include <Recorder> among others
     this.props.history.push('/recorder');
@@ -54,22 +47,15 @@ class MainRoute extends React.Component {
   }
 
   componentDidMount() {
-    this._getSampleInstances();
+    this.props.fetchAll();
   }
 
   render() {
     return (
       <div className={styles.container}>
         <Helmet>
-          <title>{`recorder - ${config('appTitle')}`}</title>
+          <title>{`${config('appTitle')}`}</title>
         </Helmet>
-
-        {/* 
-            // @todo
-            // on server, this should only concern itself with displaying a load animation
-            // on top of notched track background, showing the correct time labels related to
-            // the current track viewport 
-        */}
 
         <div className={styles.canvasContainer}>
           <div className={styles.meter}>

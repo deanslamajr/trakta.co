@@ -2,9 +2,12 @@ import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+import Helmet from 'react-helmet';
 import axios from 'axios';
 import classnames from 'classnames';
 import Tone from 'tone';
+
+import config from '../../../config';
 
 import InstancePlaylist from '../InstancePlaylist';
 import SampleInstances from '../SampleInstances';
@@ -63,8 +66,9 @@ class Staging extends React.Component {
         this.props.setStagedSample({ [type]: parsedValue })
       })
     }
-
-    this.props.setStagedSample({ [type]: parsedValue })
+    else {
+      this.props.setStagedSample({ [type]: parsedValue })
+    }
   }
 
   _saveRecording(event) {
@@ -81,10 +85,6 @@ class Staging extends React.Component {
     // show save animation
     this.setState({ isSaving: true })
 
-    const data = new FormData();
-    // @todo
-    //data.append('file', new File([this.props.blob], 'sample.mp3'));
-
     const config = {
       onUploadProgress: (progressEvent) => {
         console.log(
@@ -93,13 +93,11 @@ class Staging extends React.Component {
       },
     };
 
-    //const absoluteStartTime = this.props.trackDimensions.startTime + stagedSampleStartTime
-
     // validate that data is properly formatted
     // @todo handle invalid data state gracefully
-    validateData(/*absoluteStartTime*/stagedSampleStartTime, duration, volume, panning)
+    validateData(stagedSampleStartTime, duration, volume, panning)
 
-    const queryString = `?startTime=${stagedSampleStartTime/*absoluteStartTime*/}&duration=${duration}&volume=${volume}&panning=${panning}`;
+    const queryString = `?startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
 
     this._getBlobFromObjectUrl()
       .then(data => axios.post(`/api/sample${queryString}`, data, config))
@@ -207,6 +205,9 @@ class Staging extends React.Component {
 
     return (
       <div>
+        <Helmet>
+          <title>{`staging - ${config('appTitle')}`}</title>
+        </Helmet>
         <form className={styles.container} onSubmit={this._saveRecording}>
           <label htmlFor='startTime'>startTime</label>
           <input 
