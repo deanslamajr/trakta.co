@@ -13,11 +13,6 @@ import configureStore from '../../../shared/redux/configureStore';
 import ServerHTML from './ServerHTML';
 import App from '../../../shared/components/App';
 
-// We're using this outer context to store all server-rendered css for injection in server rendered header style tag
-// necessary configuration to support isomorphic-style-loader
-const css = new Set();
-const insertCssLambda = (styles) => css.add(styles._getCss());
-
 /**
  * React application middleware, supports server side rendering.
  */
@@ -28,6 +23,23 @@ export default function reactApplicationMiddleware(request, response) {
     throw new Error('A "nonce" value has not been attached to the response');
   }
   const nonce = response.locals.nonce;
+
+
+  
+  // fetchTracks:
+    // if traks are returned:
+      // pick a random track from the list, fetch the associated sampleInstances
+      // initialize the redux store
+        // 1. the list of traks
+        // 2. the sampleInstances
+    // If fetchTracks does not return any values:
+      // redirect to trakta.co/editor/new
+
+
+
+
+
+
 
   // It's possible to disable SSR, which can be useful in development mode.
   // In this case traditional client side only rendering will occur.
@@ -59,6 +71,11 @@ export default function reactApplicationMiddleware(request, response) {
 
   // Create the redux store.
   const store = configureStore();
+
+  // We're using this outer context to store all server-rendered css for injection in server rendered header style tag
+  // necessary configuration to support isomorphic-style-loader
+  const css = new Set();
+  const insertCssLambda = (styles) => css.add(styles._getCss());
 
   // Declare our React application.
   const app = (
