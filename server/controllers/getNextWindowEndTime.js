@@ -35,22 +35,10 @@ function processNext(session) {
   return session.currentEndtime;
 }
 
-/**
- * Resets the mock session
- * this if for testing only
- * @todo remove this after sessions are properly implemented
- */
-function resetSession(req, res) {
-  mockSession.currentEndtime = INITIAL_CURRENT_ENDTIME;
-  mockSession.farthestTime = INITIAL_FARTHEST_TIME;
-  res.redirect('/');
-}
-
 export default getNextWindowEndTime
 
 export {
   getNextWindowEndTime,
-  resetSession,
   processNext,
   ORIGIN_END_TIME,
   ROUND_PROGRESS_LENGTH
