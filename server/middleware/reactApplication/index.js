@@ -10,6 +10,8 @@ import config from '../../../config';
 
 import configureStore from '../../../shared/redux/configureStore';
 
+import Traks from '../../models/Traks';
+
 import ServerHTML from './ServerHTML';
 import App from '../../../shared/components/App';
 
@@ -22,24 +24,6 @@ export default function reactApplicationMiddleware(request, response) {
   if (typeof response.locals.nonce !== 'string') {
     throw new Error('A "nonce" value has not been attached to the response');
   }
-  const nonce = response.locals.nonce;
-
-
-  
-  // fetchTracks:
-    // if traks are returned:
-      // pick a random track from the list, fetch the associated sampleInstances
-      // initialize the redux store
-        // 1. the list of traks
-        // 2. the sampleInstances
-    // If fetchTracks does not return any values:
-      // redirect to trakta.co/editor/new
-
-
-
-
-
-
 
   // It's possible to disable SSR, which can be useful in development mode.
   // In this case traditional client side only rendering will occur.
@@ -56,18 +40,46 @@ export default function reactApplicationMiddleware(request, response) {
     return;
   }
 
-  // Create a context for our AsyncComponentProvider.
-  const asyncComponentsContext = createAsyncContext();
+  /**
+   * Begin SSR of application
+   */
+  initializeReactApplication(request, response)
 
-  // Create a context for <StaticRouter>, which will allow us to
-  // query for the results of the render.
-  const reactRouterContext = {};
+  // if (request.url === '/editor/new') {
+  //   initializeReactApplication(request, response)
+  // }
+  // else {
+  //   Traks.findAll({})
+  //     .then(traks => {
+  //       console.log('after get all tracks, traks:')
+  //       console.dir(traks)
+  //       if (traks && traks.length) {
+  //         console.log('traks && traks.length')
+  //         // pick a random track from the list, fetch the associated sampleInstances
+  //         // initialize the redux store
+  //           // 1. the list of traks
+  //           // 2. the sampleInstances
+  //         return initializeReactApplication(request, response)
+  //       }
+  //       else {
+  //         console.log('traks.length is falsey')
+  //         // redirect to trakta.co/editor/new
+  //         response.status(302).setHeader('Location', '/editor/new')
+  //         response.end();
+  //         return;
+  //       }
+  //     });
+  // }
+}
+
+function initializeReactApplication(req, res) {
+  const nonce = res.locals.nonce;
 
   /**
-   * @todo use request.url to initialize the store
+   * @todo use req.url to initialize the store
    * via appropriate data fetches
    */
-  // const initialState = initializeReduxState(request.url)
+  // const initialState = initializeReduxState(req.url)
 
   // Create the redux store.
   const store = configureStore();
@@ -77,12 +89,19 @@ export default function reactApplicationMiddleware(request, response) {
   const css = new Set();
   const insertCssLambda = (styles) => css.add(styles._getCss());
 
+  // Create a context for our AsyncComponentProvider.
+  const asyncComponentsContext = createAsyncContext();
+
+  // Create a context for <StaticRouter>, which will allow us to
+  // query for the results of the render.
+  const reactRouterContext = {};
+
   // Declare our React application.
   const app = (
     <AsyncComponentProvider asyncContext={asyncComponentsContext}>
-      <StaticRouter location={request.url} context={reactRouterContext}>
+      <StaticRouter location={req.url} context={reactRouterContext}>
         <Provider store={store}>
-           <App insertCssLambda={insertCssLambda} /> 
+          <App insertCssLambda={insertCssLambda} /> 
         </Provider>
       </StaticRouter>
     </AsyncComponentProvider>
@@ -90,7 +109,7 @@ export default function reactApplicationMiddleware(request, response) {
 
   // Pass our app into the react-async-component helper so that any async
   // components are resolved for the render.
-  asyncBootstrapper(app).then(() => {
+  return asyncBootstrapper(app).then(() => {
     const appString = renderToString(app);
 
     // Generate the html response.
@@ -108,13 +127,12 @@ export default function reactApplicationMiddleware(request, response) {
     // Check if the router context contains a redirect, if so we need to set
     // the specific status and redirect header and end the response.
     if (reactRouterContext.url) {
-      response.status(302).setHeader('Location', reactRouterContext.url);
-      response.end();
+      res.status(302).setHeader('Location', reactRouterContext.url);
+      res.end();
       return;
     }
 
-    response
-      .status(
+    res.status(
         reactRouterContext.missed
           ? // If the renderResult contains a "missed" match then we set a 404 code.
             // Our App component will handle the rendering of an Error404 view.
@@ -123,5 +141,5 @@ export default function reactApplicationMiddleware(request, response) {
             200,
       )
       .send(`<!DOCTYPE html>${html}`);
-  });
+    });
 }
