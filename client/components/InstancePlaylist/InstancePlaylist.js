@@ -78,7 +78,8 @@ class InstancePlaylist extends React.Component {
     }
 
     // this debounce slows down invocation just enough so that redux store can be updated properly from form
-    this._downloadAndArrangeSampleInstances = debounce(this._downloadAndArrangeSampleInstances.bind(this), 1000);
+    this._debouncedDownloadAndArrangeSampleInstances = debounce(this._downloadAndArrangeSampleInstances.bind(this), 1000);
+    this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this);
   }
 
   _downloadAndArrangeSampleInstances(instances) {
@@ -96,70 +97,69 @@ class InstancePlaylist extends React.Component {
       ? trackLength + trackStartTime
       : trackLength;
 
-    if (instances && instances.length) {
-      // clear the transport
-      Tone.Transport.cancel();
+    // clear the transport
+    Tone.Transport.cancel();
 
-      // Load the samples
-      const tasks = instances.map(instance => {
-        return new Promise((resolve, reject) => {
-          let sampleBuffer = bufferCache[instance.sample.id];
+    // Load the samples
+    const tasks = instances.map(instance => {
+      return new Promise((resolve, reject) => {
+        let sampleBuffer = bufferCache[instance.sample.id];
 
-          if (sampleBuffer) {
-            let samplePlayer = playersCache[instance.sample.id];
-            if (!samplePlayer) {
-              // @todo can this path be reached??
-              throw new Error('samplePlayer doesnt exist in playersCache!');
-              //onInstanceLoadSuccess(instance, trackStartTime, trackLength, resolve);
-            }
-
-            const startTime = instance.start_time - trackStartTime;
-
-            syncPlayerToTransport(samplePlayer, startTime);
-
-            resolve();
+        if (sampleBuffer) {
+          let samplePlayer = playersCache[instance.sample.id];
+          if (!samplePlayer) {
+            // @todo can this path be reached??
+            throw new Error('samplePlayer doesnt exist in playersCache!');
+            //onInstanceLoadSuccess(instance, trackStartTime, trackLength, resolve);
           }
-          else {
-            const url = `${baseUrl}/${instance.sample.url}`;
-            bufferCache[instance.sample.id] = new Tone.Buffer(
-              url, 
-              onInstanceLoadSuccess.bind(this, instance, trackStartTime, trackLength, resolve),
-              onInstanceLoadError.bind(this, instance, reject)
-            );
-          }
-        });
+
+          const startTime = instance.start_time - trackStartTime;
+
+          syncPlayerToTransport(samplePlayer, startTime);
+
+          resolve();
+        }
+        else {
+          const url = `${baseUrl}/${instance.sample.url}`;
+          bufferCache[instance.sample.id] = new Tone.Buffer(
+            url, 
+            onInstanceLoadSuccess.bind(this, instance, trackStartTime, trackLength, resolve),
+            onInstanceLoadError.bind(this, instance, reject)
+          );
+        }
+      });
+    });
+
+    // if buffer exists, add the staged sample to the track
+    if (this.props.buffer) {
+      const addBufferToTrack = new Promise((resolve, reject) => {
+        const samplePlayer = new Tone.Player(this.props.buffer);
+
+        const playerStartTime = this.props.stagedSample.startTime - trackStartTime;
+
+        addPluginsToPlayer(samplePlayer, this.props.stagedSample.volume, this.props.stagedSample.panning)
+        syncPlayerToTransport(samplePlayer, playerStartTime);
+        resolve();
       });
 
-      // if buffer exists, add the staged sample to the track
-      if (this.props.buffer) {
-        const addBufferToTrack = new Promise((resolve, reject) => {
-          const samplePlayer = new Tone.Player(this.props.buffer);
-
-          const playerStartTime = this.props.stagedSample.startTime - trackStartTime;
-
-          addPluginsToPlayer(samplePlayer, this.props.stagedSample.volume, this.props.stagedSample.panning)
-          syncPlayerToTransport(samplePlayer, playerStartTime);
-        });
-
-        tasks.push(addBufferToTrack);
-      }
-
-      // The result of loading the sample will determine the look of this component
-      Promise.all(tasks)
-        .then(() => {
-          this.setState({ error: null })
-          this.props.endLoadingState();
-        })
-        .catch(error => {
-          // @todo log error
-          console.error(error)
-          this.setState({ error })
-        });
+      tasks.push(addBufferToTrack);
     }
+
+    // The result of loading the sample will determine the look of this component
+    Promise.all(tasks)
+      .then(() => {
+        this.setState({ error: null })
+        this.props.endLoadingState();
+      })
+      .catch(error => {
+        // @todo log error
+        console.error(error)
+        this.setState({ error })
+      });
   }
 
   componentWillReceiveProps(nextProps) {
-    this._downloadAndArrangeSampleInstances(nextProps.instances);
+    this._debouncedDownloadAndArrangeSampleInstances(nextProps.instances);
   }
 
   componentDidMount() {
