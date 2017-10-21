@@ -209,15 +209,23 @@ class Staging extends React.Component {
           <title>{`staging - ${config('appTitle')}`}</title>
         </Helmet>
         <form className={styles.container} onSubmit={this._saveRecording}>
-          <label htmlFor='startTime'>startTime</label>
-          <input 
-            id='startTime'
-            type='number'
-            step='0.01'
-            value={startTime}
-            onChange={this._handleChange.bind(this, 'startTime')}
-            placeholder='startTime'
-            className={styles.formInput} />
+          { 
+            this.props.instances && this.props.instances.length
+              ? (
+                  <div>
+                    <label htmlFor='startTime'>startTime</label>
+                    <input 
+                      id='startTime'
+                      type='number'
+                      step='0.01'
+                      value={startTime}
+                      onChange={this._handleChange.bind(this, 'startTime')}
+                      placeholder='startTime'
+                      className={styles.formInput} />
+                  </div>
+                )
+              : null
+          }
           
           <label htmlFor='volume'>volume (-infinity to +infinity)</label>
           <input id='volume'
@@ -266,7 +274,8 @@ function mapStateToProps(state) {
   return { 
     objectUrl: selectors.getStagedObjectUrl(state),
     stagedSample: selectors.getStagedSample(state),
-    trackDimensions: selectors.getTrackDimensions(state)
+    trackDimensions: selectors.getTrackDimensions(state),
+    instances: selectors.getInstances(state)
   }
 }
 
