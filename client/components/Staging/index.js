@@ -97,18 +97,22 @@ class Staging extends React.Component {
     // @todo handle invalid data state gracefully
     validateData(stagedSampleStartTime, duration, volume, panning)
 
-    const queryString = `?startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
+    const trakName = this.props.trakName || '';
 
+    const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
+    
     this._getBlobFromObjectUrl()
-      .then(data => axios.post(`/api/sample${queryString}`, data, config))
-      .then(() => {
+      .then((data) => axios.post(`/api/sample${queryString}`, data, config))
+      .then(response => {
+        const trakName = response.data.trakName;
+    
         this.props.setStagedSample({
           startTime: 0,
           volume: 0,
           panning: 0,
           duration: 0
         });
-        this.props.history.push('/track');
+        this.props.history.push(`/edit/${trakName}`);
       })
       .catch((err) => {
         // @todo log error
@@ -275,7 +279,8 @@ function mapStateToProps(state) {
     objectUrl: selectors.getStagedObjectUrl(state),
     stagedSample: selectors.getStagedSample(state),
     trackDimensions: selectors.getTrackDimensions(state),
-    instances: selectors.getInstances(state)
+    instances: selectors.getInstances(state),
+    trakName: selectors.getTrakName(state)
   }
 }
 

@@ -2,7 +2,8 @@ import {
   INSTANCES_FETCH_PENDING, 
   INSTANCES_FETCH_FULFILLED,
   INSTANCES_FETCH_REJECTED,
-  INSTANCES_UPDATE_TRACK_DIMENSIONS_BY_ADDING_SAMPLE
+  INSTANCES_UPDATE_TRACK_DIMENSIONS_BY_ADDING_SAMPLE,
+  INSTANCES_SET_TRAKNAME
  } from '../../actions/instances';
 
 import { calculateTrackDimensions } from './trackDimensions'
@@ -14,6 +15,7 @@ const defaultState = {
     startTime: 0,
     length: 0
   },
+  trakName: undefined,
   error: null
 };
 
@@ -21,7 +23,12 @@ const defaultState = {
 // REDUCER
 
 function instances (state = defaultState, action) {
-  if (action.type === INSTANCES_FETCH_PENDING) {
+  if (action.type === INSTANCES_SET_TRAKNAME) {
+    return Object.assign({}, state,
+      { trakName: action.payload }
+    );
+  }
+  else if (action.type === INSTANCES_FETCH_PENDING) {
     return Object.assign({}, state,
       { isFetching: true }
     );
@@ -75,6 +82,10 @@ export function isFetching(state) {
 
 export function getTrackDimensions(state) {
   return state.trackDimensions;
+}
+
+export function getTrakName(state) {
+  return state.trakName;
 }
 
 // -----------------------------------------------------------------------------

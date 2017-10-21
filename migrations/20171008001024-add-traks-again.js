@@ -14,6 +14,10 @@ module.exports = {
             primaryKey: true,
             allowNull: false
           },
+          name: {
+            type: Sequelize.STRING,
+            allowNull: false
+          },
           originators_player_id: {
             type: Sequelize.UUID,
             references: {

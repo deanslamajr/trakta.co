@@ -1,4 +1,4 @@
-import Traks from '../models/Traks';
+import { Traks } from '../models'
 
 function getAll(req, res) {
   return Traks.findAll({})

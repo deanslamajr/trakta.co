@@ -1,9 +1,12 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 
-import { create as createSample } from './controllers/sample';
-import { getAll as getAllSampleInstances } from './controllers/sample-instances';
-import { getAll as getAllTraks } from './controllers/traks';
+import { getByTrakName as getTraksSampleInstances } from './controllers/sample-instances';
+import {
+  getAll as getAllTraks,
+  create as createTrakAndCreateAddSample } from './controllers/traks';
+
+import { create as createSampleAndAddInstanceToTrak } from './controllers/samples'
 
 //import { getNextWindowEndTime } from './controllers/getNextWindowEndTime'
 
@@ -11,15 +14,16 @@ import { getAll as getAllTraks } from './controllers/traks';
 const router = express.Router();
 
 /**
- * Client posts mp3 stream here
- */
-router.post('/sample', createSample);
-
-/**
  * Fetch all the sample instances
  * @todo target a particular track's sample instances
  */
-router.get('/sampleInstances', getAllSampleInstances);
+router.get('/sample-instances/:trakName', getTraksSampleInstances);
+
+/**
+ * Add sample to existing track
+ * @todo add trak update logic
+ */
+router.post('/sample', createSampleAndAddInstanceToTrak);
 
 /**
  * Fetch all the traks
