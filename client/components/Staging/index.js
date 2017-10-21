@@ -99,9 +99,21 @@ class Staging extends React.Component {
 
     const queryString = `?startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
 
+    const trackUpdateAction = this.props.trackName
+      ? (data) => axios.put(`/api/trak/${this.props.trackName}/sample${queryString}`, data, config)
+      : (data) => axios.post(`/api/trak${queryString}`, data, config)
+    
     this._getBlobFromObjectUrl()
-      .then(data => axios.post(`/api/sample${queryString}`, data, config))
-      .then(() => {
+      .then(trackUpdateAction)
+      .then(response => {
+        const trakName = response.data.trakName;
+
+        // If we just created a new trak, the trakName will be
+        // in the response
+        if (trakName) {
+          // @todo set trackName
+        }
+    
         this.props.setStagedSample({
           startTime: 0,
           volume: 0,
@@ -275,7 +287,8 @@ function mapStateToProps(state) {
     objectUrl: selectors.getStagedObjectUrl(state),
     stagedSample: selectors.getStagedSample(state),
     trackDimensions: selectors.getTrackDimensions(state),
-    instances: selectors.getInstances(state)
+    instances: selectors.getInstances(state),
+    trakName: selectors.getTrakName(state)
   }
 }
 

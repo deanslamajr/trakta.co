@@ -14,6 +14,7 @@ const defaultState = {
     startTime: 0,
     length: 0
   },
+  trackName: undefined,
   error: null
 };
 
@@ -75,6 +76,10 @@ export function isFetching(state) {
 
 export function getTrackDimensions(state) {
   return state.trackDimensions;
+}
+
+export function getTrakName(state) {
+  return state.trackName;
 }
 
 // -----------------------------------------------------------------------------

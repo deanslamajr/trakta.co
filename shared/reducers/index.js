@@ -33,6 +33,10 @@ export function isFetchingInstances(state) {
   return FromInstances.isFetching(state.instances);
 }
 
+export function getTrakName(state) {
+  return FromInstances.getTrakName(state.instances);
+}
+
 // RECORDER
 export function getStagedObjectUrl(state) {
   return FromRecorder.getStagedObjectUrl(state.recorder);

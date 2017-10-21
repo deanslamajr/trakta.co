@@ -5,10 +5,9 @@ import SampleInstances from './Sample-Instances'
 
 Players.hasMany(Samples);
 Players.hasMany(Traks, { foreignKey: 'originators_player_id' });
-
-SampleInstances.belongsTo(Samples);
 Samples.hasMany(SampleInstances);
 
+SampleInstances.belongsTo(Samples);
 SampleInstances.belongsTo(Players);
 SampleInstances.belongsTo(Traks);
 
