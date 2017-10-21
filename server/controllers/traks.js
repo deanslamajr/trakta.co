@@ -1,3 +1,5 @@
+import randomWords from 'random-words'
+
 import { sequelize } from '../adapters/db'
 import { saveBlobToS3 } from '../adapters/s3'
 
@@ -9,7 +11,6 @@ function createSampleTrakSampleInstance(queryStrings = [], s3ResourceName) {
   return sequelize.transaction(transaction => {
     let player
     let sample
-    //let trakName
 
     return Players.findById(ANONYMOUS_PLAYER_ID)
       .then(thePlayer => {
@@ -24,28 +25,30 @@ function createSampleTrakSampleInstance(queryStrings = [], s3ResourceName) {
       })
       .then(newSample => {
         sample = newSample
-        //@todo create name
-        // @todo verify trakName is not already taken
-        return player.createTrak({ /* add trakName here */ }, { transaction })
+        
+        const trakName = randomWords({ exactly: 3, join: '-' });
+
+        return player.createTrak({ name: trakName }, { transaction })
+          .then(trak => {
+            return sample.createSample_instance({
+              start_time: queryStrings.startTime ? queryStrings.startTime : 0.0,
+              volume: queryStrings.volume ? queryStrings.volume : -6.0,
+              panning: queryStrings.panning ? queryStrings.panning : 0.0,
+              player_id: ANONYMOUS_PLAYER_ID,
+              trak_id: trak.id
+            }, { transaction })
+          })
+          .then(() => trakName);
       })
-      .then(trak => {
-        return sample.createSample_instance({
-          start_time: queryStrings.startTime ? queryStrings.startTime : 0.0,
-          volume: queryStrings.volume ? queryStrings.volume : -6.0,
-          panning: queryStrings.panning ? queryStrings.panning : 0.0,
-          player_id: ANONYMOUS_PLAYER_ID,
-          trak_id: trak.id
-        }, { transaction })
-      });
-  });
-  //.then(() => trakName);
+  })
+  
 }
 
 function create(req, res) {
   saveBlobToS3(req)
     .then(createSampleTrakSampleInstance.bind(this, req.query))
     .then(trakName => {
-      // @todo return trakName
+      res.json({ trakName })
       res.sendStatus(200)
     })
     .catch((err) => {

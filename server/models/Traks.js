@@ -9,6 +9,10 @@ const Traks = sequelize.define('traks',
       defaultValue: Sequelize.UUIDV4,
       primaryKey: true,
       allowNull: false
+    },
+    name: {
+      type: Sequelize.STRING,
+      allowNull: false
     }
   },
   {
