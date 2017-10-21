@@ -12,6 +12,7 @@ import './globals.css';
 
 import AsyncMain from './AsyncMain';
 import AsyncRecorder from './AsyncRecorder';
+import AsyncContribute from './AsyncContribute';
 import Error404 from './Error404';
 
 class App extends React.Component {
@@ -107,6 +108,7 @@ class App extends React.Component {
             <Route exact path="/" component={AsyncMain} />
             <Route path="/track" component={AsyncMain} />
             <Route path="/recorder" component={AsyncRecorder} />
+            <Route path="/new" component={AsyncContribute} />
             {/* 
             <Route path="/cleanup" component={ContextWrappedAsyncMain} /> */ }
 
