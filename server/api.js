@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 
-import { getAll as getAllSampleInstances } from './controllers/sample-instances';
+import { getByTrakName as getTraksSampleInstances } from './controllers/sample-instances';
 import {
   getAll as getAllTraks,
   create as createTrakAndCreateAddSample } from './controllers/traks';
@@ -15,7 +15,7 @@ const router = express.Router();
  * Fetch all the sample instances
  * @todo target a particular track's sample instances
  */
-router.get('/sampleInstances', getAllSampleInstances);
+router.get('/sample-instances/:trakName', getTraksSampleInstances);
 
 /**
  * Add sample to existing track

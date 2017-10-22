@@ -49,7 +49,6 @@ function create(req, res) {
     .then(createSampleTrakSampleInstance.bind(this, req.query))
     .then(trakName => {
       res.json({ trakName })
-      res.sendStatus(200)
     })
     .catch((err) => {
       // @todo log error

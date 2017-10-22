@@ -14,7 +14,7 @@ import SampleInstances from '../SampleInstances';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedSample } from '../../../shared/actions/recorder';
-import { updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/instances';
+import { updateTrackDimensionsWithAdditionalSample, setTrakName } from '../../../shared/actions/instances';
 
 import styles from './staging.css'
 
@@ -111,7 +111,7 @@ class Staging extends React.Component {
         // If we just created a new trak, the trakName will be
         // in the response
         if (trakName) {
-          // @todo set trackName
+          this.props.setTrakName(trakName);
         }
     
         this.props.setStagedSample({
@@ -279,7 +279,8 @@ class Staging extends React.Component {
 
 const mapActionsToProps = {
   setStagedSample,
-  updateTrackDimensionsWithAdditionalSample
+  updateTrackDimensionsWithAdditionalSample,
+  setTrakName
 };
 
 function mapStateToProps(state) {

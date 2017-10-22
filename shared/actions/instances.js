@@ -7,6 +7,7 @@ export const INSTANCES_FETCH_PENDING = 'INSTANCES_FETCH_PENDING';
 export const INSTANCES_FETCH_FULFILLED = 'INSTANCES_FETCH_FULFILLED';
 export const INSTANCES_FETCH_REJECTED = 'INSTANCES_FETCH_REJECTED';
 export const INSTANCES_UPDATE_TRACK_DIMENSIONS_BY_ADDING_SAMPLE = 'INSTANCES_UPDATE_TRACK_DIMENSIONS_BY_ADDING_SAMPLE';
+export const INSTANCES_SET_TRAKNAME = 'INSTANCES_SET_TRAKNAME';
 
 // -----------------------------------------------------------------------------
 // ACTIONS
@@ -27,12 +28,19 @@ export function updateTrackDimensionsWithAdditionalSample(newSampleInstance) {
   return { type: INSTANCES_UPDATE_TRACK_DIMENSIONS_BY_ADDING_SAMPLE, payload: newSampleInstance }
 }
 
+export function setTrakName(trakName) { 
+  return { type: INSTANCES_SET_TRAKNAME, payload: trakName };
+}
+
 export function fetchAll() {
   return (dispatch, getState, { axios }) => {
     dispatch(fetching());
 
+    const { instances } = getState()
+    const trakName = instances.trakName
+
     return axios
-      .get('/api/sampleInstances')
+      .get(`/api/sample-instances/${trakName}`)
       .then(({ data }) => dispatch(fetched(data)))
       .catch(error => dispatch(failed(error)));
   };

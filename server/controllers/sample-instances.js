@@ -1,8 +1,22 @@
-import SampleInstances from '../models/Sample-Instances';
-import Samples from '../models/Samples';
+import {  Samples, SampleInstances, Traks } from '../models'
 
-function getAll(req, res) {
-  return SampleInstances.findAll({ include: [ Samples ] })
+function getByTrakName(req, res) {
+  const trakName = req.params.trakName;
+
+  if (!trakName) {
+    // @log this case where a trakName wasn't sent with the request
+    return res.sendStatus(404);
+  }
+
+  return SampleInstances.findAll({
+      include: [ 
+        Samples,
+        {
+          model: Traks,
+          where: { name: trakName }
+        }
+      ]
+    })
     .then(sampleInstances => {
       res.json(sampleInstances)
     })
@@ -13,5 +27,5 @@ function getAll(req, res) {
 }
 
 export {
-  getAll
+  getByTrakName
 };

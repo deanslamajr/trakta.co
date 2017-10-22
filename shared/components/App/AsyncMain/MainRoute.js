@@ -85,7 +85,8 @@ function mapStateToProps(state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
     instances: selectors.getInstances(state),
-    trackDimensions: selectors.getTrackDimensions(state)
+    trackDimensions: selectors.getTrackDimensions(state),
+    trakName: selectors.getTrakName(state)
   };
 };
 
