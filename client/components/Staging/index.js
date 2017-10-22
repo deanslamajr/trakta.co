@@ -112,7 +112,7 @@ class Staging extends React.Component {
           panning: 0,
           duration: 0
         });
-        this.props.history.push(`/edit/${trakName}`);
+        this.props.history.push(`/e/${trakName}`);
       })
       .catch((err) => {
         // @todo log error
