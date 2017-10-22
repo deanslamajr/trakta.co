@@ -14,12 +14,23 @@ import * as selectors from '../../../reducers';
 import styles from './listRoute.css';
 
 class ListRoute extends React.Component {
-  // _navigateRecord() {
-  //   this.props.history.push('/recorder');
-  // }
+  constructor(props) {
+    super(props)
+    this._renderListItem = this._renderListItem.bind(this)
+  }
 
-  _renderListItem() {
+  _navigateToTrak(trak) {
+    this.props.history.push(`/e/${trak.name}`);
+  }
 
+  _renderListItem(trak) {
+    return (
+      <div
+        key={trak.id}
+        onClick={this._navigateToTrak.bind(this, trak)}>
+        { trak.name }
+      </div>
+    )
   }
 
   _renderNoListItems() {
