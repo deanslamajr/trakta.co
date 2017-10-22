@@ -19,23 +19,27 @@ class ListRoute extends React.Component {
     this._renderListItem = this._renderListItem.bind(this)
   }
 
-  _navigateToTrak(trak) {
-    this.props.history.push(`/e/${trak.name}`);
+  _navigateToTrak(name) {
+    this.props.history.push(`/e/${name}`);
   }
 
   _renderListItem(trak) {
     return (
       <div
         key={trak.id}
-        onClick={this._navigateToTrak.bind(this, trak)}>
+        onClick={this._navigateToTrak.bind(this, trak.name)}>
         { trak.name }
       </div>
     )
   }
 
-  _renderNoListItems() {
+  _renderNewTrakItem() {
     return (
-      <div>There don't appear to be any trak tacos meeting the current search criteria</div>
+      <div
+        key='new-trak-item'
+        onClick={() => this.props.history.push(`/new`)}>
+        New Trak
+      </div>
     )
   }
 
@@ -44,22 +48,15 @@ class ListRoute extends React.Component {
   }
 
   render() {
-    console.log('traks:')
-    console.dir(this.props.traks)
-
-
     return (
       <div className={styles.container}>
         <Helmet>
-          <title>{`traktacos! - ${config('appTitle')}`}</title>
+          <title>{'traktacos'}</title>
         </Helmet>
 
         <div className={styles.label}>
-          {
-            this.props.traks && this.props.traks.length
-              ? this.props.traks.map(this._renderListItem)
-              : this._renderNoListItems()
-          }
+          { this._renderNewTrakItem() }
+          { this.props.traks.map(this._renderListItem) }
         </div>
 
       </div>

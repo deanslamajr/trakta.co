@@ -1,7 +1,10 @@
 @import "../../../colors.css";
 
+.container {
+  position: inherit;
+}
+
 .label {
-  position: absolute;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
