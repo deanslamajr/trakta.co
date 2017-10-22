@@ -14,7 +14,7 @@ import SampleInstances from '../SampleInstances';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedSample } from '../../../shared/actions/recorder';
-import { updateTrackDimensionsWithAdditionalSample, setTrakName } from '../../../shared/actions/instances';
+import { updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/instances';
 
 import styles from './staging.css'
 
@@ -97,22 +97,14 @@ class Staging extends React.Component {
     // @todo handle invalid data state gracefully
     validateData(stagedSampleStartTime, duration, volume, panning)
 
-    const queryString = `?startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
+    const trakName = this.props.trakName || '';
 
-    const trackUpdateAction = this.props.trackName
-      ? (data) => axios.put(`/api/trak/${this.props.trackName}/sample${queryString}`, data, config)
-      : (data) => axios.post(`/api/trak${queryString}`, data, config)
+    const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
     
     this._getBlobFromObjectUrl()
-      .then(trackUpdateAction)
+      .then((data) => axios.post(`/api/sample${queryString}`, data, config))
       .then(response => {
         const trakName = response.data.trakName;
-
-        // If we just created a new trak, the trakName will be
-        // in the response
-        if (trakName) {
-          this.props.setTrakName(trakName);
-        }
     
         this.props.setStagedSample({
           startTime: 0,
@@ -120,7 +112,7 @@ class Staging extends React.Component {
           panning: 0,
           duration: 0
         });
-        this.props.history.push('/track');
+        this.props.history.push(`/edit/${trakName}`);
       })
       .catch((err) => {
         // @todo log error
@@ -279,8 +271,7 @@ class Staging extends React.Component {
 
 const mapActionsToProps = {
   setStagedSample,
-  updateTrackDimensionsWithAdditionalSample,
-  setTrakName
+  updateTrackDimensionsWithAdditionalSample
 };
 
 function mapStateToProps(state) {

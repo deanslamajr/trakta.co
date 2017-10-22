@@ -6,6 +6,8 @@ import {
   getAll as getAllTraks,
   create as createTrakAndCreateAddSample } from './controllers/traks';
 
+import { create as createSampleAndAddInstanceToTrak } from './controllers/samples'
+
 //import { getNextWindowEndTime } from './controllers/getNextWindowEndTime'
 
 
@@ -21,13 +23,7 @@ router.get('/sample-instances/:trakName', getTraksSampleInstances);
  * Add sample to existing track
  * @todo add trak update logic
  */
-router.post('/trak', createTrakAndCreateAddSample);
-
-/**
- * Add sample to existing track
- * @todo add trak update logic
- */
-//router.put('/trak/:trak/sample', createSample);
+router.post('/sample', createSampleAndAddInstanceToTrak);
 
 /**
  * Fetch all the traks

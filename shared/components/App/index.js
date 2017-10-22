@@ -106,7 +106,7 @@ class App extends React.Component {
         <div>
           <Switch>
             <Route exact path="/" component={AsyncMain} />
-            <Route path="/track" component={AsyncMain} />
+            <Route path="/edit/:trakName" component={AsyncMain} />
             <Route path="/recorder" component={AsyncRecorder} />
             <Route path="/new" component={AsyncContribute} />
             {/* 

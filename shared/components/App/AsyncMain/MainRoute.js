@@ -9,7 +9,7 @@ import classnames from 'classnames';
 import config from '../../../../config';
 
 import * as selectors from '../../../reducers';
-import { fetchAll } from '../../../actions/instances';
+import { fetchAll, setTrakName } from '../../../actions/instances';
 
 import SampleInstances from '../../../../client/components/SampleInstances';
 import InstancePlaylist from '../../../../client/components/InstancePlaylist';
@@ -47,6 +47,17 @@ class MainRoute extends React.Component {
   }
 
   componentDidMount() {
+    // If we just created a new trak, the trakName will be
+    // in the response
+    if (this.props.match.params.trakName) {
+      this.props.setTrakName(this.props.match.params.trakName);
+    }
+    else {
+      // @todo
+      // fetch a random track??
+      return this.props.history.push('/new');
+    }
+
     this.props.fetchAll();
   }
 
@@ -91,7 +102,8 @@ function mapStateToProps(state, ownProps) {
 };
 
 const mapActionsToProps = {
-  fetchAll
+  fetchAll,
+  setTrakName
 };
 
 export default compose(
