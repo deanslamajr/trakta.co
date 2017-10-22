@@ -10,6 +10,7 @@ import config from '../../../config';
 
 import './globals.css';
 
+import AsyncList from './AsyncList';
 import AsyncMain from './AsyncMain';
 import AsyncRecorder from './AsyncRecorder';
 import AsyncContribute from './AsyncContribute';
@@ -105,8 +106,8 @@ class App extends React.Component {
         </Helmet>
         <div>
           <Switch>
-            <Route exact path="/" component={AsyncMain} />
-            <Route path="/edit/:trakName" component={AsyncMain} />
+            <Route exact path="/" component={AsyncList} />
+            <Route path="/e/:trakName" component={AsyncMain} />
             <Route path="/recorder" component={AsyncRecorder} />
             <Route path="/new" component={AsyncContribute} />
             {/* 

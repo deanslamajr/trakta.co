@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import ui, * as FromUi from './ui';
 import instances, * as FromInstances from './instances';
 import recorder, * as FromRecorder from './recorder';
+import traks, * as FromTraks from './traks';
 
 // -----------------------------------------------------------------------------
 // REDUCER
@@ -9,7 +10,8 @@ import recorder, * as FromRecorder from './recorder';
 const rootReducer = combineReducers({
   ui,
   instances,
-  recorder
+  recorder,
+  traks
 });
 
 // -----------------------------------------------------------------------------
@@ -18,6 +20,11 @@ const rootReducer = combineReducers({
 // UI
 export function isLoading(state) {
   return FromUi.isLoading(state.ui);
+}
+
+// TRAKS
+export function getTraks(state) {
+  return FromTraks.getTraks(state.traks);
 }
 
 // INSTANCES
