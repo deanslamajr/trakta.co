@@ -51,14 +51,13 @@ class MainRoute extends React.Component {
     // in the response
     if (this.props.match.params.trakName) {
       this.props.setTrakName(this.props.match.params.trakName);
+      this.props.fetchAll();
     }
     else {
       // @todo
       // fetch a random track??
       return this.props.history.push('/new');
     }
-
-    this.props.fetchAll();
   }
 
   render() {
@@ -85,7 +84,6 @@ class MainRoute extends React.Component {
           
           <SampleInstances />
         </div>
-
         { this.props.isLoading && this._renderLoadingComponent() }
       </div>
     );
@@ -95,9 +93,7 @@ class MainRoute extends React.Component {
 function mapStateToProps(state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
-    instances: selectors.getInstances(state),
-    trackDimensions: selectors.getTrackDimensions(state),
-    trakName: selectors.getTrakName(state)
+    trackDimensions: selectors.getTrackDimensions(state)
   };
 };
 

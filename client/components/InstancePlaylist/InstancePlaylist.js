@@ -5,17 +5,17 @@ import Tone from 'tone';
 import classnames from 'classnames';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import debounce from 'debounce';
+import isEqual from 'lodash.isequal';
 
 import config from '../../../config';
 
 import * as selectors from '../../../shared/reducers';
-import { startLoadingState, endLoadingState } from '../../../shared/actions/ui';
+import { startFetchSample, endFetchSample } from '../../../shared/actions/samples';
 
 import styles from './InstancePlaylist.css';
 
 const baseUrl = config('s3SampleBucket');
 
-const playersCache = {};
 const bufferCache = {};
 
 function addPluginsToPlayer(samplePlayer, volume, panning) {
@@ -47,8 +47,6 @@ function onInstanceLoadSuccess(instance, trackStartTime, trackLength, resolve) {
   addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
   syncPlayerToTransport(samplePlayer, playerStartTime);
 
-  // cache the player
-  playersCache[instance.sample.id] = samplePlayer;
   resolve();
 }
 
@@ -67,6 +65,42 @@ function renderPlayComponent() {
       <span className={styles.icon}>&#128266;</span>
     </div>
   );
+}
+
+function prepTransport(trackStartTime, trackLength) {
+  Tone.Transport.loop = true;
+  Tone.Transport.position = Tone.Transport.loopStart = trackStartTime >= 0
+    ? trackStartTime
+    : 0;
+  Tone.Transport.loopEnd = trackStartTime >= 0
+    ? trackLength + trackStartTime
+    : trackLength;
+
+  // clear the transport
+  Tone.Transport.cancel();
+}
+
+function loadSample(trackStartTime, trackLength, instance) {
+  return new Promise((resolve, reject) => {
+    const url = `${baseUrl}/${instance.sample.url}`;
+    bufferCache[instance.sample.id] = new Tone.Buffer(
+      url, 
+      onInstanceLoadSuccess.bind(null, instance, trackStartTime, trackLength, resolve),
+      onInstanceLoadError.bind(null, instance, reject)
+    );
+  });
+}
+
+function loadBuffer(buffer, stagedSample, trackStartTime) {
+  return new Promise((resolve, reject) => {
+    const samplePlayer = new Tone.Player(buffer);
+
+    const playerStartTime = stagedSample.startTime - trackStartTime;
+
+    addPluginsToPlayer(samplePlayer, stagedSample.volume, stagedSample.panning)
+    syncPlayerToTransport(samplePlayer, playerStartTime);
+    resolve();
+  })
 }
 
 class InstancePlaylist extends React.Component {
@@ -88,68 +122,23 @@ class InstancePlaylist extends React.Component {
       length: trackLength
     } = this.props.trackDimensions;
 
-    // prep global transport
-    Tone.Transport.loop = true;
-    Tone.Transport.position = Tone.Transport.loopStart = trackStartTime >= 0
-      ? trackStartTime
-      : 0;
-    Tone.Transport.loopEnd = trackStartTime >= 0
-      ? trackLength + trackStartTime
-      : trackLength;
+    this.props.startFetchSample()
 
-    // clear the transport
-    Tone.Transport.cancel();
+    prepTransport(trackStartTime, trackLength)
 
     // Load the samples
-    const tasks = instances.map(instance => {
-      return new Promise((resolve, reject) => {
-        let sampleBuffer = bufferCache[instance.sample.id];
-
-        if (sampleBuffer) {
-          let samplePlayer = playersCache[instance.sample.id];
-          if (!samplePlayer) {
-            // @todo can this path be reached??
-            throw new Error('samplePlayer doesnt exist in playersCache!');
-            //onInstanceLoadSuccess(instance, trackStartTime, trackLength, resolve);
-          }
-
-          const startTime = instance.start_time - trackStartTime;
-
-          syncPlayerToTransport(samplePlayer, startTime);
-
-          resolve();
-        }
-        else {
-          const url = `${baseUrl}/${instance.sample.url}`;
-          bufferCache[instance.sample.id] = new Tone.Buffer(
-            url, 
-            onInstanceLoadSuccess.bind(this, instance, trackStartTime, trackLength, resolve),
-            onInstanceLoadError.bind(this, instance, reject)
-          );
-        }
-      });
-    });
+    const tasks = instances.map(loadSample.bind(null, trackStartTime, trackLength))
 
     // if buffer exists, add the staged sample to the track
     if (this.props.buffer) {
-      const addBufferToTrack = new Promise((resolve, reject) => {
-        const samplePlayer = new Tone.Player(this.props.buffer);
-
-        const playerStartTime = this.props.stagedSample.startTime - trackStartTime;
-
-        addPluginsToPlayer(samplePlayer, this.props.stagedSample.volume, this.props.stagedSample.panning)
-        syncPlayerToTransport(samplePlayer, playerStartTime);
-        resolve();
-      });
-
-      tasks.push(addBufferToTrack);
+      tasks.push(loadBuffer(this.props.buffer, this.props.stagedSample, trackStartTime))
     }
 
     // The result of loading the sample will determine the look of this component
     Promise.all(tasks)
       .then(() => {
+        this.props.endFetchSample()
         this.setState({ error: null })
-        this.props.endLoadingState();
       })
       .catch(error => {
         // @todo log error
@@ -159,7 +148,12 @@ class InstancePlaylist extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this._debouncedDownloadAndArrangeSampleInstances(nextProps.instances);
+    const instancesHaveChanged = !isEqual(this.props.instances, nextProps.instances);
+    const stagedSamplePropsHaveChanged = !isEqual(this.props.stagedSample, nextProps.stagedSample);
+
+    if (instancesHaveChanged || stagedSamplePropsHaveChanged) {
+      this._debouncedDownloadAndArrangeSampleInstances(nextProps.instances);
+    }
   }
 
   componentDidMount() {
@@ -180,8 +174,8 @@ class InstancePlaylist extends React.Component {
 }
 
 const mapActionsToProps = {
-  startLoadingState,
-  endLoadingState
+  startFetchSample,
+  endFetchSample
 };
 
 function mapStateToProps(state, ownProps) {

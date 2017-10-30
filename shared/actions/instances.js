@@ -12,7 +12,7 @@ export const INSTANCES_SET_TRAKNAME = 'INSTANCES_SET_TRAKNAME';
 // -----------------------------------------------------------------------------
 // ACTIONS
 
-function fetching() {
+function startFetch() {
   return { type: INSTANCES_FETCH_PENDING };
 }
 
@@ -34,14 +34,16 @@ export function setTrakName(trakName) {
 
 export function fetchAll() {
   return (dispatch, getState, { axios }) => {
-    dispatch(fetching());
-
+    startFetch();
+    
     const { instances } = getState()
     const trakName = instances.trakName
 
     return axios
       .get(`/api/sample-instances/${trakName}`)
-      .then(({ data }) => dispatch(fetched(data)))
+      .then(({ data }) => {
+        dispatch(fetched(data));
+      })
       .catch(error => dispatch(failed(error)));
   };
 }

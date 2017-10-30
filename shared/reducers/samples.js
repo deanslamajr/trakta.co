@@ -1,19 +1,19 @@
-import { UI_START_LOADING_STATE, UI_END_LOADING_STATE } from '../actions/ui';
+import { SAMPLES_START_FETCH, SAMPLES_END_FETCH } from '../actions/samples';
 
-const defaultState = { isLoading: true };
+const defaultState = { fetchCount: 0 };
 
 // -----------------------------------------------------------------------------
 // REDUCER
 
-function ui (state = defaultState, action) {
-  if (action.type === UI_START_LOADING_STATE) {
+function samples (state = defaultState, action) {
+  if (action.type === SAMPLES_START_FETCH) {
     return Object.assign({}, state,
-      { isLoading: true },
+      { fetchCount: state.fetchCount + 1 },
     );
   }
-  else if (action.type === UI_END_LOADING_STATE) {
+  else if (action.type === SAMPLES_END_FETCH) {
     return Object.assign({}, state,
-      {  isLoading: false },
+      { fetchCount: state.fetchCount - 1 },
     );
   }
 
@@ -24,10 +24,10 @@ function ui (state = defaultState, action) {
 // EXPORTED SELECTORS
 
 export function isLoading(state) {
-  return state.isLoading;
+  return state.fetchCount > 0;
 }
 
 // -----------------------------------------------------------------------------
 // REDUCER EXPORT
 
-export default ui;
+export default samples;

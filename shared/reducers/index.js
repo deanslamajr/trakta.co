@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import ui, * as FromUi from './ui';
+import samples, * as FromSamples from './samples';
 import instances, * as FromInstances from './instances';
 import recorder, * as FromRecorder from './recorder';
 import traks, * as FromTraks from './traks';
@@ -8,7 +8,7 @@ import traks, * as FromTraks from './traks';
 // REDUCER
 
 const rootReducer = combineReducers({
-  ui,
+  samples,
   instances,
   recorder,
   traks
@@ -19,7 +19,7 @@ const rootReducer = combineReducers({
 
 // UI
 export function isLoading(state) {
-  return FromUi.isLoading(state.ui);
+  return FromSamples.isLoading(state.samples) || FromInstances.isFetching(state.instances);
 }
 
 // TRAKS
@@ -34,10 +34,6 @@ export function getInstances(state) {
 
 export function getTrackDimensions(state) {
   return FromInstances.getTrackDimensions(state.instances);
-}
-
-export function isFetchingInstances(state) {
-  return FromInstances.isFetching(state.instances);
 }
 
 export function getTrakName(state) {
