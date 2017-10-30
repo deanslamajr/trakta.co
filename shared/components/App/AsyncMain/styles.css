@@ -44,3 +44,9 @@
   top: 75%;
   bottom: 5%;
 }
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}

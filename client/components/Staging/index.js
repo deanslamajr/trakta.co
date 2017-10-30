@@ -13,8 +13,10 @@ import InstancePlaylist from '../InstancePlaylist';
 import SampleInstances from '../SampleInstances';
 
 import * as selectors from '../../../shared/reducers';
+
 import { setStagedSample } from '../../../shared/actions/recorder';
-import { updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/instances';
+import { updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak';
+import { reset as resetSampleLoaderState } from '../../../shared/actions/samples';
 
 import styles from './staging.css'
 
@@ -112,6 +114,9 @@ class Staging extends React.Component {
           panning: 0,
           duration: 0
         });
+
+        this.props.resetSampleLoaderState()
+        
         this.props.history.push(`/e/${trakName}`);
       })
       .catch((err) => {
@@ -136,26 +141,6 @@ class Staging extends React.Component {
       <div onClick={clickHandler} className={classnames()}>
         <div className={classnames(styles.icon)}>&#9888;</div>
       </div>
-    );
-  }
-
-  // initialize the buffer everytime the user navigates to this page
-  componentDidMount() {
-    const buffer = new Tone.Buffer(this.props.objectUrl,
-      // success
-      () => {
-        this.setState({ buffer })
-        
-        const duration = buffer.get().duration;
-        this.props.setStagedSample({ duration });
-
-        this._updateTrack()
-      },
-      // error
-      // @todo log, set error view state (w/ try again functionality)
-      error => {
-        console.error(error);
-      }
     );
   }
 
@@ -198,6 +183,26 @@ class Staging extends React.Component {
         updateTrack: false
       })
     }
+  }
+
+  // initialize the buffer everytime the user navigates to this page
+  componentDidMount() {
+    const buffer = new Tone.Buffer(this.props.objectUrl,
+      // success
+      () => {
+        const duration = buffer.get().duration;
+        this.props.setStagedSample({ duration });
+
+        this._updateTrack()
+
+        this.setState({ buffer })
+      },
+      // error
+      // @todo log, set error view state (w/ try again functionality)
+      error => {
+        console.error(error);
+      }
+    );
   }
 
   render () {
@@ -271,7 +276,8 @@ class Staging extends React.Component {
 
 const mapActionsToProps = {
   setStagedSample,
-  updateTrackDimensionsWithAdditionalSample
+  updateTrackDimensionsWithAdditionalSample,
+  resetSampleLoaderState
 };
 
 function mapStateToProps(state) {

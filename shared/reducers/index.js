@@ -1,47 +1,51 @@
 import { combineReducers } from 'redux';
-import ui, * as FromUi from './ui';
-import instances, * as FromInstances from './instances';
+import samples, * as FromSamples from './samples';
+import trak, * as FromTrak from './trak';
 import recorder, * as FromRecorder from './recorder';
-import traks, * as FromTraks from './traks';
+import traklist, * as FromTraklist from './traklist';
 
 // -----------------------------------------------------------------------------
 // REDUCER
 
 const rootReducer = combineReducers({
-  ui,
-  instances,
+  samples,
+  trak,
   recorder,
-  traks
+  traklist
 });
 
 // -----------------------------------------------------------------------------
 // EXPORTED SELECTORS
 
-// UI
+// SAMPLES
 export function isLoading(state) {
-  return FromUi.isLoading(state.ui);
+  return FromSamples.isLoading(state.samples);
 }
 
-// TRAKS
+export function getTotalTasks(state) {
+  return FromSamples.getTotalTasks(state.samples);
+}
+
+export function getFinishedTasks(state) {
+  return FromSamples.getFinishedTasks(state.samples);
+}
+
+// TRAKLIST
 export function getTraks(state) {
-  return FromTraks.getTraks(state.traks);
+  return FromTraklist.getTraks(state.traklist);
 }
 
-// INSTANCES
+// TRAK
 export function getInstances(state) {
-  return FromInstances.getInstances(state.instances);
+  return FromTrak.getInstances(state.trak);
 }
 
 export function getTrackDimensions(state) {
-  return FromInstances.getTrackDimensions(state.instances);
-}
-
-export function isFetchingInstances(state) {
-  return FromInstances.isFetching(state.instances);
+  return FromTrak.getDimensions(state.trak);
 }
 
 export function getTrakName(state) {
-  return FromInstances.getTrakName(state.instances);
+  return FromTrak.getName(state.trak);
 }
 
 // RECORDER
