@@ -3,23 +3,23 @@
 // -----------------------------------------------------------------------------
 // ACTION NAME CONSTANTS
 
-export const TRAKS_FETCH_PENDING = 'TRAKS_FETCH_PENDING';
-export const TRAKS_FETCH_FULFILLED = 'TRAKS_FETCH_FULFILLED';
-export const TRAKS_FETCH_REJECTED = 'TRAKS_FETCH_REJECTED';
+export const TRAKLIST_FETCH_PENDING = 'TRAKLIST_FETCH_PENDING';
+export const TRAKLIST_FETCH_FULFILLED = 'TRAKLIST_FETCH_FULFILLED';
+export const TRAKLIST_FETCH_REJECTED = 'TRAKLIST_FETCH_REJECTED';
 
 // -----------------------------------------------------------------------------
 // ACTIONS
 
 function fetching() {
-  return { type: TRAKS_FETCH_PENDING };
+  return { type: TRAKLIST_FETCH_PENDING };
 }
 
 function fetched(data) {
-  return { type: TRAKS_FETCH_FULFILLED, payload: data };
+  return { type: TRAKLIST_FETCH_FULFILLED, payload: data };
 }
 
 function failed(error) {
-  return { type: TRAKS_FETCH_REJECTED, payload: error };
+  return { type: TRAKLIST_FETCH_REJECTED, payload: error };
 }
 
 export function fetchAll() {

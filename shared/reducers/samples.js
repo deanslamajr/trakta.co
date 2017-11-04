@@ -1,19 +1,50 @@
-import { SAMPLES_START_FETCH, SAMPLES_END_FETCH } from '../actions/samples';
+import {
+  SAMPLES_BEGIN_INITIAL_FETCH_TASK,
+  SAMPLES_FINISH_INITIAL_FETCH_TASK,
+  SAMPLES_FINISH_LOAD_TASK,
+  SAMPLES_END_FETCH,
+  SAMPLES_RESET } from '../actions/samples';
 
-const defaultState = { fetchCount: 0 };
+const defaultState = {
+  totalTasks: 0,
+  finishedTasks: 0,
+  isLoading: true
+};
 
 // -----------------------------------------------------------------------------
 // REDUCER
 
 function samples (state = defaultState, action) {
-  if (action.type === SAMPLES_START_FETCH) {
+  if (action.type === SAMPLES_BEGIN_INITIAL_FETCH_TASK) {
     return Object.assign({}, state,
-      { fetchCount: state.fetchCount + 1 },
+      { totalTasks: state.totalTasks + 1 }
+    );
+  }
+  else if (action.type === SAMPLES_RESET) {
+    return Object.assign({}, state,
+      {
+        isLoading: true,
+        finishedTasks: 0,
+        totalTasks: 0
+      }
     );
   }
   else if (action.type === SAMPLES_END_FETCH) {
     return Object.assign({}, state,
-      { fetchCount: state.fetchCount - 1 },
+      { isLoading: false },
+    );
+  }
+  else if (action.type === SAMPLES_FINISH_INITIAL_FETCH_TASK) {
+    return Object.assign({}, state,
+      {
+        finishedTasks: state.finishedTasks + 1,
+        totalTasks: state.totalTasks + action.payload
+      },
+    );
+  }
+  else if (action.type === SAMPLES_FINISH_LOAD_TASK) {
+    return Object.assign({}, state,
+      { finishedTasks: state.finishedTasks + 1 },
     );
   }
 
@@ -24,7 +55,15 @@ function samples (state = defaultState, action) {
 // EXPORTED SELECTORS
 
 export function isLoading(state) {
-  return state.fetchCount > 0;
+  return state.isLoading;
+}
+
+export function getTotalTasks(state) {
+  return state.totalTasks;
+}
+
+export function getFinishedTasks(state) {
+  return state.finishedTasks;
 }
 
 // -----------------------------------------------------------------------------

@@ -8,7 +8,10 @@ import classnames from 'classnames';
 
 import config from '../../../../config';
 
-import { fetchAll as fetchTraks } from '../../../actions/traks';
+import { fetchAll as fetchTraks } from '../../../actions/traklist';
+import { reset as resetSampleLoaderState } from '../../../actions/samples';
+import { reset as resetTrakState } from '../../../actions/trak';
+
 import * as selectors from '../../../reducers';
 
 import styles from './listRoute.css';
@@ -44,7 +47,9 @@ class ListRoute extends React.Component {
   }
 
   componentDidMount() {
-    this.props.fetchTraks()
+    this.props.fetchTraks();
+    this.props.resetSampleLoaderState();
+    this.props.resetTrakState()
   }
 
   render() {
@@ -66,7 +71,9 @@ class ListRoute extends React.Component {
 
 
 const mapActionsToProps = {
-  fetchTraks
+  fetchTraks,
+  resetSampleLoaderState,
+  resetTrakState
 };
 
 function mapStateToProps(state) {

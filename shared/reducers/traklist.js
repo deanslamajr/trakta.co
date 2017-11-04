@@ -1,8 +1,8 @@
 import { 
-  TRAKS_FETCH_PENDING, 
-  TRAKS_FETCH_FULFILLED,
-  TRAKS_FETCH_REJECTED
- } from '../actions/traks';
+  TRAKLIST_FETCH_PENDING, 
+  TRAKLIST_FETCH_FULFILLED,
+  TRAKLIST_FETCH_REJECTED
+ } from '../actions/traklist';
 
 const defaultState = { 
   traks: [],
@@ -12,13 +12,13 @@ const defaultState = {
 // -----------------------------------------------------------------------------
 // REDUCER
 
-function traks (state = defaultState, action) {
-  if (action.type === TRAKS_FETCH_PENDING) {
+function traklist (state = defaultState, action) {
+  if (action.type === TRAKLIST_FETCH_PENDING) {
     return Object.assign({}, state,
       { isFetching: true }
     );
   }
-  else if (action.type === TRAKS_FETCH_FULFILLED) {
+  else if (action.type === TRAKLIST_FETCH_FULFILLED) {
     const traks = action.payload;
 
     return Object.assign({}, state,
@@ -29,7 +29,7 @@ function traks (state = defaultState, action) {
       }
     );
   }
-  else if (action.type === TRAKS_FETCH_REJECTED) {
+  else if (action.type === TRAKLIST_FETCH_REJECTED) {
     return Object.assign({}, state,
       { 
         isFetching: false,
@@ -52,4 +52,4 @@ export function getTraks(state) {
 // -----------------------------------------------------------------------------
 // REDUCER EXPORT
 
-export default traks;
+export default traklist;

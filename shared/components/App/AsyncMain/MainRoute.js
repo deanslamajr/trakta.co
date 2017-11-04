@@ -9,10 +9,14 @@ import classnames from 'classnames';
 import config from '../../../../config';
 
 import * as selectors from '../../../reducers';
-import { fetchAll, setTrakName } from '../../../actions/instances';
+
+import { fetchInstances, setName as setTrakName } from '../../../actions/trak';
+import { reset as resetSampleLoaderState } from '../../../actions/samples';
 
 import SampleInstances from '../../../../client/components/SampleInstances';
 import InstancePlaylist from '../../../../client/components/InstancePlaylist';
+
+import ProgressRing from '../AsyncProgressRing'
 
 import styles from './styles.css';
 
@@ -27,15 +31,18 @@ class MainRoute extends React.Component {
 
   _showContribute() {
     //@todo have this show a menu of contribution options, which would include <Recorder> among others
+    this.props.resetSampleLoaderState();
     this.props.history.push('/recorder');
   }
 
-  _renderLoadingComponent(clickHandler) {
+  _renderLoadingComponent() {
+    const progress = this.props.finishedTasks / this.props.totalTasks;
+
     return (
-      <div onClick={clickHandler} className={classnames(styles.loading, styles.button, styles.centerButton)}>
-        <div className={classnames(styles.icon, styles.loadSpinner)}></div>
+      <div className={styles.spinner}>
+        <ProgressRing radius={50} stroke={2} progress={progress} />
       </div>
-    );
+    )
   }
 
   _renderErrorComponent(clickHandler) {
@@ -51,13 +58,21 @@ class MainRoute extends React.Component {
     // in the response
     if (this.props.match.params.trakName) {
       this.props.setTrakName(this.props.match.params.trakName);
-      this.props.fetchAll();
+      this.props.fetchInstances();
     }
     else {
       // @todo
       // fetch a random track??
       return this.props.history.push('/new');
     }
+  }
+
+  _renderContributeComponent() {
+    return (
+      <div className={classnames(styles.contribute, styles.button, styles.bottomButton)} onClick={this._showContribute}>
+        <span className={styles.icon}>contribute</span>
+      </div>
+    )
   }
 
   render() {
@@ -76,15 +91,12 @@ class MainRoute extends React.Component {
           <div className={styles.label}>
             {/* Play button  */}
             <InstancePlaylist renderErrorComponent={this._renderErrorComponent} />
-            {/* Contribute button  */}
-            <div className={classnames(styles.contribute, styles.button, styles.bottomButton)} onClick={this._showContribute}>
-              <span className={styles.icon}>&#10133;</span>
-            </div>
+            { !this.props.isLoading && this._renderContributeComponent() }
           </div>
           
           <SampleInstances />
         </div>
-        { this.props.isLoading && this._renderLoadingComponent() }
+         { this.props.isLoading && this._renderLoadingComponent() } 
       </div>
     );
   }
@@ -93,13 +105,16 @@ class MainRoute extends React.Component {
 function mapStateToProps(state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
-    trackDimensions: selectors.getTrackDimensions(state)
+    trackDimensions: selectors.getTrackDimensions(state),
+    totalTasks: selectors.getTotalTasks(state),
+    finishedTasks: selectors.getFinishedTasks(state)
   };
 };
 
 const mapActionsToProps = {
-  fetchAll,
-  setTrakName
+  fetchInstances,
+  setTrakName,
+  resetSampleLoaderState
 };
 
 export default compose(
