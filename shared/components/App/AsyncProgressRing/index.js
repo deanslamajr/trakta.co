@@ -12,7 +12,7 @@ class ProgressRing extends React.Component {
 
   render() {
     const { radius, stroke, progress } = this.props;
-    const strokeDashoffset = this.circumference - progress * this.circumference;
+    const strokeDashoffset = this.circumference - progress * this.circumference || 0;
 
     return (
       <svg

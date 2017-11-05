@@ -206,6 +206,11 @@ class Staging extends React.Component {
     );
   }
 
+  componentWillUnmount() {
+    // this effectively disables the drawing of a staged sample rectangle in <SampleInstances />
+    this.props.setStagedSample({ duration: 0 });
+  }
+
   render () {
     const {
       startTime,

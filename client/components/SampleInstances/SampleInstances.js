@@ -85,7 +85,7 @@ const SampleInstances = ({ instances, trackDimensions, stagedSample }) => {
   );
 
   let stagedSampleRectangle;
-  if (stagedSample) {
+  if (stagedSample && stagedSample.duration) {
     const stagedSampleRectangleIngredients = {
       start_time: stagedSample.startTime,
       duration: stagedSample.duration,
