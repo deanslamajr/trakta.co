@@ -54,12 +54,19 @@ class MainRoute extends React.Component {
   }
 
   componentDidMount() {
-    // If we just created a new trak, the trakName will be
-    // in the response
+    console.log('this.props.instances')
+    console.dir(this.props.instances)
+    
     if (this.props.match.params.trakName) {
-      this.props.setTrakName(this.props.match.params.trakName);
+      // @todo handle the case where a non existant trakName is passed
+
+      // verify that we have updated the store to the correct trakName
+      if(this.props.trakName !== this.props.match.params.trakName) {
+        this.props.setTrakName(this.props.match.params.trakName);
+      }
       this.props.fetchInstances();
     }
+    // @case - url navigation without trakName in path
     else {
       // @todo
       // fetch a random track??
@@ -76,6 +83,8 @@ class MainRoute extends React.Component {
   }
 
   render() {
+    console.log('this.props.isLoading')
+    console.dir(this.props.isLoading)
     return (
       <div className={styles.container}>
         <Helmet>
@@ -107,7 +116,9 @@ function mapStateToProps(state, ownProps) {
     isLoading: selectors.isLoading(state),
     trackDimensions: selectors.getTrackDimensions(state),
     totalTasks: selectors.getTotalTasks(state),
-    finishedTasks: selectors.getFinishedTasks(state)
+    finishedTasks: selectors.getFinishedTasks(state),
+    instances: selectors.getInstances(state),
+    trakName: selectors.getTrakName(state)
   };
 };
 
