@@ -54,9 +54,6 @@ class MainRoute extends React.Component {
   }
 
   componentDidMount() {
-    console.log('this.props.instances')
-    console.dir(this.props.instances)
-    
     if (this.props.match.params.trakName) {
       // @todo handle the case where a non existant trakName is passed
 
@@ -83,8 +80,6 @@ class MainRoute extends React.Component {
   }
 
   render() {
-    console.log('this.props.isLoading')
-    console.dir(this.props.isLoading)
     return (
       <div className={styles.container}>
         <Helmet>
