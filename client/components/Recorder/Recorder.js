@@ -275,7 +275,7 @@ class Recorder extends React.Component {
   }
 
   _clickUseThisSelection() {
-    this.props.history.push(`${this.props.match.url}/staging`);
+    this.props.history.replace(`${this.props.match.url}/staging`);
   }
 
   _drawSample(buffer) {

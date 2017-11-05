@@ -15,7 +15,7 @@ const defaultState = {
 
 function recorder (state = defaultState, action) {
   if (action.type === RECORDER_STAGE_OBJECT_URL) {
-    return Object.assign({}, state, { objectUrl: action.objectUrl });
+    return Object.assign({}, state, { objectUrl: action.payload });
   }
   else if (action.type === RECORDER_SET_STAGED_SAMPLE) {
     return Object.assign({}, state,

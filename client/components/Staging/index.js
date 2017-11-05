@@ -14,7 +14,7 @@ import SampleInstances from '../SampleInstances';
 
 import * as selectors from '../../../shared/reducers';
 
-import { setStagedSample } from '../../../shared/actions/recorder';
+import { setStagedSample, setStagedObjectUrl } from '../../../shared/actions/recorder';
 import { reset as resetTrak, updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak';
 import { reset as resetSampleLoaderState } from '../../../shared/actions/samples';
 
@@ -118,7 +118,7 @@ class Staging extends React.Component {
         this.props.resetSampleLoaderState();
         this.props.resetTrak();
         
-        this.props.history.push(`/e/${trakName}`);
+        this.props.history.goBack();
       })
       .catch((err) => {
         // @todo log error
@@ -209,6 +209,7 @@ class Staging extends React.Component {
   componentWillUnmount() {
     // this effectively disables the drawing of a staged sample rectangle in <SampleInstances />
     this.props.setStagedSample({ duration: 0 });
+    this.props.setStagedObjectUrl(undefined)
   }
 
   render () {
@@ -284,7 +285,8 @@ const mapActionsToProps = {
   setStagedSample,
   updateTrackDimensionsWithAdditionalSample,
   resetSampleLoaderState,
-  resetTrak
+  resetTrak,
+  setStagedObjectUrl
 };
 
 function mapStateToProps(state) {
