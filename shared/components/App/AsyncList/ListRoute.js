@@ -56,7 +56,7 @@ class ListRoute extends React.Component {
     return (
       <div className={styles.container}>
         <Helmet>
-          <title>{'traktacos'}</title>
+          <title>{`traktacos - ${config('appTitle')}`}</title>
         </Helmet>
 
         <div className={styles.label}>

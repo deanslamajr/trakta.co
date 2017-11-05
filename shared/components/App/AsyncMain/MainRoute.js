@@ -80,10 +80,12 @@ class MainRoute extends React.Component {
   }
 
   render() {
+    const currentTrakName = this.props.trakName || '';
+
     return (
       <div className={styles.container}>
         <Helmet>
-          <title>{`${config('appTitle')}`}</title>
+          <title>{`${currentTrakName} - ${config('appTitle')}`}</title>
         </Helmet>
 
         <div className={styles.canvasContainer}>

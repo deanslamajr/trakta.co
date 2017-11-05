@@ -221,9 +221,6 @@ class Staging extends React.Component {
 
     return (
       <div>
-        <Helmet>
-          <title>{`staging - ${config('appTitle')}`}</title>
-        </Helmet>
         <form className={styles.container} onSubmit={this._saveRecording}>
           { 
             this.props.instances && this.props.instances.length
