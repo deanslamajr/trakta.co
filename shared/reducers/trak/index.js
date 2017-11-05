@@ -28,12 +28,14 @@ function trak (state = defaultState, action) {
     );
   }
   else if (action.type === TRAK_INSTANCES_FETCH_FULFILLED) {
-    const instances = action.payload;
-    const dimensions = calculateTrackDimensions(instances);
+    const newInstances = action.payload;
+    const dimensions = calculateTrackDimensions(newInstances);
 
-    return Object.assign({}, state,
+    const { instances, ...stateWithoutInstances } = state;
+
+    return Object.assign({}, stateWithoutInstances,
       { 
-        instances,
+        instances: newInstances,
         dimensions,
         error: null
       }

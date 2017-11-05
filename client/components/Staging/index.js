@@ -15,7 +15,7 @@ import SampleInstances from '../SampleInstances';
 import * as selectors from '../../../shared/reducers';
 
 import { setStagedSample } from '../../../shared/actions/recorder';
-import { updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak';
+import { reset as resetTrak, updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak';
 import { reset as resetSampleLoaderState } from '../../../shared/actions/samples';
 
 import styles from './staging.css'
@@ -115,7 +115,8 @@ class Staging extends React.Component {
           duration: 0
         });
 
-        this.props.resetSampleLoaderState()
+        this.props.resetSampleLoaderState();
+        this.props.resetTrak();
         
         this.props.history.push(`/e/${trakName}`);
       })
@@ -277,7 +278,8 @@ class Staging extends React.Component {
 const mapActionsToProps = {
   setStagedSample,
   updateTrackDimensionsWithAdditionalSample,
-  resetSampleLoaderState
+  resetSampleLoaderState,
+  resetTrak
 };
 
 function mapStateToProps(state) {
