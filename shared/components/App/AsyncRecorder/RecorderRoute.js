@@ -31,10 +31,12 @@ class RecorderRoute extends React.Component {
   }
 
   render() {
+    const currentTrakName = this.props.trakName || '';
+
     return (
       <div className={styles.container}>
         <Helmet>
-          <title>{`recorder - ${config('appTitle')}`}</title>
+          <title>{`${currentTrakName}::recorder - ${config('appTitle')}`}</title>
         </Helmet>
 
         {
@@ -66,7 +68,10 @@ class RecorderRoute extends React.Component {
 }
 
 function mapStateToProps(state) {
-  return { objectUrl: selectors.getStagedObjectUrl(state) }
+  return {
+    objectUrl: selectors.getStagedObjectUrl(state),
+    trakName: selectors.getTrakName(state)
+  }
 }
 
 export { RecorderRoute }
