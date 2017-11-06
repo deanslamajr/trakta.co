@@ -26,9 +26,6 @@ function createSampleTrakSampleInstance(queryStrings = [], s3ResourceName) {
       .then(newSample => {
         sample = newSample
 
-        console.log('queryStrings.trakName')
-        console.dir(queryStrings.trakName)
-
         let trakName = queryStrings.trakName;
 
         if (!trakName) {

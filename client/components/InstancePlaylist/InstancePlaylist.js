@@ -72,8 +72,9 @@ class InstancePlaylist extends React.Component {
     }
 
     // this debounce slows down invocation just enough so that redux store can be updated properly from form
-    this._debouncedDownloadAndArrangeSampleInstances = debounce(this._downloadAndArrangeSampleInstances.bind(this), 1000);
     this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this);
+    this._debouncedDownloadAndArrangeSampleInstances = debounce(this._downloadAndArrangeSampleInstances, 1000);
+
     this._loadBuffer = this._loadBuffer.bind(this);
   }
 

@@ -15,63 +15,6 @@ import Traks from '../../models/Traks';
 import ServerHTML from './ServerHTML';
 import App from '../../../shared/components/App';
 
-/**
- * React application middleware, supports server side rendering.
- */
-export default function reactApplicationMiddleware(request, response) {
-  // Ensure a nonce has been provided to us.
-  // See the server/middleware/security.js for more info.
-  if (typeof response.locals.nonce !== 'string') {
-    throw new Error('A "nonce" value has not been attached to the response');
-  }
-
-  // It's possible to disable SSR, which can be useful in development mode.
-  // In this case traditional client side only rendering will occur.
-  if (config('disableSSR')) {
-    if (process.env.BUILD_FLAG_IS_DEV === 'true') {
-      // eslint-disable-next-line no-console
-      console.log('==> Handling react route without SSR');
-    }
-
-    // SSR is disabled so we will return an "empty" html page and
-    // rely on the client to initialize and render the react application.
-    const html = renderToStaticMarkup(<ServerHTML nonce={nonce} />);
-    response.status(200).send(`<!DOCTYPE html>${html}`);
-    return;
-  }
-
-  /**
-   * Begin SSR of application
-   */
-  initializeReactApplication(request, response)
-
-  // if (request.url === '/editor/new') {
-  //   initializeReactApplication(request, response)
-  // }
-  // else {
-  //   Traks.findAll({})
-  //     .then(traks => {
-  //       console.log('after get all tracks, traks:')
-  //       console.dir(traks)
-  //       if (traks && traks.length) {
-  //         console.log('traks && traks.length')
-  //         // pick a random track from the list, fetch the associated sampleInstances
-  //         // initialize the redux store
-  //           // 1. the list of traks
-  //           // 2. the sampleInstances
-  //         return initializeReactApplication(request, response)
-  //       }
-  //       else {
-  //         console.log('traks.length is falsey')
-  //         // redirect to trakta.co/editor/new
-  //         response.status(302).setHeader('Location', '/editor/new')
-  //         response.end();
-  //         return;
-  //       }
-  //     });
-  // }
-}
-
 function initializeReactApplication(req, res) {
   const nonce = res.locals.nonce;
 
@@ -142,4 +85,35 @@ function initializeReactApplication(req, res) {
       )
       .send(`<!DOCTYPE html>${html}`);
     });
+}
+
+/**
+ * React application middleware, supports server side rendering.
+ */
+export default function reactApplicationMiddleware(request, response) {
+  // Ensure a nonce has been provided to us.
+  // See the server/middleware/security.js for more info.
+  if (typeof response.locals.nonce !== 'string') {
+    throw new Error('A "nonce" value has not been attached to the response');
+  }
+
+  // It's possible to disable SSR, which can be useful in development mode.
+  // In this case traditional client side only rendering will occur.
+  if (config('disableSSR')) {
+    if (process.env.BUILD_FLAG_IS_DEV === 'true') {
+      // eslint-disable-next-line no-console
+      console.log('==> Handling react route without SSR');
+    }
+
+    // SSR is disabled so we will return an "empty" html page and
+    // rely on the client to initialize and render the react application.
+    const html = renderToStaticMarkup(<ServerHTML nonce={nonce} />);
+    response.status(200).send(`<!DOCTYPE html>${html}`);
+    return;
+  }
+
+  /**
+   * Begin SSR of application
+   */
+  initializeReactApplication(request, response)
 }
