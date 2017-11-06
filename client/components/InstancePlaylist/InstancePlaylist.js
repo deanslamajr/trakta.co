@@ -165,6 +165,10 @@ class InstancePlaylist extends React.Component {
     this._downloadAndArrangeSampleInstances(this.props.instances);
   }
 
+  componentWillUnmount() {
+    Tone.Transport.stop()
+  }
+
   render () {
     if (this.state.error) {
       return this.props.renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
