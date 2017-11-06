@@ -1,6 +1,6 @@
 {
   "name": "trakta.co",
-  "version": "0.15.6",
+  "version": "0.16.0",
   "description": "Make a sound!",
   "main": "build/server/index.js",
   "engines": {
