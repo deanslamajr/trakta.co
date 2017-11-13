@@ -31,7 +31,7 @@
 			"type": "image\/png"
 		}
 	],
-	"theme_color": "#2b2b2b",
+	"theme_color": "#ffffff",
 	"background_color": "#ffffff",
 	"display": "standalone"
 }
