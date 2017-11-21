@@ -3,139 +3,63 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import viewportDimensions from 'viewport-dimensions';
-import Tone from 'tone';
-import lamejs from 'lamejs';
 import ReactAudioPlayer from 'react-audio-player';
 import WaveformData from 'waveform-data';
 
 import { setStagedObjectUrl, setStagedSample } from '../../../shared/actions/recorder';
 import * as selectors from '../../../shared/reducers';
 
+import SampleCreator from './SampleCreator';
+
 import styles from './Recorder.css'
 
-const resolution = 256;
-
-let dataBuffer;
-let audioBuffers;
-let blob;
-
-let mp3Encoder;
-
-function inititializeEncoder(sampleRate) {
-  mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
-  clearBuffers();
+function clearCanvas(ctx) {
+  requestAnimationFrame(() => {
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+    
+    ctx.beginPath();
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.closePath();
+  })
 }
-
-function clearBuffers() {
-  dataBuffer = [];
-  audioBuffers = [];
-}
-
-function encode(arrayBuffer, bufferSize) {
-  const samplesMono = convertBuffer(arrayBuffer);
-
-  let remaining = samplesMono.length;
-  for (let i = 0; remaining >= 0; i += bufferSize) {
-    const left = samplesMono.subarray(i, i + bufferSize);
-    const mp3buf = mp3Encoder.encodeBuffer(left);
-    appendToBuffer(mp3buf);
-    remaining -= bufferSize;
-  }
-}
-
-function generateMp3Blob() {
-  appendToBuffer(mp3Encoder.flush());
-  return new Blob(dataBuffer, { type: 'audio/mp3' });
-}
-
-function appendToBuffer(mp3Buf) {
-  dataBuffer.push(new Int8Array(mp3Buf));
-}
-
-function convertBuffer(arrayBuffer) {
-  // need to clone the incoming buffer otherwise we end up with 
-  // samples reflecting the sound coming from the microphone at the instant we stopped recording
-  const data = new Float32Array(arrayBuffer);
-  const output = new Int16Array(data.length);
-  
-  floatTo16BitPCM(data, output);
-  return output;
-}
-
-function floatTo16BitPCM(input, output) {
-  for (let i = 0; i < input.length; i++) {
-    const s = Math.max(-1, Math.min(1, input[i]));
-    // magic bit shuffling
-    output[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-  }
-}
-
-/**
- * Creates a new Uint8Array based on two different ArrayBuffers
- *
- * @param {ArrayBuffer} buffer1 The first buffer.
- * @param {ArrayBuffer} buffer2 The second buffer.
- * @return {ArrayBuffer} The new ArrayBuffer created out of the two.
- */
-function appendBuffer(buffer1, buffer2) {
-  var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
-  tmp.set(new Uint8Array(buffer1), 0);
-  tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
-  return tmp.buffer;
-};
-
 
 class Recorder extends React.Component {
   constructor(props) {
     super(props);
 
     this.prompts = {
-      START: this._renderInitializingRecorderPrompt.bind(this),
-      STOP: this._renderStopRecordingPrompt.bind(this),
-      FINISHED: this._renderFinishedRecordingPrompt.bind(this),
-      SAVE_PENDING: this._renderSaveRecordingPrompt.bind(this),
-      SAVE_ERROR: this._renderSaveErrorPrompt.bind(this),
-      USER_MEDIA_DENIED: this._renderUserMediaDenied.bind(this)
+      START: this._renderSTART.bind(this),
+      STOP: this._renderSTOP.bind(this),
+      FINISHED: this._renderFINISHED.bind(this),
+      USER_MEDIA_DENIED: this._renderUSER_MEDIA_DENIED.bind(this)
     };
 
     this.state = {
       isRecording: false,
       disableRecording: true,
       currentPrompt: this.prompts.START,
-      userMediaSupported: Tone.UserMedia.supported,
       drawWave: false,
       duration: undefined
     };
 
-    if (Tone.UserMedia.supported) {
-      this.userMedia = new Tone.UserMedia();
-
-      this.analyser = new Tone.Analyser({
-        type : 'waveform',
-        size : resolution
-      });
-
-      this.userMedia.connect(this.analyser);
+    try {
+      this.sampleCreator = new SampleCreator();
+    }
+    catch(error) {
+      // Tone.UserMedia is not supported
     }
 
-    this._renderStartRecordingPrompt = this._renderStartRecordingPrompt.bind(this);
     this._startRecording = this._startRecording.bind(this);
     this._stopRecording = this._stopRecording.bind(this);
-    this._openRecorderAndBeginDrawingWaves = this._openRecorderAndBeginDrawingWaves.bind(this);
+    this._beginDrawingWaves = this._beginDrawingWaves.bind(this);
     this._drawWave = this._drawWave.bind(this);
     this._drawSample = this._drawSample.bind(this);
-    this._combineBuffers = this._combineBuffers.bind(this);
     this._clickedRetry = this._clickedRetry.bind(this);
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this);
   }
 
-  _renderUserMediaDenied() {
-      return (
-        <div>Welp, you blew it!</div>
-      );
-  }
-
-  _openRecorderAndBeginDrawingWaves() {
+  _beginDrawingWaves() {
     this.canvasContext = this.canvas.getContext('2d'); 
 
     // @todo have these resize with window resize
@@ -161,7 +85,8 @@ class Recorder extends React.Component {
     }
 
     // draw the waveform
-    const values = this.analyser.analyse();
+    const values = this.sampleCreator.getValues()
+    //const values = this.analyser.analyse();
 
     this.canvasContext.beginPath();
     this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -191,91 +116,14 @@ class Recorder extends React.Component {
           this.canvasContext.lineJoin = 'round';
         }
       }
-      const val = values[i] / (resolution - 1);
+      const val = values[i] / (this.sampleCreator.resolution - 1);
       x = val * canvasWidth;
-      y = (i / (resolution - 1)) * canvasHeight;
+      y = (i / (this.sampleCreator.resolution - 1)) * canvasHeight;
       this.canvasContext.lineTo(x, y);
     }
 
     this.canvasContext.stroke();
     this.canvasContext.closePath();
-  }
-
-  _renderInitializingRecorderPrompt() {
-    return (
-      <div>
-        {
-          this.state.disableRecording
-            ? <div>Waiting on encoder to initialize</div>
-            : this._renderStartRecordingPrompt()
-        }
-      </div>
-    );
-  }
-
-  _renderStartRecordingPrompt() {
-    return (
-      <div className={styles.blueMask} onClick={this._startRecording} >
-        <div className={styles.label}>
-          tap to BEGIN recording
-        </div>
-      </div>
-    );
-  }
-
-  _renderStopRecordingPrompt() {
-    return (
-      <div className={styles.redMask} onClick={this._stopRecording}>
-        <div className={styles.label}>
-          tap to END recording
-        </div>
-      </div>
-    );
-  }
-
-  _combineBuffers() {
-    let combinedArrayBuffer = audioBuffers[0];
-    for(let i = 1; i < audioBuffers.length; i++) {
-      combinedArrayBuffer = appendBuffer(combinedArrayBuffer, audioBuffers[i])
-    }
-    return combinedArrayBuffer;
-  }
-
-  _clickedRetry() {
-    clearBuffers();
-
-    this.setState(
-      { 
-        currentPrompt: this.prompts.START,
-        drawWave: true 
-      }, 
-      () => this._drawWave())
-  }
-
-  _renderFinishedRecordingPrompt() {
-    return (
-      <div>
-        <div className={styles.label}>
-          <div className={styles.subsetSelector}>Selector</div>
-          <div className={styles.retryButton} onClick={this._clickedRetry}>Do another recording</div>
-          {
-            this.props.objectUrl && 
-            (
-              <div>
-                <div className={styles.playButton}>
-                  <ReactAudioPlayer src={this.props.objectUrl} controls />
-                </div>
-                <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
-              </div>
-            )
-          }
-        </div>
-      </div>
-    );
-  }
-
-  _clickUseThisSelection() {
-    this.props.history.replace(`${this.props.match.url}/staging`);
   }
 
   _drawSample(buffer) {
@@ -307,30 +155,64 @@ class Recorder extends React.Component {
     ctx.stroke();
   }
 
-  _renderSaveRecordingPrompt() {
-    return <div> saving recording... </div>;
-  }
-
-  _renderSaveErrorPrompt() {
-    return <div>Ice Cream melted :(</div>;
+  _renderSTART() {
+    return (
+      <div>
+        {
+          this.state.disableRecording
+            ? <div>Waiting on encoder to initialize</div>
+            : (
+                <div className={styles.blueMask} onClick={this._startRecording} >
+                  <div className={styles.label}>
+                    tap to BEGIN recording
+                  </div>
+                </div>
+              )
+        }
+      </div>
+    );
   }
 
   _startRecording() {
-    if (this.processor) {
-      this.userMedia.connect(this.processor);
-      // if the ScriptProcessorNode is not connected to an output the "onaudioprocess" event is not triggered in chrome
-      this.processor.connect(this.userMedia.context._context.destination);
+    this.sampleCreator.startRecording()
 
-      this.setState({ 
-        recordingStartTime: Date.now(),
-        isRecording: true,
-        currentPrompt: this.prompts.STOP
-      });
-    }
-    else {
-      // @todo log and metric
-      console.error('this.processor has not been initialized!');
-    }
+    this.setState({ 
+      recordingStartTime: Date.now(),
+      isRecording: true,
+      currentPrompt: this.prompts.STOP
+    });
+  }
+
+  _renderSTOP() {
+    return (
+      <div className={styles.redMask} onClick={this._stopRecording}>
+        <div className={styles.label}>
+          tap to END recording
+        </div>
+      </div>
+    );
+  }
+
+  _renderFINISHED() {
+    return (
+      <div>
+        <div className={styles.label}>
+          <div className={styles.subsetSelector}>Selector</div>
+          <div className={styles.retryButton} onClick={this._clickedRetry}>Do another recording</div>
+          {
+            this.props.objectUrl && 
+            (
+              <div>
+                <div className={styles.playButton}>
+                  <ReactAudioPlayer src={this.props.objectUrl} controls />
+                </div>
+                <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
+              </div>
+            )
+          }
+        </div>
+      </div>
+    );
   }
 
   _stopRecording() {
@@ -340,33 +222,11 @@ class Recorder extends React.Component {
       drawWave: false
     });
 
-    // clear canvas
-    requestAnimationFrame(() => {
-      const ctx = this.canvasContext;
+    clearCanvas(this.canvasContext);
 
-      const canvasWidth = ctx.canvas.width;
-      const canvasHeight = ctx.canvas.height;
-      
-      ctx.beginPath();
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-      ctx.closePath();
-    })
+    this.sampleCreator.stopAndFinishRecording();
 
-    // recorder cleanup
-    this.processor.disconnect();
-    
-    // combine audioBuffers
-    const summedBuffer = this._combineBuffers();
-    
-    // draw wave
-    // const curriedDrawSample = this._drawSample.bind(this, summedBuffer);
-    // requestAnimationFrame(curriedDrawSample);
-
-    // encode mp3
-    encode(summedBuffer, this.bufferSize); 
-    blob = generateMp3Blob();
-
-    const objectUrl = window.URL.createObjectURL(blob);
+    const objectUrl = this.sampleCreator.createBlobObjectUrl();
 
     this.props.setStagedSample({
       startTime: 0,
@@ -377,33 +237,33 @@ class Recorder extends React.Component {
     this.props.setStagedObjectUrl(objectUrl);
   }
 
+  _clickedRetry() {
+    this.sampleCreator.resetRecorder();
+
+    this.setState(
+      { 
+        currentPrompt: this.prompts.START,
+        drawWave: true 
+      }, 
+      () => this._drawWave())
+  }
+
+  _clickUseThisSelection() {
+    this.props.history.replace(`${this.props.match.url}/staging`);
+  }
+
+  _renderUSER_MEDIA_DENIED() {
+    return (
+      <div>Welp, you blew it!</div>
+    );
+  }
+
   componentDidMount() {
-    // opening the input asks the user to activate their mic
-    this.userMedia.open()
+    this.sampleCreator.openMic()
       .then(() => {
-        // save a reference to the AudioContext
-        const context = this.userMedia.context._context;
-
-        inititializeEncoder(context.sampleRate)
-
-        // a bufferSize of 0 instructs the browser to choose the best bufferSize
-        this.processor = context.createScriptProcessor(0, 1, 1);
-        this.bufferSize = this.processor.bufferSize;
-
-        this.processor.onaudioprocess = (event) => {
-          const float32Array = event.inputBuffer.getChannelData(0); 
-          const arrayBuffer = float32Array.buffer.slice();
-
-          audioBuffers.push(arrayBuffer);
-        };
-
-        // @todo tweak this for best performance
-        // @see{https://tonejs.github.io/docs/#Context}
-        // this.userMedia.context.latencyHint = 'balanced';
-        
         // overlay 'start recording' mask
         this.setState({ disableRecording: false });
-        this._openRecorderAndBeginDrawingWaves();
+        this._beginDrawingWaves();
       })
       .catch(err => {
         console.error(err);
@@ -425,16 +285,10 @@ class Recorder extends React.Component {
       // @todo replace with imported css
       <div>
         { 
-          this.state.userMediaSupported 
+          this.sampleCreator
             ? (
               <div>
                 {this.state.currentPrompt()}
-                <canvas 
-                  className={styles.container}
-                  width={width} 
-                  height={height}
-                  ref={(canvas) => { this.canvas = canvas; }}
-                />
               </div>
             )
             : (
@@ -447,6 +301,13 @@ class Recorder extends React.Component {
               </div>
             )
         }
+
+        <canvas 
+          className={styles.container}
+          width={width} 
+          height={height}
+          ref={(canvas) => { this.canvas = canvas; }}
+        />
       </div>
     );
   }
