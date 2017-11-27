@@ -9,7 +9,7 @@ import WaveformData from 'waveform-data';
 import { setStagedObjectUrl, setStagedSample } from '../../../shared/actions/recorder';
 import * as selectors from '../../../shared/reducers';
 
-import SampleCreator from './SampleCreator';
+import { getSampleCreator } from './SampleCreator';
 
 import styles from './Recorder.css'
 
@@ -31,7 +31,6 @@ class Recorder extends React.Component {
     this.prompts = {
       START: this._renderSTART.bind(this),
       STOP: this._renderSTOP.bind(this),
-      FINISHED: this._renderFINISHED.bind(this),
       USER_MEDIA_DENIED: this._renderUSER_MEDIA_DENIED.bind(this)
     };
 
@@ -44,10 +43,11 @@ class Recorder extends React.Component {
     };
 
     try {
-      this.sampleCreator = new SampleCreator();
+      this.sampleCreator = getSampleCreator();
     }
     catch(error) {
       // Tone.UserMedia is not supported
+      // @todo catch this earlier
     }
 
     this._startRecording = this._startRecording.bind(this);
@@ -56,7 +56,6 @@ class Recorder extends React.Component {
     this._drawWave = this._drawWave.bind(this);
     this._drawSample = this._drawSample.bind(this);
     this._clickedRetry = this._clickedRetry.bind(this);
-    this._clickUseThisSelection = this._clickUseThisSelection.bind(this);
   }
 
   _beginDrawingWaves() {
@@ -193,31 +192,12 @@ class Recorder extends React.Component {
     );
   }
 
-  _renderFINISHED() {
-    return (
-      <div>
-        <div className={styles.label}>
-          <div className={styles.subsetSelector}>Selector</div>
-          <div className={styles.retryButton} onClick={this._clickedRetry}>Do another recording</div>
-          {
-            this.props.objectUrl && 
-            (
-              <div>
-                <div className={styles.playButton}>
-                  <ReactAudioPlayer src={this.props.objectUrl} controls />
-                </div>
-                <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
-              </div>
-            )
-          }
-        </div>
-      </div>
-    );
+  _navigateToCleanup() {
+    this.props.history.push(`${this.props.match.url}/cleanup`);
   }
 
   _stopRecording() {
     this.setState({ 
-      currentPrompt: this.prompts.FINISHED,
       isRecording: false,
       drawWave: false
     });
@@ -225,7 +205,6 @@ class Recorder extends React.Component {
     clearCanvas(this.canvasContext);
 
     this.sampleCreator.stopAndFinishRecording();
-
     const objectUrl = this.sampleCreator.createBlobObjectUrl();
 
     this.props.setStagedSample({
@@ -235,6 +214,8 @@ class Recorder extends React.Component {
       duration: 0
     });
     this.props.setStagedObjectUrl(objectUrl);
+
+    this._navigateToCleanup()
   }
 
   _clickedRetry() {
@@ -246,10 +227,6 @@ class Recorder extends React.Component {
         drawWave: true 
       }, 
       () => this._drawWave())
-  }
-
-  _clickUseThisSelection() {
-    this.props.history.replace(`${this.props.match.url}/staging`);
   }
 
   _renderUSER_MEDIA_DENIED() {

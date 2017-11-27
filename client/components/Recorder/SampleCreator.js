@@ -4,6 +4,7 @@ import lamejs from 'lamejs';
 /**
  * Private
  */
+let sampleCreator
 let userMedia;
 let analyser;
 let mp3Encoder;
@@ -11,6 +12,7 @@ let dataBuffer;
 let audioBuffers;
 let processor;
 let bufferSize;
+let summedBuffer;
 let blob;
 
 function inititializeEncoder (sampleRate) {
@@ -52,16 +54,17 @@ function appendBuffer(buffer1, buffer2) {
   return tmp.buffer;
 };
 
-function encode(arrayBuffer, bufferSize) {
+function encode(arrayBuffer) {
   const samplesMono = convertBuffer(arrayBuffer);
 
   let remaining = samplesMono.length;
-  for (let i = 0; remaining >= 0; i += bufferSize) {
-    const left = samplesMono.subarray(i, i + bufferSize);
+  for (let i = 0; remaining >= 0; i++) {
+    const left = samplesMono.subarray(i, i + 1);
     const mp3buf = mp3Encoder.encodeBuffer(left);
-    appendToBuffer(mp3buf);
-    remaining -= bufferSize;
+    appendToDataBuffer(mp3buf);
+    remaining--;
   }
+  appendToDataBuffer(mp3Encoder.flush());
 }
 
 function convertBuffer(arrayBuffer) {
@@ -82,13 +85,25 @@ function floatTo16BitPCM(input, output) {
   }
 }
 
-function appendToBuffer(mp3Buf) {
+function appendToDataBuffer(mp3Buf) {
   dataBuffer.push(new Int8Array(mp3Buf));
 }
 
-function generateMp3Blob() {
-  appendToBuffer(mp3Encoder.flush());
-  return new Blob(dataBuffer, { type: 'audio/mp3' });
+function generateMp3Blob(startOfSplice, endOfSplice) {
+  let start = Number(startOfSplice);
+  let end = Number(endOfSplice);
+
+  if (!start || start < 0 || start > dataBuffer.length) {
+    start = 0;
+  }
+  if (!end || end < 0 || end > dataBuffer.length || end < start) {
+    end = dataBuffer.length;
+  }
+
+  let bufferToBlob = Array.from(dataBuffer);
+  bufferToBlob = bufferToBlob.slice(start, end + 1)
+
+  return new Blob(bufferToBlob, { type: 'audio/mp3' });
 }
 
 /**
@@ -109,8 +124,13 @@ export default class SampleCreator {
       userMedia.connect(analyser);
     }
     else {
+      // @todo do this better
       throw new Error('Tone.UserMedia is not supported')
     }
+  }
+
+  getDataBufferLength () {
+    return dataBuffer.length
   }
 
   openMic () {
@@ -146,20 +166,39 @@ export default class SampleCreator {
   stopAndFinishRecording () {
     // recorder cleanup
     processor.disconnect();
-    
-    // combine audioBuffers
-    const summedBuffer = combineBuffers();
 
+    // combine audioBuffers
+    summedBuffer = combineBuffers();
+    
     // encode mp3
-    encode(summedBuffer, bufferSize); 
-    blob = generateMp3Blob();
+    encode(summedBuffer);
+
+    // create blob and return the size of the recording
+    this.createBlob()
   }
 
   createBlobObjectUrl () {
     return window.URL.createObjectURL(blob);
   }
 
+  createBlob (start, stop) {
+    blob = generateMp3Blob(start, stop);
+  }
+
   getValues () {
     return analyser.analyse();
   }
+}
+
+function createSampleCreator () {
+  sampleCreator = new SampleCreator();
+  return sampleCreator;
+}
+
+export function getSampleCreator () {
+  if (!sampleCreator) {
+    createSampleCreator();
+  }
+
+  return sampleCreator;
 }

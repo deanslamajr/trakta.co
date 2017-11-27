@@ -11,6 +11,7 @@ import config from '../../../../config';
 
 import Recorder from '../../../../client/components/Recorder';
 import Staging from './AsyncStaging';
+import Cleanup from './AsyncCleanup';
 
 import * as selectors from '../../../reducers';
 
@@ -50,7 +51,12 @@ class RecorderRoute extends React.Component {
 
                 { // If a recording does not exist, we shouldn't be able to route to /staging
                   this.props.objectUrl
-                    ? <Route path={`${this.props.match.url}/staging`} component={Staging} />
+                    ? (
+                      [
+                        <Route key={1} path={`${this.props.match.url}/staging`} component={Staging} />,
+                        <Route key={2} path={`${this.props.match.url}/cleanup`} component={Cleanup} />
+                      ]
+                    )
                     : <Redirect to={{ pathname: `${this.props.match.url}` }}/>
                 }
               </Switch>
