@@ -29,6 +29,7 @@ class ListRoute extends React.Component {
   _renderListItem(trak) {
     return (
       <div
+        className={classnames(styles.card, styles.trak)}
         key={trak.id}
         onClick={this._navigateToTrak.bind(this, trak.name)}>
         { trak.name }
@@ -40,6 +41,7 @@ class ListRoute extends React.Component {
     return (
       <div
         key='new-trak-item'
+        className={classnames(styles.card, styles.new)}
         onClick={() => this.props.history.push(`/new`)}>
         New Trak
       </div>

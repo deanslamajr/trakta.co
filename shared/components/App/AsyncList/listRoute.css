@@ -4,17 +4,41 @@
   position: inherit;
 }
 
+.card {
+  padding: 1.25rem;
+  border-radius: 2px;
+  box-shadow: 0 4px 4px 0 white;
+  display: flex;
+  justify-content: center;
+  background-color: #F8F2E7;
+  margin: 0.5rem;
+  border-color: #696969;
+  border-width: .1rem;
+  border-style: solid;
+  color: #696969;
+  cursor: pointer;
+}
+
+.new {
+  width: 95%;
+}
+
+.trak {
+  width: 45%;
+  font-size: 2.5rem;
+}
+
 .label {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   justify-content: space-around;
   top: 0;
   bottom: 0;
-  width: 100%;
   text-align: center;
   font-size: 3.5rem;
   color: var(--black);
   user-select: none;
+  margin: 0 auto;
 }
 
 .button {
