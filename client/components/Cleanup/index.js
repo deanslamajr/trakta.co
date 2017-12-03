@@ -3,6 +3,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import ReactAudioPlayer from 'react-audio-player';
+import debounce from 'debounce';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedObjectUrl } from '../../../shared/actions/recorder';
@@ -26,6 +27,7 @@ class Cleanup extends React.Component {
     catch(error) {
       // Tone.UserMedia is not supported
       // @todo catch this earlier
+      console.error(error)
     }
 
     this.state = {
@@ -33,8 +35,8 @@ class Cleanup extends React.Component {
       clipEnd: this.sampleCreator.getDataBufferLength()
     }
 
-    this._clickedRetry = this._clickedRetry.bind(this);
-    this._clickUseThisSelection = this._clickUseThisSelection.bind(this);
+    this._renderSample = this._renderSample.bind(this);
+    this.debouncedRenderSample = debounce(this._renderSample, 1000);
   }
 
   _clickedRetry () {
@@ -80,13 +82,17 @@ class Cleanup extends React.Component {
     )
   }
 
+  _renderSample(start, stop) {
+    this.sampleCreator.createBlob(start, stop)
+
+    const objectUrl = this.sampleCreator.createBlobObjectUrl();
+
+    this.props.setStagedObjectUrl(objectUrl);
+  }
+
   componentWillUpdate(nextProps, nextState) {
     if (this.state.clipStart != nextState.clipStart || this.state.clipEnd != nextState.clipEnd) {
-      this.sampleCreator.createBlob(nextState.clipStart, nextState.clipEnd)
-
-      const objectUrl = this.sampleCreator.createBlobObjectUrl();
-
-      this.props.setStagedObjectUrl(objectUrl);
+      this.debouncedRenderSample(nextState.clipStart, nextState.clipEnd);
     }
   }
 
