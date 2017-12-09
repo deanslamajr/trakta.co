@@ -14,6 +14,8 @@ let processor;
 let bufferSize;
 let summedBuffer;
 let blob;
+let reducedSet;
+let drawSet;
 
 function inititializeEncoder (sampleRate) {
   mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
@@ -23,6 +25,7 @@ function inititializeEncoder (sampleRate) {
 function clearBuffers () {
   dataBuffer = [];
   audioBuffers = [];
+  drawSet = [];
 }
 
 function processAudioEvent (event) {
@@ -103,7 +106,25 @@ function generateMp3Blob(startOfSplice, endOfSplice) {
   let bufferToBlob = Array.from(dataBuffer);
   bufferToBlob = bufferToBlob.slice(start, end + 1)
 
+  const dataView = new Int8Array(dataBuffer[100])
+
   return new Blob(bufferToBlob, { type: 'audio/mp3' });
+}
+
+function generateRandomIndex(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+function generateWaveForm() {
+  reducedSet = [];
+  const SAMPLING_PERIOD = 200;
+
+  for (let index = SAMPLING_PERIOD; index < drawSet.length; index += SAMPLING_PERIOD) {
+    const randomIndex = generateRandomIndex(index-SAMPLING_PERIOD, index)
+    reducedSet.push(drawSet[randomIndex])
+  }
 }
 
 /**
@@ -127,6 +148,14 @@ export default class SampleCreator {
       // @todo do this better
       throw new Error('Tone.UserMedia is not supported')
     }
+  }
+
+  addRawDataToDrawSet (aNumber) {
+    drawSet.push(aNumber)
+  }
+
+  getReducedSet () {
+    return reducedSet;
   }
 
   getDataBufferLength () {
@@ -169,6 +198,8 @@ export default class SampleCreator {
 
     // combine audioBuffers
     summedBuffer = combineBuffers();
+
+    generateWaveForm();
     
     // encode mp3
     encode(summedBuffer);

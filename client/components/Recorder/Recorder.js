@@ -85,7 +85,6 @@ class Recorder extends React.Component {
 
     // draw the waveform
     const values = this.sampleCreator.getValues()
-    //const values = this.analyser.analyse();
 
     this.canvasContext.beginPath();
     this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -101,6 +100,12 @@ class Recorder extends React.Component {
     this.canvasContext.moveTo((values[0] / 255) * canvasWidth, canvasHeight);
 
     const now = Date.now();
+
+    if(this.state.isRecording) {
+      for (let i = 0; i < values.length; i++){
+          this.sampleCreator.addRawDataToDrawSet(values[i])
+      }
+    }
     
     for (let i = values.length; i > 0; i--){
       if(this.state.isRecording) {
