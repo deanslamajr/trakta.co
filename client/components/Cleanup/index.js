@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import ReactAudioPlayer from 'react-audio-player';
 import debounce from 'debounce';
-import viewportDimensions from 'viewport-dimensions';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedObjectUrl } from '../../../shared/actions/recorder';
@@ -96,16 +95,14 @@ class Cleanup extends React.Component {
     const canvasHeight = this.canvasContext.canvas.height;
 
     let x;
-    let y;
 
     // draw the waveform
-    const values = this.sampleCreator.getReducedSet()
-    //const values = this.analyser.analyse();
+    const values = this.sampleCreator.getReducedSet(this.state.canvasHeight)
 
     this.canvasContext.beginPath();
     this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
     this.canvasContext.lineJoin = 'round';
-    this.canvasContext.lineWidth = 2;
+    this.canvasContext.lineWidth = 1;
     this.canvasContext.strokeStyle = '#CCCCCC';
 
     this.canvasContext.moveTo((values[0] / 255) * canvasWidth, canvasHeight);
@@ -113,8 +110,7 @@ class Cleanup extends React.Component {
     for (let i = values.length; i > 0; i--){
       const val = values[i]/ (this.sampleCreator.resolution - 1);
       x = val * canvasWidth;
-      y = (i / (this.sampleCreator.resolution - 1)) * canvasHeight;
-      this.canvasContext.lineTo(x, y);
+      this.canvasContext.lineTo(x, i);
     }
 
     this.canvasContext.stroke();
@@ -128,25 +124,30 @@ class Cleanup extends React.Component {
   }
 
   componentDidMount() {
-    this.canvasContext = this.canvas.getContext('2d'); 
+    const height = this.container
+        ? this.container.parentNode.clientHeight
+        : 0;
+    const width = this.container
+        ? this.container.parentNode.clientWidth
+        : 0;
 
-    // @todo have these resize with window resize
-    this.canvasContext.canvas.width = this.canvas.width;
-    this.canvasContext.canvas.height = this.canvas.height;
+    this.setState({
+      canvasWidth: width,
+      canvasHeight: height
+    }, () => {
+      this.canvasContext = this.canvas.getContext('2d');
 
-    this._drawWaveForm();
+      // @todo have these resize with window resize
+      this.canvasContext.canvas.width = this.state.canvasWidth;
+      this.canvasContext.canvas.height = this.state.canvasHeight;
+
+      this._drawWaveForm();
+    })
   }
 
   render() {
-    const width = viewportDimensions 
-      ? viewportDimensions.width() && viewportDimensions.width() - 5
-      : 300;
-    const height = viewportDimensions
-      ? viewportDimensions.height() && viewportDimensions.height() - 5
-      : 300;
-
     return (
-      <div>
+      <div ref={(container) => { this.container = container; }}>
         <div className={styles.label}>
           {/* <div className={styles.retryButton} onClick={this._clickedRetry}>Try another recording</div> */}
           {
@@ -160,8 +161,8 @@ class Cleanup extends React.Component {
                 <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
                 <canvas 
                   className={styles.canvas}
-                  width={width} 
-                  height={height}
+                  width={ this.state.canvasWidth || 0} 
+                  height= { this.state.canvasHeight || 0} 
                   ref={(canvas) => { this.canvas = canvas; }}
                 />
               </div>

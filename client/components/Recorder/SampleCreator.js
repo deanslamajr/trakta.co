@@ -117,12 +117,11 @@ function generateRandomIndex(min, max) {
   return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
-function generateWaveForm() {
+function generateWaveForm(samplingPeriod) {
   reducedSet = [];
-  const SAMPLING_PERIOD = 200;
 
-  for (let index = SAMPLING_PERIOD; index < drawSet.length; index += SAMPLING_PERIOD) {
-    const randomIndex = generateRandomIndex(index-SAMPLING_PERIOD, index)
+  for (let index = samplingPeriod; index < drawSet.length; index += samplingPeriod) {
+    const randomIndex = generateRandomIndex(index - samplingPeriod, index)
     reducedSet.push(drawSet[randomIndex])
   }
 }
@@ -154,7 +153,9 @@ export default class SampleCreator {
     drawSet.push(aNumber)
   }
 
-  getReducedSet () {
+  getReducedSet (canvasHeight) {
+    const samplingPeriod = drawSet.length / canvasHeight
+    generateWaveForm(samplingPeriod);
     return reducedSet;
   }
 
@@ -198,8 +199,6 @@ export default class SampleCreator {
 
     // combine audioBuffers
     summedBuffer = combineBuffers();
-
-    generateWaveForm();
     
     // encode mp3
     encode(summedBuffer);

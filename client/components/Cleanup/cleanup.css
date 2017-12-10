@@ -1,3 +1,5 @@
+@import "../../../shared/constants.css";
+
 .label {
   position: absolute;
   top: 20%;
@@ -10,7 +12,7 @@
 
 .canvas {
   position: fixed;
-  top: 0;
+  top: var(--bottomOfTopNav);
   left: 0;
   animation: fadein .5s;
   z-index: -1;

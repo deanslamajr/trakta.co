@@ -2,7 +2,6 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import viewportDimensions from 'viewport-dimensions';
 import ReactAudioPlayer from 'react-audio-player';
 import WaveformData from 'waveform-data';
 
@@ -241,31 +240,42 @@ class Recorder extends React.Component {
   }
 
   componentDidMount() {
-    this.sampleCreator.openMic()
-      .then(() => {
-        // overlay 'start recording' mask
-        this.setState({ disableRecording: false });
-        this._beginDrawingWaves();
-      })
-      .catch(err => {
-        console.error(err);
-        // @todo log and metric
-        this.setState({ currentPrompt: this.prompts.USER_MEDIA_DENIED });
-      });
+    const height = this.container
+        ? this.container.parentNode.clientHeight
+        : 0;
+    const width = this.container
+        ? this.container.parentNode.clientWidth
+        : 0;
+
+    this.setState({
+      canvasWidth: width,
+      canvasHeight: height
+    }, () => {
+      this.sampleCreator.openMic()
+        .then(() => {
+          // overlay 'start recording' mask
+          this.setState({ disableRecording: false });
+          this._beginDrawingWaves();
+        })
+        .catch(err => {
+          console.error(err);
+          // @todo log and metric
+          this.setState({ currentPrompt: this.prompts.USER_MEDIA_DENIED });
+        });
+    });
   }
 
   render() {
-    // "- 5" to keep canvas within viewport i.e. no scrollbars
-    const width = viewportDimensions 
-      ? viewportDimensions.width() && viewportDimensions.width() - 5
-      : 300;
-    const height = viewportDimensions
-      ? viewportDimensions.height() && viewportDimensions.height() - 5
-      : 300;
+    const height = this.container
+        ? this.container.parentNode.clientHeight
+        : 0;
+    const width = this.container
+        ? this.container.parentNode.clientWidth
+        : 0;
 
     return (
       // @todo replace with imported css
-      <div>
+      <div ref={(container) => { this.container = container; }}>
         { 
           this.sampleCreator
             ? (
@@ -286,8 +296,8 @@ class Recorder extends React.Component {
 
         <canvas 
           className={styles.container}
-          width={width} 
-          height={height}
+          width={ this.state.canvasWidth || 0} 
+          height= { this.state.canvasHeight || 0}
           ref={(canvas) => { this.canvas = canvas; }}
         />
       </div>

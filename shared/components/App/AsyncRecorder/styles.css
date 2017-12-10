@@ -1,7 +1,12 @@
 @import "../../../colors.css";
+@import "../../../constants.css";
 
 .container {
   text-align: center;
+  position: fixed;
+  top: var(--bottomOfTopNav);
+  width: 100%;
+  bottom: 0;
 }
 
 .loading-message {
