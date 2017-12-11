@@ -179,11 +179,11 @@ class Cleanup extends React.Component {
                 {/* <div className={styles.playButton}>
                   <ReactAudioPlayer src={this.props.objectUrl} controls />
                 </div> */}
-                <div onClick={playArrangement}>
+                <div className={styles.playButton} onClick={playArrangement}>
                   PLAY
                 </div>
-                {this._renderClippingInputs()}
-                <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>
+                {/* {this._renderClippingInputs()}
+                <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div> */}
                 <canvas 
                   className={styles.canvas}
                   width={ this.state.canvasWidth || 0} 
