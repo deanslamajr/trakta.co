@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import ReactAudioPlayer from 'react-audio-player';
 import debounce from 'debounce';
+import Tone from 'tone';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedObjectUrl } from '../../../shared/actions/recorder';
@@ -12,9 +13,21 @@ import { getSampleCreator } from '../Recorder/SampleCreator';
 
 import styles from './cleanup.css'
 
+let samplePlayer
+
 function getRootPath (fullPath) {
   const pathTokens = fullPath.split('/');
   return pathTokens[1] || ''
+}
+
+function playArrangement() {
+  console.log('clicked!')
+  if (Tone.Transport.state === 'started') {
+    Tone.Transport.stop()
+  }
+  else {
+    Tone.Transport.start();
+  }
 }
 
 class Cleanup extends React.Component {
@@ -87,6 +100,14 @@ class Cleanup extends React.Component {
 
     const objectUrl = this.sampleCreator.createBlobObjectUrl();
 
+    this.sampleCreator.createBuffer(objectUrl)
+      .then(buffer => {
+        samplePlayer = new Tone.Player(buffer);
+        samplePlayer.loop = true;
+        samplePlayer.toMaster().sync().start(0);
+        console.log('samplePlayer is ready')
+      })
+
     this.props.setStagedObjectUrl(objectUrl);
   }
 
@@ -142,6 +163,7 @@ class Cleanup extends React.Component {
       this.canvasContext.canvas.height = this.state.canvasHeight;
 
       this._drawWaveForm();
+      this._renderSample();
     })
   }
 
@@ -154,8 +176,11 @@ class Cleanup extends React.Component {
             this.props.objectUrl && 
             (
               <div>
-                <div className={styles.playButton}>
+                {/* <div className={styles.playButton}>
                   <ReactAudioPlayer src={this.props.objectUrl} controls />
+                </div> */}
+                <div onClick={playArrangement}>
+                  PLAY
                 </div>
                 {this._renderClippingInputs()}
                 <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div>

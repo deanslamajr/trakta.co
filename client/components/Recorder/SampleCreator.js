@@ -211,6 +211,25 @@ export default class SampleCreator {
     return window.URL.createObjectURL(blob);
   }
 
+  createBuffer (objectUrl) {
+    return new Promise((resolve, reject) => {
+      new Tone.Buffer(objectUrl,
+        // success
+        buffer => {
+          console.log('buffer??')
+          console.dir(buffer)
+          resolve(buffer)
+        },
+        // error
+        // @todo log, set error view state (w/ try again functionality)
+        error => {
+          console.error(error);
+          reject(error)
+        }
+      )
+    })
+  }
+
   createBlob (start, stop) {
     blob = generateMp3Blob(start, stop);
   }
