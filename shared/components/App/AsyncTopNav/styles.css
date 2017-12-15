@@ -7,6 +7,6 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  background-color: white;
+  background-color: rgba(0, 0, 0, 0.2);
   height: var(--bottomOfTopNav)
 }

@@ -1,4 +1,4 @@
-@import "../../../shared/constants.css";
+@import "../../../shared/colors.css";
 
 .label {
   position: absolute;
@@ -12,17 +12,37 @@
 
 .canvas {
   position: fixed;
-  top: var(--bottomOfTopNav);
+  top: 0;
   left: 0;
   animation: fadein .5s;
   z-index: -1;
+  left: 15%;
+  right: 15%;
 }
 
 .play-button {
   height: 100%;
   position: fixed;
-  top: 7%;
-  left: 20%;
-  right: 20%;
+  left: 15%;
+  right: 15%;
   background: rgba(1,1,1,.05);
+  height: 5rem;
+}
+
+.slider-left {
+  height: 100%;
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 80%;
+}
+
+.slider-right {
+  height: 100%;
+  position: fixed !important;
+  top: 0;
+  right: 0;
+  left: 80%;
+  display: flex;
+  justify-content: flex-end;
 }

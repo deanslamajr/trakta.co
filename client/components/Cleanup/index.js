@@ -2,9 +2,9 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import ReactAudioPlayer from 'react-audio-player';
 import debounce from 'debounce';
 import Tone from 'tone';
+import ReactSlider from 'react-slider';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedObjectUrl } from '../../../shared/actions/recorder';
@@ -21,7 +21,6 @@ function getRootPath (fullPath) {
 }
 
 function playArrangement() {
-  console.log('clicked!')
   if (Tone.Transport.state === 'started') {
     Tone.Transport.stop()
   }
@@ -48,14 +47,13 @@ class Cleanup extends React.Component {
       clipEnd: this.sampleCreator.getDataBufferLength()
     }
 
+    this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
+    this._onLeftSliderFinish = this._onLeftSliderFinish.bind(this)
+    this._onRightSliderChange = this._onRightSliderChange.bind(this)
+    this._onRightSliderFinish = this._onRightSliderFinish.bind(this)
+
     this._renderSample = this._renderSample.bind(this);
     this.debouncedRenderSample = debounce(this._renderSample, 1000);
-  }
-
-  _clickedRetry () {
-    const rootPath = getRootPath(this.props.match.path);
-
-    this.props.history.goBack();
   }
 
   _clickUseThisSelection () {
@@ -63,36 +61,14 @@ class Cleanup extends React.Component {
 
     this.props.history.push(`/${rootPath}/staging`);
   }
+
+  _updateState (type, value) {
+    this.setState({ [type]: value })
+  }
   
   _handleChange (type, event) {
     const parsedValue = parseFloat(event.target.value);
-    this.setState({ [type]: parsedValue })
-  }
-
-  _renderClippingInputs () {
-    const maxClipValue = this.sampleCreator.getDataBufferLength()
-
-    return (
-      <div>
-        (min: 0, max: {maxClipValue})
-
-        <label htmlFor='start'>start position</label>
-        <input id='start'
-          type='number'
-          step='0.01'
-          value={this.state.clipStart}
-          onChange={this._handleChange.bind(this, 'clipStart')}
-          className={styles.formInput} />
-
-        <label htmlFor='end'>end position</label>
-        <input id='end'
-          type='number'
-          step='0.01'
-          value={this.state.clipEnd}
-          onChange={this._handleChange.bind(this, 'clipEnd')}
-          className={styles.formInput} />
-      </div>
-    )
+    this._updateState(type, parsedValue)
   }
 
   _renderSample(start, stop) {
@@ -102,10 +78,11 @@ class Cleanup extends React.Component {
 
     this.sampleCreator.createBuffer(objectUrl)
       .then(buffer => {
+        // clear the transport 
+        Tone.Transport.cancel();
         samplePlayer = new Tone.Player(buffer);
         samplePlayer.loop = true;
         samplePlayer.toMaster().sync().start(0);
-        console.log('samplePlayer is ready')
       })
 
     this.props.setStagedObjectUrl(objectUrl);
@@ -153,7 +130,7 @@ class Cleanup extends React.Component {
         : 0;
 
     this.setState({
-      canvasWidth: width,
+      canvasWidth: width * .7,
       canvasHeight: height
     }, () => {
       this.canvasContext = this.canvas.getContext('2d');
@@ -167,23 +144,82 @@ class Cleanup extends React.Component {
     })
   }
 
+  _onLeftSliderChange (value) {
+    // @todo update playback draw rectangle
+  }
+
+  _onRightSliderChange (value) {
+    // @todo update playback draw rectangle
+  }
+
+  _onLeftSliderFinish (value) {
+    this._updateState('clipStart', value)
+  }
+
+  _onRightSliderFinish (value) {
+    this._updateState('clipEnd', value)
+  }
+
   render() {
+    const maxClipValue = this.sampleCreator.getDataBufferLength();
+    const stepValue = Math.ceil(maxClipValue / 1000)
+
     return (
       <div ref={(container) => { this.container = container; }}>
         <div className={styles.label}>
-          {/* <div className={styles.retryButton} onClick={this._clickedRetry}>Try another recording</div> */}
           {
             this.props.objectUrl && 
             (
               <div>
-                {/* <div className={styles.playButton}>
-                  <ReactAudioPlayer src={this.props.objectUrl} controls />
-                </div> */}
+                <div>
+                  <ReactSlider
+                    orientation='vertical'
+                    className={styles.sliderLeft}
+                    onChange={this._onLeftSliderChange}
+                    max={maxClipValue}
+                    step={stepValue}
+                    onAfterChange={this._onLeftSliderFinish}
+                  >
+                    <svg width="96" height="144" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                          <rect fill="none" id="canvas_background" height="146" width="98" y="-1" x="-1"/>
+                        </g>
+                        <g>
+                          <path stroke="#000000" id="svg_11" d="m0.55582,53.17546l12.68336,-33.12395l21.96661,-19.12553l25.36672,0l21.96661,19.12553l12.68336,33.12395l0,38.25106l-12.68336,33.12395l-21.96661,19.12552l-25.36672,0l-21.96661,-19.12552l-12.68336,-33.12395l0,-38.25106z" strokeWidth="0.5" fill="none"/>
+                          <path stroke="#000000" transform="rotate(-179.62478637695312 48.03125000000001,112.3503189086914) " id="svg_13" d="m31.19168,112.27864l16.83957,-29.78879l16.83957,29.78879l-8.41981,0l0,29.93214l-16.83954,0l0,-29.93214l-8.41981,0z" strokeWidth="0.5" fill="#1cffe0"/>
+                          <path stroke="#000000" id="svg_14" d="m31.19122,31.94578l16.83957,-29.78879l16.83957,29.78879l-8.4198,0l0,29.93214l-16.83954,0l0,-29.93214l-8.4198,0z" strokeWidth="0.5" fill="#1cffe0"/>
+                        </g>
+                      </svg>
+                  </ReactSlider>
+
+                  <ReactSlider
+                    orientation='vertical'
+                    className={styles.sliderRight}
+                    onChange={this._onRightSliderChange}
+                    max={maxClipValue}
+                    defaultValue={maxClipValue}
+                    step={stepValue}
+                    onAfterChange={this._onRightSliderFinish}
+                  >
+                      <svg width="96" height="144" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                          <rect fill="none" id="canvas_background" height="146" width="98" y="-1" x="-1"/>
+                        </g>
+                        <g>
+                          <path stroke="#000000" id="svg_11" d="m0.55582,53.17546l12.68336,-33.12395l21.96661,-19.12553l25.36672,0l21.96661,19.12553l12.68336,33.12395l0,38.25106l-12.68336,33.12395l-21.96661,19.12552l-25.36672,0l-21.96661,-19.12552l-12.68336,-33.12395l0,-38.25106z" strokeWidth="0.5" fill="none"/>
+                          <path stroke="#000000" transform="rotate(-179.62478637695312 48.03125000000001,112.3503189086914) " id="svg_13" d="m31.19168,112.27864l16.83957,-29.78879l16.83957,29.78879l-8.41981,0l0,29.93214l-16.83954,0l0,-29.93214l-8.41981,0z" strokeWidth="0.5" fill="#1cffe0"/>
+                          <path stroke="#000000" id="svg_14" d="m31.19122,31.94578l16.83957,-29.78879l16.83957,29.78879l-8.4198,0l0,29.93214l-16.83954,0l0,-29.93214l-8.4198,0z" strokeWidth="0.5" fill="#1cffe0"/>
+                        </g>
+                      </svg>
+                  </ReactSlider>
+                </div>
+
                 <div className={styles.playButton} onClick={playArrangement}>
                   PLAY
                 </div>
                 {/* {this._renderClippingInputs()}
                 <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div> */}
+
                 <canvas 
                   className={styles.canvas}
                   width={ this.state.canvasWidth || 0} 

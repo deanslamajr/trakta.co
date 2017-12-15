@@ -4,7 +4,7 @@
 .container {
   text-align: center;
   position: fixed;
-  top: var(--bottomOfTopNav);
+  top: 0;
   width: 100%;
   bottom: 0;
 }

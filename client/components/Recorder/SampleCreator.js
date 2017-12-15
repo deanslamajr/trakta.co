@@ -216,8 +216,6 @@ export default class SampleCreator {
       new Tone.Buffer(objectUrl,
         // success
         buffer => {
-          console.log('buffer??')
-          console.dir(buffer)
           resolve(buffer)
         },
         // error
