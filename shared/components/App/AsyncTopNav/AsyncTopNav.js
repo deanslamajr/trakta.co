@@ -23,7 +23,6 @@ class TopNav extends React.Component {
     return (
       <div className={styles.container}>
         <button>Back</button>
-        Title
         <button>Ok</button>
       </div>
     );
