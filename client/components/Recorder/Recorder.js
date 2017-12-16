@@ -2,7 +2,6 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import ReactAudioPlayer from 'react-audio-player';
 import WaveformData from 'waveform-data';
 
 import { setStagedObjectUrl, setStagedSample } from '../../../shared/actions/recorder';
@@ -173,7 +172,7 @@ class Recorder extends React.Component {
   _startRecording() {
     this.sampleCreator.startRecording()
 
-    this.props.addItemToNavBar((
+    this.props.addItemToNavBar(null, (
       <button onClick={this._stopRecording}>STOP recording</button>
     ))
 
@@ -245,7 +244,7 @@ class Recorder extends React.Component {
     }, () => {
       this.sampleCreator.openMic()
         .then(() => {
-          this.props.addItemToNavBar((
+          this.props.addItemToNavBar(null, (
             <button onClick={this._startRecording}>START recording</button>
           ))
           // overlay 'start recording' mask

@@ -64,6 +64,7 @@
     "classnames": "^2.2.5",
     "colors": "1.1.2",
     "compression": "1.6.2",
+    "create-react-class": "^15.6.2",
     "cross-env": "4.0.0",
     "debounce": "^1.0.2",
     "dotenv": "4.0.0",

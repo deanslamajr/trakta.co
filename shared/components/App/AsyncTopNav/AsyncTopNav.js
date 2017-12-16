@@ -15,7 +15,8 @@ class TopNav extends React.Component {
     super();
 
     this.state = {
-      nodes: []
+      right: null,
+      center: null
     };
 
     this.onBackClick = this.onBackClick.bind(this);
@@ -26,24 +27,38 @@ class TopNav extends React.Component {
     window.history.back();
   }
 
-  addItemToNavBar(node, clearAllButBack=true) {
-    if (clearAllButBack) {
-      this.setState({
-        nodes: [node]
-      })
+  addItemToNavBar(newCenterNode, newRightNode) {
+    let centerNode
+    if (newCenterNode === null) {
+      centerNode = null
+    }
+    else if (newCenterNode === undefined) {
+      centerNode = this.state.center
     }
     else {
-      const currentNodes = this.state.nodes
-      const combinedSetOfNodes = currentNodes.concat([node])
-
-      this.setState({
-        nodes: combinedSetOfNodes
-      })
+      centerNode = newCenterNode
     }
+
+    let rightNode
+    if (newRightNode === null) {
+      rightNode = null
+    }
+    else if (newRightNode === undefined) {
+      rightNode = this.state.right
+    }
+    else {
+      rightNode = newRightNode
+    }
+
+    this.setState({
+      center: centerNode,
+      right: rightNode
+    })
   }
 
   render() {
-    const ActionButtons = this.state.nodes;
+    const RightButton = this.state.right;
+    const CenterButton = this.state.center;
 
     return (
       <div>
@@ -52,9 +67,8 @@ class TopNav extends React.Component {
         }
         <div className={styles.container}>
           <button onClick={this.onBackClick}>Back</button>
-          {
-            ActionButtons
-          }
+          { CenterButton }
+          { RightButton }
         </div>
       </div>
     );

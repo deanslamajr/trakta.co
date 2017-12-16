@@ -40,7 +40,6 @@ class Staging extends React.Component {
 
     this._saveRecording = this._saveRecording.bind(this);
     this._renderTrackPlayer = this._renderTrackPlayer.bind(this);
-    this._renderSubmitButton = this._renderSubmitButton.bind(this);
     this._getBlobFromObjectUrl = this._getBlobFromObjectUrl.bind(this);
     this._updateTrack = this._updateTrack.bind(this);
   }
@@ -145,18 +144,6 @@ class Staging extends React.Component {
     );
   }
 
-  _renderSubmitButton() {
-    return (
-      <div>
-        <input
-            type='submit'
-            value='Create Instance'
-            className={classnames(styles.formInput, { [styles.formSaving]: this.state.isSaving })}
-            />
-      </div>
-    )
-  }
-
   _renderTrackPlayer() {
     const { buffer } = this.state;
 
@@ -165,6 +152,7 @@ class Staging extends React.Component {
         <div className={styles.label}>
           {/* Play button  */}
           <InstancePlaylist
+            addItemToNavBar={this.props.addItemToNavBar}
             renderErrorComponent={this._renderErrorComponent}
             buffer={buffer}
             />
@@ -197,6 +185,9 @@ class Staging extends React.Component {
         this._updateTrack()
 
         this.setState({ buffer })
+        this.props.addItemToNavBar(undefined, (
+          <button onClick={this._saveRecording}>USE this configuration</button>
+        ))
       },
       // error
       // @todo log, set error view state (w/ try again functionality)
@@ -257,20 +248,14 @@ class Staging extends React.Component {
             onChange={this._handleChange.bind(this, 'panning')}
             placeholder='panning'
             className={styles.formInput} />
-          
-          {
-            this.state.buffer
-              ? this._renderSubmitButton()
-              : null
-          }
 
           <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} /> 
         </form>
 
         {
-          this.state.buffer
+           this.state.buffer
             ? this._renderTrackPlayer()
-            : null
+            : null 
         }
          
       </div>

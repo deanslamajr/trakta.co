@@ -71,11 +71,13 @@ class InstancePlaylist extends React.Component {
       error: null
     }
 
+    this._loadBuffer = this._loadBuffer.bind(this);
+    this._play = this._play.bind(this);
+    this._stop = this._stop.bind(this);
+
     // this debounce slows down invocation just enough so that redux store can be updated properly from form
     this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this);
     this._debouncedDownloadAndArrangeSampleInstances = debounce(this._downloadAndArrangeSampleInstances, 1000);
-
-    this._loadBuffer = this._loadBuffer.bind(this);
   }
 
   _onInstanceLoadError(instance, reject, error) {
@@ -141,7 +143,7 @@ class InstancePlaylist extends React.Component {
         this._loadBuffer()
       }
 
-      Promise.all(tasks)
+      return Promise.all(tasks)
         .then(() => {
           this.props.endFetchSample()
         })
@@ -150,6 +152,9 @@ class InstancePlaylist extends React.Component {
           console.error(error)
           this.setState({ error })
         });
+    }
+    else {
+      return Promise.resolve();
     }
   }
 
@@ -162,8 +167,27 @@ class InstancePlaylist extends React.Component {
     }
   }
 
+  _stop() {
+    playArrangement();
+    this.props.addItemToNavBar((
+      <button onClick={this._play}>PLAY</button>
+    ))
+  }
+
+  _play() {
+    playArrangement();
+    this.props.addItemToNavBar((
+      <button onClick={this._stop}>STOP</button>
+    ))
+  }
+
   componentDidMount() {
-    this._downloadAndArrangeSampleInstances(this.props.instances);
+    this._downloadAndArrangeSampleInstances(this.props.instances)
+      .then(() => {
+        this.props.addItemToNavBar && this.props.addItemToNavBar((
+          <button onClick={this._play}>PLAY</button>
+        ))
+      })
   }
 
   componentWillUnmount() {

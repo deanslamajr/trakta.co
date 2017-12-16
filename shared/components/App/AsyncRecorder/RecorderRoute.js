@@ -56,7 +56,9 @@ class RecorderRoute extends React.Component {
                   this.props.objectUrl
                     ? (
                       [
-                        <Route key={1} path={`${this.props.match.url}/staging`} component={Staging} />,
+                        <Route key={1} path={`${this.props.match.url}/staging`} render={props => (
+                          <Staging {...props} addItemToNavBar={this.props.addItemToNavBar} />
+                        )}/>,
                         <Route key={2} path={`${this.props.match.url}/cleanup`} render={props => (
                           <Cleanup {...props} addItemToNavBar={this.props.addItemToNavBar} />
                         )}/>

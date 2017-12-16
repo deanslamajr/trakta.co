@@ -119,13 +119,10 @@ class Cleanup extends React.Component {
   }
 
   _stopRecording() {
-    playArrangement()
+    playArrangement();
     this.props.addItemToNavBar((
       <button onClick={this._playRecording}>PLAY recording</button>
-    ))
-    this.props.addItemToNavBar((
-      <button onClick={this._clickUseThisSelection}>USE this selection</button>
-    ), false)
+    ));
   }
 
   _playRecording() {
@@ -164,10 +161,9 @@ class Cleanup extends React.Component {
 
       this.props.addItemToNavBar((
         <button onClick={this._playRecording}>PLAY recording</button>
-      ))
-      this.props.addItemToNavBar((
+      ),(
         <button onClick={this._clickUseThisSelection}>USE this selection</button>
-      ), false)
+      ));
     })
   }
 
