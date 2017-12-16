@@ -15,15 +15,47 @@ class TopNav extends React.Component {
     super();
 
     this.state = {
-      
+      nodes: []
     };
+
+    this.onBackClick = this.onBackClick.bind(this);
+    this.addItemToNavBar = this.addItemToNavBar.bind(this);
+  }
+
+  onBackClick() {
+    window.history.back();
+  }
+
+  addItemToNavBar(node, clearAllButBack=true) {
+    if (clearAllButBack) {
+      this.setState({
+        nodes: [node]
+      })
+    }
+    else {
+      const currentNodes = this.state.nodes
+      const combinedSetOfNodes = currentNodes.concat([node])
+
+      this.setState({
+        nodes: combinedSetOfNodes
+      })
+    }
   }
 
   render() {
+    const ActionButtons = this.state.nodes;
+
     return (
-      <div className={styles.container}>
-        <button>Back</button>
-        <button>Ok</button>
+      <div>
+        {
+          this.props.render(this.addItemToNavBar)
+        }
+        <div className={styles.container}>
+          <button onClick={this.onBackClick}>Back</button>
+          {
+            ActionButtons
+          }
+        </div>
       </div>
     );
   }

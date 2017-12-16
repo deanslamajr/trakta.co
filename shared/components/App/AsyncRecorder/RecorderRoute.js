@@ -47,14 +47,19 @@ class RecorderRoute extends React.Component {
                 <Route 
                   exact 
                   path={this.props.match.url}
-                  component={Recorder} />
+                  render={props => (
+                    <Recorder {...props} addItemToNavBar={this.props.addItemToNavBar} />
+                  )}
+                />
 
                 { // If a recording does not exist, we shouldn't be able to route to /staging
                   this.props.objectUrl
                     ? (
                       [
                         <Route key={1} path={`${this.props.match.url}/staging`} component={Staging} />,
-                        <Route key={2} path={`${this.props.match.url}/cleanup`} component={Cleanup} />
+                        <Route key={2} path={`${this.props.match.url}/cleanup`} render={props => (
+                          <Cleanup {...props} addItemToNavBar={this.props.addItemToNavBar} />
+                        )}/>
                       ]
                     )
                     : <Redirect to={{ pathname: `${this.props.match.url}` }}/>

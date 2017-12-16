@@ -106,17 +106,18 @@ class App extends React.Component {
           <link rel="manifest" href="/manifest.json" />
         </Helmet>
         <div>
-          <AsyncTopNav />
-          <Switch>
-            <Route exact path="/" component={AsyncList} />
-            <Route path="/e/:trakName" component={AsyncMain} />
-            <Route path="/recorder" component={AsyncRecorder} />
-            <Route path="/new" component={AsyncContribute} />
-            {/* 
-            <Route path="/cleanup" component={ContextWrappedAsyncMain} /> */ }
+          <AsyncTopNav render={addItemToNavBar => (
+            <Switch>
+              <Route exact path="/" component={AsyncList} />
+              <Route path="/e/:trakName" component={AsyncMain} />
+              <Route path="/recorder" render={props => (
+                <AsyncRecorder {...props} addItemToNavBar={addItemToNavBar} />
+              )}/>
+              <Route path="/new" component={AsyncContribute} />
 
-            <Route component={Error404} />
-          </Switch>
+              <Route component={Error404} />
+            </Switch>
+          )}/>
         </div>
       </div>
     );

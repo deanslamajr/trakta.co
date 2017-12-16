@@ -164,13 +164,7 @@ class Recorder extends React.Component {
         {
           this.state.disableRecording
             ? <div>Waiting on encoder to initialize</div>
-            : (
-                <div className={styles.blueMask} onClick={this._startRecording} >
-                  <div className={styles.label}>
-                    tap to BEGIN recording
-                  </div>
-                </div>
-              )
+            : <div className={styles.blueMask} />
         }
       </div>
     );
@@ -178,6 +172,10 @@ class Recorder extends React.Component {
 
   _startRecording() {
     this.sampleCreator.startRecording()
+
+    this.props.addItemToNavBar((
+      <button onClick={this._stopRecording}>STOP recording</button>
+    ))
 
     this.setState({ 
       recordingStartTime: Date.now(),
@@ -187,13 +185,7 @@ class Recorder extends React.Component {
   }
 
   _renderSTOP() {
-    return (
-      <div className={styles.redMask} onClick={this._stopRecording}>
-        <div className={styles.label}>
-          tap to END recording
-        </div>
-      </div>
-    );
+    return (<div className={styles.redMask} />);
   }
 
   _navigateToCleanup() {
@@ -253,6 +245,9 @@ class Recorder extends React.Component {
     }, () => {
       this.sampleCreator.openMic()
         .then(() => {
+          this.props.addItemToNavBar((
+            <button onClick={this._startRecording}>START recording</button>
+          ))
           // overlay 'start recording' mask
           this.setState({ disableRecording: false });
           this._beginDrawingWaves();

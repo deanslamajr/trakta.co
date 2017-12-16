@@ -51,6 +51,9 @@ class Cleanup extends React.Component {
     this._onLeftSliderFinish = this._onLeftSliderFinish.bind(this)
     this._onRightSliderChange = this._onRightSliderChange.bind(this)
     this._onRightSliderFinish = this._onRightSliderFinish.bind(this)
+    this._playRecording = this._playRecording.bind(this)
+    this._stopRecording = this._stopRecording.bind(this)
+    this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
 
     this._renderSample = this._renderSample.bind(this);
     this.debouncedRenderSample = debounce(this._renderSample, 1000);
@@ -115,6 +118,23 @@ class Cleanup extends React.Component {
     this.canvasContext.closePath();
   }
 
+  _stopRecording() {
+    playArrangement()
+    this.props.addItemToNavBar((
+      <button onClick={this._playRecording}>PLAY recording</button>
+    ))
+    this.props.addItemToNavBar((
+      <button onClick={this._clickUseThisSelection}>USE this selection</button>
+    ), false)
+  }
+
+  _playRecording() {
+    playArrangement()
+    this.props.addItemToNavBar((
+      <button onClick={this._stopRecording}>STOP playback</button>
+    ))
+  }
+
   componentWillUpdate(nextProps, nextState) {
     if (this.state.clipStart != nextState.clipStart || this.state.clipEnd != nextState.clipEnd) {
       this.debouncedRenderSample(nextState.clipStart, nextState.clipEnd);
@@ -141,6 +161,13 @@ class Cleanup extends React.Component {
 
       this._drawWaveForm();
       this._renderSample();
+
+      this.props.addItemToNavBar((
+        <button onClick={this._playRecording}>PLAY recording</button>
+      ))
+      this.props.addItemToNavBar((
+        <button onClick={this._clickUseThisSelection}>USE this selection</button>
+      ), false)
     })
   }
 
@@ -213,12 +240,6 @@ class Cleanup extends React.Component {
                       </svg>
                   </ReactSlider>
                 </div>
-
-                <div className={styles.playButton} onClick={playArrangement}>
-                  PLAY
-                </div>
-                {/* {this._renderClippingInputs()}
-                <div className={styles.saveButton} onClick={this._clickUseThisSelection}>Use this selection</div> */}
 
                 <canvas 
                   className={styles.canvas}
