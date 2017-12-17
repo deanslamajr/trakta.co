@@ -37,3 +37,39 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.handle {
+  line-height: 0;
+  animation: pulse 0.75s infinite;
+  animation-direction: alternate;
+  animation-timing-function: cubic-bezier(.1, 0.5, .7, 1);
+  width: 100%;
+  height: 32px;
+  height: 2rem;
+}
+
+.left-handle {
+  border-bottom-right-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.right-handle {
+  border-bottom-left-radius: 1rem;
+  border-top-left-radius: 1rem;
+}
+
+.canvas-mask {
+  left: 15%;
+  right: 15%;
+  position: fixed;
+  background-color: rgba(1,1,1,.05);
+}
+
+@keyframes pulse {
+  0% {
+    background-color: #fff;
+  }
+  100% {
+    background-color: #888;
+  }
+}

@@ -5,6 +5,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import debounce from 'debounce';
 import Tone from 'tone';
 import ReactSlider from 'react-slider';
+import classnames from 'classnames';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedObjectUrl } from '../../../shared/actions/recorder';
@@ -42,9 +43,14 @@ class Cleanup extends React.Component {
       console.error(error)
     }
 
+    const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
+    const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
+
     this.state = {
-      clipStart: 0,
-      clipEnd: this.sampleCreator.getDataBufferLength()
+      leftSliderValue: initialStartValue,
+      rightSliderValue: initialEndValue,
+      clipStart: initialStartValue,
+      clipEnd: initialEndValue
     }
 
     this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
@@ -63,15 +69,6 @@ class Cleanup extends React.Component {
     const rootPath = getRootPath(this.props.match.path);
 
     this.props.history.push(`/${rootPath}/staging`);
-  }
-
-  _updateState (type, value) {
-    this.setState({ [type]: value })
-  }
-  
-  _handleChange (type, event) {
-    const parsedValue = parseFloat(event.target.value);
-    this._updateState(type, parsedValue)
   }
 
   _renderSample(start, stop) {
@@ -168,24 +165,32 @@ class Cleanup extends React.Component {
   }
 
   _onLeftSliderChange (value) {
-    // @todo update playback draw rectangle
+    this.setState({ leftSliderValue: value });
   }
 
   _onRightSliderChange (value) {
-    // @todo update playback draw rectangle
+    this.setState({ rightSliderValue: value });
   }
 
   _onLeftSliderFinish (value) {
-    this._updateState('clipStart', value)
+    this.setState({
+      clipStart: value,
+      leftSliderValue: value
+    });
   }
 
   _onRightSliderFinish (value) {
-    this._updateState('clipEnd', value)
+    this.setState({
+      clipEnd: value,
+      rightSliderValue: value });
   }
 
   render() {
     const maxClipValue = this.sampleCreator.getDataBufferLength();
     const stepValue = Math.ceil(maxClipValue / 1000)
+
+    const top = this.state.canvasHeight * (this.state.leftSliderValue/maxClipValue);
+    const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.state.rightSliderValue/maxClipValue));
 
     return (
       <div ref={(container) => { this.container = container; }}>
@@ -198,43 +203,23 @@ class Cleanup extends React.Component {
                   <ReactSlider
                     orientation='vertical'
                     className={styles.sliderLeft}
+                    handleClassName={classnames(styles.leftHandle, styles.handle)}
                     onChange={this._onLeftSliderChange}
                     max={maxClipValue}
                     step={stepValue}
                     onAfterChange={this._onLeftSliderFinish}
-                  >
-                    <svg width="96" height="144" xmlns="http://www.w3.org/2000/svg">
-                        <g>
-                          <rect fill="none" id="canvas_background" height="146" width="98" y="-1" x="-1"/>
-                        </g>
-                        <g>
-                          <path stroke="#000000" id="svg_11" d="m0.55582,53.17546l12.68336,-33.12395l21.96661,-19.12553l25.36672,0l21.96661,19.12553l12.68336,33.12395l0,38.25106l-12.68336,33.12395l-21.96661,19.12552l-25.36672,0l-21.96661,-19.12552l-12.68336,-33.12395l0,-38.25106z" strokeWidth="0.5" fill="none"/>
-                          <path stroke="#000000" transform="rotate(-179.62478637695312 48.03125000000001,112.3503189086914) " id="svg_13" d="m31.19168,112.27864l16.83957,-29.78879l16.83957,29.78879l-8.41981,0l0,29.93214l-16.83954,0l0,-29.93214l-8.41981,0z" strokeWidth="0.5" fill="#1cffe0"/>
-                          <path stroke="#000000" id="svg_14" d="m31.19122,31.94578l16.83957,-29.78879l16.83957,29.78879l-8.4198,0l0,29.93214l-16.83954,0l0,-29.93214l-8.4198,0z" strokeWidth="0.5" fill="#1cffe0"/>
-                        </g>
-                      </svg>
-                  </ReactSlider>
-
+                    defaultValue={this.state.clipStart}
+                  />
                   <ReactSlider
                     orientation='vertical'
                     className={styles.sliderRight}
+                    handleClassName={classnames(styles.rightHandle, styles.handle)}
                     onChange={this._onRightSliderChange}
                     max={maxClipValue}
-                    defaultValue={maxClipValue}
                     step={stepValue}
                     onAfterChange={this._onRightSliderFinish}
-                  >
-                      <svg width="96" height="144" xmlns="http://www.w3.org/2000/svg">
-                        <g>
-                          <rect fill="none" id="canvas_background" height="146" width="98" y="-1" x="-1"/>
-                        </g>
-                        <g>
-                          <path stroke="#000000" id="svg_11" d="m0.55582,53.17546l12.68336,-33.12395l21.96661,-19.12553l25.36672,0l21.96661,19.12553l12.68336,33.12395l0,38.25106l-12.68336,33.12395l-21.96661,19.12552l-25.36672,0l-21.96661,-19.12552l-12.68336,-33.12395l0,-38.25106z" strokeWidth="0.5" fill="none"/>
-                          <path stroke="#000000" transform="rotate(-179.62478637695312 48.03125000000001,112.3503189086914) " id="svg_13" d="m31.19168,112.27864l16.83957,-29.78879l16.83957,29.78879l-8.41981,0l0,29.93214l-16.83954,0l0,-29.93214l-8.41981,0z" strokeWidth="0.5" fill="#1cffe0"/>
-                          <path stroke="#000000" id="svg_14" d="m31.19122,31.94578l16.83957,-29.78879l16.83957,29.78879l-8.4198,0l0,29.93214l-16.83954,0l0,-29.93214l-8.4198,0z" strokeWidth="0.5" fill="#1cffe0"/>
-                        </g>
-                      </svg>
-                  </ReactSlider>
+                    defaultValue={this.state.clipEnd}
+                  />
                 </div>
 
                 <canvas 
@@ -243,6 +228,7 @@ class Cleanup extends React.Component {
                   height= { this.state.canvasHeight || 0} 
                   ref={(canvas) => { this.canvas = canvas; }}
                 />
+                <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask}></div>
               </div>
             )
           }
