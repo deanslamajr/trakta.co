@@ -6,6 +6,7 @@ import debounce from 'debounce';
 import Tone from 'tone';
 import ReactSlider from 'react-slider';
 import classnames from 'classnames';
+import { keyframes } from 'styled-components';
 
 import * as selectors from '../../../shared/reducers';
 import { setStagedObjectUrl } from '../../../shared/actions/recorder';
@@ -50,7 +51,9 @@ class Cleanup extends React.Component {
       leftSliderValue: initialStartValue,
       rightSliderValue: initialEndValue,
       clipStart: initialStartValue,
-      clipEnd: initialEndValue
+      clipEnd: initialEndValue,
+      isPlaying: false,
+      duration: 0
     }
 
     this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
@@ -60,6 +63,7 @@ class Cleanup extends React.Component {
     this._playRecording = this._playRecording.bind(this)
     this._stopRecording = this._stopRecording.bind(this)
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
+    this._generateKeyFrames = this._generateKeyFrames.bind(this)
 
     this._renderSample = this._renderSample.bind(this);
     this.debouncedRenderSample = debounce(this._renderSample, 1000);
@@ -83,6 +87,8 @@ class Cleanup extends React.Component {
         samplePlayer = new Tone.Player(buffer);
         samplePlayer.loop = true;
         samplePlayer.toMaster().sync().start(0);
+
+        this.setState({ duration: buffer.get().duration })
       })
 
     this.props.setStagedObjectUrl(objectUrl);
@@ -120,6 +126,7 @@ class Cleanup extends React.Component {
     this.props.addItemToNavBar((
       <button onClick={this._playRecording}>PLAY recording</button>
     ));
+    this.setState({ isPlaying: false })
   }
 
   _playRecording() {
@@ -127,11 +134,13 @@ class Cleanup extends React.Component {
     this.props.addItemToNavBar((
       <button onClick={this._stopRecording}>STOP playback</button>
     ))
+    this.setState({ isPlaying: true })
   }
 
   componentWillUpdate(nextProps, nextState) {
     if (this.state.clipStart != nextState.clipStart || this.state.clipEnd != nextState.clipEnd) {
       this.debouncedRenderSample(nextState.clipStart, nextState.clipEnd);
+      this._generateKeyFrames();
     }
   }
 
@@ -155,6 +164,8 @@ class Cleanup extends React.Component {
 
       this._drawWaveForm();
       this._renderSample();
+
+      this._generateKeyFrames();
 
       this.props.addItemToNavBar((
         <button onClick={this._playRecording}>PLAY recording</button>
@@ -185,12 +196,33 @@ class Cleanup extends React.Component {
       rightSliderValue: value });
   }
 
+  _generateKeyFrames () {
+    const maxClipValue = this.sampleCreator.getDataBufferLength();
+    const top = this.state.canvasHeight * (this.state.leftSliderValue/maxClipValue);
+    const keyframeBottom = this.state.canvasHeight * (this.state.rightSliderValue/maxClipValue)
+
+    const playAnimationKeyframeName = keyframes`
+        0%   { top: ${Math.ceil(top)}px; }
+        100% { top: ${Math.ceil(keyframeBottom)}px; }
+      `
+
+    this.setState({ playAnimationKeyframeName })
+  }
+
   render() {
     const maxClipValue = this.sampleCreator.getDataBufferLength();
     const stepValue = Math.ceil(maxClipValue / 1000)
 
     const top = this.state.canvasHeight * (this.state.leftSliderValue/maxClipValue);
     const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.state.rightSliderValue/maxClipValue));
+    const keyframeBottom = this.state.canvasHeight * (this.state.rightSliderValue/maxClipValue)
+
+    const playIndicatorStyles = this.state.isPlaying
+      ? {
+        animation: `${this.state.playAnimationKeyframeName} ${this.state.duration}s linear infinite`,
+        backgroundColor: 'black'
+      }
+      : {}
 
     return (
       <div ref={(container) => { this.container = container; }}>
@@ -229,6 +261,7 @@ class Cleanup extends React.Component {
                   ref={(canvas) => { this.canvas = canvas; }}
                 />
                 <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask}></div>
+                <div style={playIndicatorStyles} className={styles.playIndicator}></div>
               </div>
             )
           }
