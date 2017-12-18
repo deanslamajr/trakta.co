@@ -61,7 +61,7 @@ class Cleanup extends React.Component {
     this._onRightSliderChange = this._onRightSliderChange.bind(this)
     this._onRightSliderFinish = this._onRightSliderFinish.bind(this)
     this._playRecording = this._playRecording.bind(this)
-    this._stopRecording = this._stopRecording.bind(this)
+    this._stopPlayback = this._stopPlayback.bind(this)
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
     this._generateKeyFrames = this._generateKeyFrames.bind(this)
 
@@ -121,7 +121,7 @@ class Cleanup extends React.Component {
     this.canvasContext.closePath();
   }
 
-  _stopRecording() {
+  _stopPlayback() {
     playArrangement();
     this.props.addItemToNavBar((
       <button onClick={this._playRecording}>PLAY recording</button>
@@ -132,7 +132,7 @@ class Cleanup extends React.Component {
   _playRecording() {
     playArrangement()
     this.props.addItemToNavBar((
-      <button onClick={this._stopRecording}>STOP playback</button>
+      <button onClick={this._stopPlayback}>STOP playback</button>
     ))
     this.setState({ isPlaying: true })
   }
@@ -173,6 +173,10 @@ class Cleanup extends React.Component {
         <button onClick={this._clickUseThisSelection}>USE this selection</button>
       ));
     })
+  }
+
+  componentWillUnmount() {
+    this._stopPlayback();
   }
 
   _onLeftSliderChange (value) {
