@@ -2,7 +2,6 @@ import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import debounce from 'debounce';
 import Tone from 'tone';
 import ReactSlider from 'react-slider';
 import classnames from 'classnames';
@@ -20,15 +19,6 @@ let samplePlayer
 function getRootPath (fullPath) {
   const pathTokens = fullPath.split('/');
   return pathTokens[1] || ''
-}
-
-function playArrangement() {
-  if (Tone.Transport.state === 'started') {
-    Tone.Transport.stop()
-  }
-  else {
-    Tone.Transport.start();
-  }
 }
 
 class Cleanup extends React.Component {
@@ -53,20 +43,20 @@ class Cleanup extends React.Component {
       clipStart: initialStartValue,
       clipEnd: initialEndValue,
       isPlaying: false,
-      duration: 0
+      duration: 0,
+      isFirstRender: true
     }
 
     this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
     this._onLeftSliderFinish = this._onLeftSliderFinish.bind(this)
     this._onRightSliderChange = this._onRightSliderChange.bind(this)
     this._onRightSliderFinish = this._onRightSliderFinish.bind(this)
-    this._playRecording = this._playRecording.bind(this)
+    this._startPlayback = this._startPlayback.bind(this)
     this._stopPlayback = this._stopPlayback.bind(this)
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
     this._generateKeyFrames = this._generateKeyFrames.bind(this)
 
     this._renderSample = this._renderSample.bind(this);
-    this.debouncedRenderSample = debounce(this._renderSample, 1000);
   }
 
   _clickUseThisSelection () {
@@ -80,15 +70,21 @@ class Cleanup extends React.Component {
 
     const objectUrl = this.sampleCreator.createBlobObjectUrl();
 
-    this.sampleCreator.createBuffer(objectUrl)
+    return this.sampleCreator.createBuffer(objectUrl)
       .then(buffer => {
         // clear the transport 
         Tone.Transport.cancel();
+
         samplePlayer = new Tone.Player(buffer);
         samplePlayer.loop = true;
         samplePlayer.toMaster().sync().start(0);
 
         this.setState({ duration: buffer.get().duration })
+
+        if (this.state.isFirstRender) {
+          this._renderSample(this.state.clipStart, this.state.clipEnd)
+            .then(() => this.setState({ isFirstRender: false }))
+        }
       })
 
     this.props.setStagedObjectUrl(objectUrl);
@@ -122,62 +118,21 @@ class Cleanup extends React.Component {
   }
 
   _stopPlayback() {
-    playArrangement();
+    Tone.Transport.stop()
     this.props.addItemToNavBar((
-      <button onClick={this._playRecording}>PLAY recording</button>
+      <button onClick={this._startPlayback}>PLAY recording</button>
     ));
     this.setState({ isPlaying: false })
   }
 
-  _playRecording() {
-    playArrangement()
+  _startPlayback() {
+    Tone.Transport.start()
     this.props.addItemToNavBar((
       <button onClick={this._stopPlayback}>STOP playback</button>
     ))
     this.setState({ isPlaying: true })
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if (this.state.clipStart != nextState.clipStart || this.state.clipEnd != nextState.clipEnd) {
-      this.debouncedRenderSample(nextState.clipStart, nextState.clipEnd);
-      this._generateKeyFrames();
-    }
-  }
-
-  componentDidMount() {
-    const height = this.container
-        ? this.container.parentNode.clientHeight
-        : 0;
-    const width = this.container
-        ? this.container.parentNode.clientWidth
-        : 0;
-
-    this.setState({
-      canvasWidth: width * .7,
-      canvasHeight: height
-    }, () => {
-      this.canvasContext = this.canvas.getContext('2d');
-
-      // @todo have these resize with window resize
-      this.canvasContext.canvas.width = this.state.canvasWidth;
-      this.canvasContext.canvas.height = this.state.canvasHeight;
-
-      this._drawWaveForm();
-      this._renderSample();
-
-      this._generateKeyFrames();
-
-      this.props.addItemToNavBar((
-        <button onClick={this._playRecording}>PLAY recording</button>
-      ),(
-        <button onClick={this._clickUseThisSelection}>USE this selection</button>
-      ));
-    })
-  }
-
-  componentWillUnmount() {
-    this._stopPlayback();
-  }
 
   _onLeftSliderChange (value) {
     this.setState({ leftSliderValue: value });
@@ -211,6 +166,50 @@ class Cleanup extends React.Component {
       `
 
     this.setState({ playAnimationKeyframeName })
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    if (this.state.clipStart != nextState.clipStart || this.state.clipEnd != nextState.clipEnd) {
+      this._stopPlayback()
+      this._renderSample(nextState.clipStart, nextState.clipEnd)
+         .then(this._startPlayback)
+      this._generateKeyFrames();
+    }
+  }
+
+  componentDidMount() {
+    const height = this.container
+        ? this.container.parentNode.clientHeight
+        : 0;
+    const width = this.container
+        ? this.container.parentNode.clientWidth
+        : 0;
+
+    this.setState({
+      canvasWidth: width * .7,
+      canvasHeight: height
+    }, () => {
+      this.canvasContext = this.canvas.getContext('2d');
+
+      // @todo have these resize with window resize
+      this.canvasContext.canvas.width = this.state.canvasWidth;
+      this.canvasContext.canvas.height = this.state.canvasHeight;
+
+      this._drawWaveForm();
+      this._renderSample();
+
+      this._generateKeyFrames();
+
+      this.props.addItemToNavBar((
+        <button onClick={this._startPlayback}>PLAY recording</button>
+      ),(
+        <button onClick={this._clickUseThisSelection}>USE this selection</button>
+      ));
+    })
+  }
+
+  componentWillUnmount() {
+    Tone.Transport.stop();
   }
 
   render() {
