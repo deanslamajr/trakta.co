@@ -119,20 +119,15 @@ class Cleanup extends React.Component {
 
   _stopPlayback() {
     Tone.Transport.stop()
-    this.props.addItemToNavBar((
-      <button onClick={this._startPlayback}>PLAY recording</button>
-    ));
+    this.props.addItemToNavBar({ type: 'PLAY', cb: this._startPlayback});
     this.setState({ isPlaying: false })
   }
 
   _startPlayback() {
     Tone.Transport.start()
-    this.props.addItemToNavBar((
-      <button onClick={this._stopPlayback}>STOP playback</button>
-    ))
+    this.props.addItemToNavBar({ type: 'STOP', cb: this._stopPlayback})
     this.setState({ isPlaying: true })
   }
-
 
   _onLeftSliderChange (value) {
     this.setState({ leftSliderValue: value });
@@ -200,11 +195,10 @@ class Cleanup extends React.Component {
 
       this._generateKeyFrames();
 
-      this.props.addItemToNavBar((
-        <button onClick={this._startPlayback}>PLAY recording</button>
-      ),(
-        <button onClick={this._clickUseThisSelection}>USE this selection</button>
-      ));
+      this.props.addItemToNavBar(
+        { type: 'PLAY', cb: this._startPlayback},
+        { type: 'CHECK', cb: this._clickUseThisSelection}
+      );
     })
   }
 

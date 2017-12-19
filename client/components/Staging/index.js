@@ -186,7 +186,7 @@ class Staging extends React.Component {
 
         this.setState({ buffer })
         this.props.addItemToNavBar(undefined, (
-          <button onClick={this._saveRecording}>USE this configuration</button>
+          { type: 'CHECK', cb: this._saveRecording }
         ))
       },
       // error

@@ -108,8 +108,12 @@ class App extends React.Component {
         <div>
           <AsyncTopNav render={addItemToNavBar => (
             <Switch>
-              <Route exact path="/" component={AsyncList} />
-              <Route path="/e/:trakName" component={AsyncMain} />
+              <Route exact path="/" render={props => (
+                <AsyncList {...props} addItemToNavBar={addItemToNavBar} />
+              )}/>
+              <Route path="/e/:trakName" render={props => (
+                <AsyncMain {...props} addItemToNavBar={addItemToNavBar} />
+              )}/>
               <Route path="/recorder" render={props => (
                 <AsyncRecorder {...props} addItemToNavBar={addItemToNavBar} />
               )}/>

@@ -172,9 +172,7 @@ class Recorder extends React.Component {
   _startRecording() {
     this.sampleCreator.startRecording()
 
-    this.props.addItemToNavBar(null, (
-      <button onClick={this._stopRecording}>STOP recording</button>
-    ))
+    this.props.addItemToNavBar(null, { type: 'CHECK', cb:this._stopRecording })
 
     this.setState({ 
       recordingStartTime: Date.now(),
@@ -244,9 +242,7 @@ class Recorder extends React.Component {
     }, () => {
       this.sampleCreator.openMic()
         .then(() => {
-          this.props.addItemToNavBar(null, (
-            <button onClick={this._startRecording}>START recording</button>
-          ))
+          this.props.addItemToNavBar(null, { type: 'RECORD', cb: this._startRecording })
           // overlay 'start recording' mask
           this.setState({ disableRecording: false });
           this._beginDrawingWaves();

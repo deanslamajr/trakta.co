@@ -52,6 +52,7 @@ class ListRoute extends React.Component {
     this.props.fetchTraks();
     this.props.resetSampleLoaderState();
     this.props.resetTrakState()
+    this.props.addItemToNavBar(null, null)
   }
 
   render() {

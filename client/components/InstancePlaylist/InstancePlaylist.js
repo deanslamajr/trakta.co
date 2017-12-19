@@ -169,24 +169,18 @@ class InstancePlaylist extends React.Component {
 
   _stop() {
     playArrangement();
-    this.props.addItemToNavBar((
-      <button onClick={this._play}>PLAY</button>
-    ))
+    this.props.addItemToNavBar({ type: 'PLAY', cb: this._play})
   }
 
   _play() {
     playArrangement();
-    this.props.addItemToNavBar((
-      <button onClick={this._stop}>STOP</button>
-    ))
+    this.props.addItemToNavBar({ type: 'STOP', cb: this._stop})
   }
 
   componentDidMount() {
     this._downloadAndArrangeSampleInstances(this.props.instances)
       .then(() => {
-        this.props.addItemToNavBar && this.props.addItemToNavBar((
-          <button onClick={this._play}>PLAY</button>
-        ))
+        this.props.addItemToNavBar && this.props.addItemToNavBar({ type: 'PLAY', cb: this._play})
       })
   }
 
@@ -198,12 +192,7 @@ class InstancePlaylist extends React.Component {
     if (this.state.error) {
       return this.props.renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances));
     }
-    else if (!this.props.isLoading) {
-      return renderPlayComponent();
-    }
-    else {
-      return null;
-    }
+    return null
   }
 }
 

@@ -53,14 +53,6 @@ class MainRoute extends React.Component {
     );
   }
 
-  _renderContributeComponent() {
-    return (
-      <div className={classnames(styles.contribute, styles.button, styles.bottomButton)} onClick={this._showContribute}>
-        <span className={styles.icon}>contribute</span>
-      </div>
-    )
-  }
-
   componentDidMount() {
     if (this.props.match.params.trakName) {
       // @todo handle the case where a non existant trakName is passed
@@ -77,6 +69,8 @@ class MainRoute extends React.Component {
       // fetch a random track??
       return this.props.history.push('/new');
     }
+
+    this.props.addItemToNavBar(undefined, { type: 'ADD', cb: this._showContribute })
   }
 
   render() {
@@ -96,8 +90,9 @@ class MainRoute extends React.Component {
 
           <div className={styles.label}>
             {/* Play button  */}
-            <InstancePlaylist renderErrorComponent={this._renderErrorComponent} />
-            { !this.props.isLoading && this._renderContributeComponent() }
+            <InstancePlaylist
+              addItemToNavBar={this.props.addItemToNavBar}
+              renderErrorComponent={this._renderErrorComponent} />
           </div>
           
           <SampleInstances />
