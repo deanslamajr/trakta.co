@@ -61,12 +61,15 @@ function encode(arrayBuffer) {
   const samplesMono = convertBuffer(arrayBuffer);
 
   let remaining = samplesMono.length;
+
   for (let i = 0; remaining >= 0; i++) {
     const left = samplesMono.subarray(i, i + 1);
     const mp3buf = mp3Encoder.encodeBuffer(left);
+
     appendToDataBuffer(mp3buf);
     remaining--;
   }
+  
   appendToDataBuffer(mp3Encoder.flush());
 }
 
@@ -105,8 +108,6 @@ function generateMp3Blob(startOfSplice, endOfSplice) {
 
   let bufferToBlob = Array.from(dataBuffer);
   bufferToBlob = bufferToBlob.slice(start, end + 1)
-
-  const dataView = new Int8Array(dataBuffer[100])
 
   return new Blob(bufferToBlob, { type: 'audio/mp3' });
 }
@@ -215,9 +216,7 @@ export default class SampleCreator {
     return new Promise((resolve, reject) => {
       new Tone.Buffer(objectUrl,
         // success
-        buffer => {
-          resolve(buffer)
-        },
+        resolve,
         // error
         // @todo log, set error view state (w/ try again functionality)
         error => {
