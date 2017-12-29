@@ -142,6 +142,12 @@ export default class SampleCreator {
         size : this.resolution
       });
 
+      // @todo add gain node here too
+      // const gain = new Tone.Gain(.1)
+
+      // userMedia.connect(gain)
+      // gain.connect(analyser);
+
       userMedia.connect(analyser);
     }
     else {
@@ -185,7 +191,15 @@ export default class SampleCreator {
   }
 
   startRecording () {
-    userMedia.connect(processor);
+    // @todo add gain node here too
+    // const gain = new Tone.Gain(.1)
+
+    // userMedia.connect(gain)
+    // gain.connect(processor);
+
+    //userMedia.connect(processor);
+    
+
     // if the ScriptProcessorNode is not connected to an output the "onaudioprocess" event is not triggered in chrome
     processor.connect(userMedia.context._context.destination);
   }
