@@ -176,9 +176,9 @@ class Staging extends React.Component {
 
   // initialize the buffer everytime the user navigates to this page
   componentDidMount() {
-    const buffer = new Tone.Buffer(this.props.objectUrl,
+    new Tone.Buffer(this.props.objectUrl,
       // success
-      () => {
+      buffer => {
         const duration = buffer.get().duration;
         this.props.setStagedSample({ duration });
 

@@ -132,7 +132,7 @@ class InstancePlaylist extends React.Component {
       length: trackLength
     } = this.props.trackDimensions;
 
-    if (instances.length) {
+    if (instances) {
       prepTransport(trackStartTime, trackLength)
 
       // Load the samples

@@ -14,16 +14,16 @@ import { getSampleCreator } from '../Recorder/SampleCreator';
 
 import styles from './cleanup.css'
 
-//let samplePlayer
-
-// @todo remove this (used to have this locally in then(buffer) )
-//let playerBuffer
-
 let audioElement
 
 function getRootPath (fullPath) {
   const pathTokens = fullPath.split('/');
   return pathTokens[1] || ''
+}
+
+function stopPlayback () {
+  audioElement.pause();
+  audioElement.currentTime = 0.0;
 }
 
 class Cleanup extends React.Component {
@@ -74,38 +74,11 @@ class Cleanup extends React.Component {
     this.sampleCreator.createBlob(start, stop)
 
     const objectUrl = this.sampleCreator.createBlobObjectUrl();
-    // @todo set player to to loop
+
     audioElement = new Audio([objectUrl]);
     audioElement.loop = true
 
-    //this.props.setStagedObjectUrl(objectUrl);
-
-    // return this.sampleCreator.createBuffer(objectUrl)
-    //   .then(buffer => {
-    //     // clear the transport 
-    //     // Tone.Transport.cancel();
-
-    //     // Tone.Transport.schedule((time) => {
-    //     //   Tone.Draw.schedule(() => {
-    //     //     this.props.addItemToNavBar({ type: 'STOP', cb: this._stopPlayback})
-    //     //     this.setState({ isPlaying: true })
-    //     //     // might need to refactor the animation to be done outside of the react lifecycle
-    //     //     // e.g. not using css but with canvas drawing script
-    //     //     // 
-    //     //     // * alert() and console.log() probably aren't good ways to test this scheduling accuracy
-    //     //     //   * try testing with a _simple_ canvas draw script
-    //     //     // * this doesn't seem to fix the problem with large files having a long delay on first playback
-    //     //     // * need to test if this works properly on mobile...
-    //     //   }, time)
-    //     // }, '+0.0')
-
-    //     playerBuffer = buffer
-
-    //     this.setState({
-    //       isPlaying: true//,
-    //       //duration: playerBuffer.get().duration
-    //     })
-    //   })
+    this.props.setStagedObjectUrl(objectUrl)
   }
 
   _drawWaveForm() {
@@ -136,32 +109,19 @@ class Cleanup extends React.Component {
   }
 
   _stopPlayback() {
-    //Tone.Transport.stop()
-    audioElement.pause();
-    audioElement.currentTime = 0.0;
+    stopPlayback()
 
     this.props.addItemToNavBar({ type: 'PLAY', cb: this._startPlayback});
     this.setState({ isPlaying: false })
   }
 
   _startPlayback() {
-    // @see {@link https://github.com/Tonejs/Tone.js/wiki/Performance#scheduling-in-advance}
-    // samplePlayer = new Tone.Player({
-    //   url: playerBuffer,
-    //   loop: true
-    // });
-    // samplePlayer.toMaster().sync().start(0);
-
-    // Tone.Transport.start('+0.1')
     audioElement.play()
     this.props.addItemToNavBar({ type: 'STOP', cb: this._stopPlayback})
 
-    console.log('audioElement.duration')
-    console.dir(audioElement.duration)
-
     this.setState({
       isPlaying: true,
-      duration: audioElement.duration//playerBuffer.get().duration
+      duration: audioElement.duration
     })
   }
 
@@ -204,8 +164,6 @@ class Cleanup extends React.Component {
       this._stopPlayback()
       this._renderSample(nextState.clipStart, nextState.clipEnd)
       this._generateKeyFrames();
-        //.then(this._startPlayback)
-      
     }
   }
 
@@ -240,7 +198,7 @@ class Cleanup extends React.Component {
   }
 
   componentWillUnmount() {
-    Tone.Transport.stop();
+    stopPlayback()
   }
 
   render() {

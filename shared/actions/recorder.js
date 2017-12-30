@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 // ACTION NAME CONSTANTS
 
-export const RECORDER_STAGE_OBJECT_URL = 'RECORDER_STAGE_SAMPLE';
+export const RECORDER_STAGE_OBJECT_URL = 'RECORDER_STAGE_OBJECT_URL';
 export const RECORDER_SET_STAGED_SAMPLE = 'RECORDER_SET_STAGED_SAMPLE';
 
 // -----------------------------------------------------------------------------
