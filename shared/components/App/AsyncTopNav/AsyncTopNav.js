@@ -3,12 +3,14 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import {
-  FaChevronLeft,
-  FaMicrophone,
-  FaCheck,
-  FaPlay,
-  FaStop,
-  FaPlus } from 'react-icons/lib/fa';
+  MdArrowBack,
+  MdMic,
+  MdCheck,
+  MdPlayArrow,
+  MdStop,
+  MdAdd
+} from 'react-icons/lib/md'
+
 
 import config from '../../../../config';
 
@@ -16,10 +18,12 @@ import * as selectors from '../../../reducers';
 
 import styles from './styles.css';
 
+const color = 'rgba(0, 0, 0, .4)';
+
 function renderBackButton (cb=()=>{}) {
   return (
     <div className={styles.button}>
-      <FaChevronLeft size={100} color='rgba(0, 0, 0, .4)' onClick={cb} />
+      <MdArrowBack className={styles.icon} size={50} color={color} onClick={cb} />
     </div>
   )
 }
@@ -28,7 +32,7 @@ function renderRecordButton (cb=()=>{}) {
   return (
     <div>
       <div className={styles.button}>
-        <FaMicrophone size={100} color='rgba(0, 0, 0, .4)' onClick={cb} />
+        <MdMic className={styles.icon} size={50} color={color} onClick={cb} />
       </div>
     </div>
   )
@@ -38,7 +42,7 @@ function renderCheckButton (cb=()=>{}) {
   return (
     <div>
       <div className={styles.button}>
-        <FaCheck size={100} color='rgba(0, 0, 0, .4)' onClick={cb} />
+        <MdCheck className={styles.icon} size={50} color={color} onClick={cb} />
       </div>
     </div>
   )
@@ -48,7 +52,7 @@ function renderPlayButton (cb=()=>{}) {
   return (
     <div>
       <div className={styles.button}>
-        <FaPlay size={100} color='rgba(0, 0, 0, .4)' onClick={cb} />
+        <MdPlayArrow className={styles.playIcon} size={60} color={color} onClick={cb} />
       </div>
     </div>
   )
@@ -58,7 +62,7 @@ function renderStopButton (cb=()=>{}) {
   return (
     <div>
       <div className={styles.button}>
-        <FaStop size={100} color='rgba(0, 0, 0, .4)' onClick={cb} />
+        <MdStop className={styles.playIcon} size={60} color={color} onClick={cb} />
       </div>
     </div>
   )
@@ -68,7 +72,7 @@ function renderAddButton (cb=()=>{}) {
   return (
     <div>
       <div className={styles.button}>
-        <FaPlus size={100} color='rgba(0, 0, 0, .4)' onClick={cb} />
+        <MdAdd className={styles.icon} size={50} color={color} onClick={cb} />
       </div>
     </div>
   )

@@ -197,7 +197,7 @@ export default class SampleCreator {
     // userMedia.connect(gain)
     // gain.connect(processor);
 
-    //userMedia.connect(processor);
+    userMedia.connect(processor);
     
 
     // if the ScriptProcessorNode is not connected to an output the "onaudioprocess" event is not triggered in chrome

@@ -11,7 +11,18 @@
 
 .button {
   background-color: rgba(0, 0, 0, 0.3);
-  margin: .25rem;  
   cursor: pointer;
   z-index: 1;
+  height: 5rem;
+  width: 5rem;
+  margin: .75rem;
+  box-shadow: 0 2px 1px #333;
+}
+
+.icon {
+  margin: .95rem;
+}
+
+.play-icon {
+  margin: .5rem;
 }
