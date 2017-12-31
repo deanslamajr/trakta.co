@@ -22,8 +22,8 @@ const color = 'rgba(0, 0, 0, .4)';
 
 function renderBackButton (cb=()=>{}) {
   return (
-    <div className={styles.button}>
-      <MdArrowBack className={styles.icon} size={50} color={color} onClick={cb} />
+    <div className={styles.button} onClick={cb}>
+      <MdArrowBack className={styles.icon} size={50} color={color} />
     </div>
   )
 }
@@ -31,8 +31,8 @@ function renderBackButton (cb=()=>{}) {
 function renderRecordButton (cb=()=>{}) {
   return (
     <div>
-      <div className={styles.button}>
-        <MdMic className={styles.icon} size={50} color={color} onClick={cb} />
+      <div className={styles.button} onClick={cb}>
+        <MdMic className={styles.icon} size={50} color={color} />
       </div>
     </div>
   )
@@ -41,8 +41,8 @@ function renderRecordButton (cb=()=>{}) {
 function renderCheckButton (cb=()=>{}) {
   return (
     <div>
-      <div className={styles.button}>
-        <MdCheck className={styles.icon} size={50} color={color} onClick={cb} />
+      <div className={styles.button} onClick={cb}>
+        <MdCheck className={styles.icon} size={50} color={color} />
       </div>
     </div>
   )
@@ -51,8 +51,8 @@ function renderCheckButton (cb=()=>{}) {
 function renderPlayButton (cb=()=>{}) {
   return (
     <div>
-      <div className={styles.button}>
-        <MdPlayArrow className={styles.playIcon} size={60} color={color} onClick={cb} />
+      <div className={styles.button} onClick={cb}>
+        <MdPlayArrow className={styles.playIcon} size={60} color={color} />
       </div>
     </div>
   )
@@ -61,8 +61,8 @@ function renderPlayButton (cb=()=>{}) {
 function renderStopButton (cb=()=>{}) {
   return (
     <div>
-      <div className={styles.button}>
-        <MdStop className={styles.playIcon} size={60} color={color} onClick={cb} />
+      <div className={styles.button} onClick={cb}>
+        <MdStop className={styles.playIcon} size={60} color={color} />
       </div>
     </div>
   )
@@ -71,8 +71,8 @@ function renderStopButton (cb=()=>{}) {
 function renderAddButton (cb=()=>{}) {
   return (
     <div>
-      <div className={styles.button}>
-        <MdAdd className={styles.icon} size={50} color={color} onClick={cb} />
+      <div className={styles.button} onClick={cb}>
+        <MdAdd className={styles.icon} size={50} color={color} />
       </div>
     </div>
   )
