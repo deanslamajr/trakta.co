@@ -175,26 +175,34 @@ class Cleanup extends React.Component {
         ? this.container.parentNode.clientWidth
         : 0;
 
-    this.setState({
-      canvasWidth: width * .7,
-      canvasHeight: height
-    }, () => {
-      this.canvasContext = this.canvas.getContext('2d');
+    // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
+    // don't do this stuff
+    if (this.canvas) {
+      this.setState({
+        canvasWidth: width * .7,
+        canvasHeight: height
+      }, () => {
+        // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
+        // don't do this stuff
+        if (this.canvas) {
+          this.canvasContext = this.canvas.getContext('2d');
 
-      // @todo have these resize with window resize
-      this.canvasContext.canvas.width = this.state.canvasWidth;
-      this.canvasContext.canvas.height = this.state.canvasHeight;
+          // @todo have these resize with window resize
+          this.canvasContext.canvas.width = this.state.canvasWidth;
+          this.canvasContext.canvas.height = this.state.canvasHeight;
 
-      this._drawWaveForm();
-      this._renderSample(this.state.clipStart, this.state.clipEnd);
+          this._drawWaveForm();
+          this._renderSample(this.state.clipStart, this.state.clipEnd);
 
-      this._generateKeyFrames();
+          this._generateKeyFrames();
 
-      this.props.addItemToNavBar(
-        { type: 'PLAY', cb: this._startPlayback},
-        { type: 'CHECK', cb: this._clickUseThisSelection}
-      );
-    })
+          this.props.addItemToNavBar(
+            { type: 'PLAY', cb: this._startPlayback},
+            { type: 'CHECK', cb: this._clickUseThisSelection}
+          );
+        }
+      })
+    }
   }
 
   componentWillUnmount() {

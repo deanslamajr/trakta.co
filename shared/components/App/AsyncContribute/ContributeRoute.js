@@ -21,6 +21,9 @@ class ContributeRoute extends React.Component {
     if (this.props.trakName) {
       this.props.history.replace(`/e/${this.props.trakName}`);
     }
+
+    // clear navbar
+    this.props.addItemToNavBar(null, null);
   }
 
   render() {
@@ -31,11 +34,11 @@ class ContributeRoute extends React.Component {
         </Helmet>
 
         <div className={styles.label}>
-          <div className={classnames(styles.button, styles.recordButton)} onClick={this._navigateRecord.bind(this)}>Record</div>
-          <div className={classnames(styles.button, styles.uploadButton)} onClick={this._navigateRecord.bind(this)}>Upload</div>
-          <div className={classnames(styles.button, styles.recycleButton)} onClick={this._navigateRecord.bind(this)}>Recycle</div>
-          <div className={classnames(styles.button, styles.generateButton)} onClick={this._navigateRecord.bind(this)}>Generate</div>
-          <div className={classnames(styles.button, styles.duplicateButton)} onClick={this._navigateRecord.bind(this)}>Duplicate</div>
+          <div className={classnames(styles.button, styles.recordButton)} onClick={this._navigateRecord.bind(this)}>FreeStyle</div>
+            {/* <div className={classnames(styles.button, styles.uploadButton)} onClick={this._navigateRecord.bind(this)}>SongBuilder</div> */}
+           <div className={classnames(styles.button, styles.recycleButton)} onClick={this._navigateRecord.bind(this)}>SingleRecording</div> 
+          <div className={classnames(styles.button, styles.generateButton)} onClick={this._navigateRecord.bind(this)}>SongBuilder</div> 
+          {/* <div className={classnames(styles.button, styles.duplicateButton)} onClick={this._navigateRecord.bind(this)}>SongBuilder</div>  */}
         </div>
 
       </div>

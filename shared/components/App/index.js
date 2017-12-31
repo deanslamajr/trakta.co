@@ -108,6 +108,7 @@ class App extends React.Component {
         <div>
           <AsyncTopNav render={addItemToNavBar => (
             <Switch>
+              
               <Route exact path="/" render={props => (
                 <AsyncList {...props} addItemToNavBar={addItemToNavBar} />
               )}/>
@@ -117,9 +118,11 @@ class App extends React.Component {
               <Route path="/recorder" render={props => (
                 <AsyncRecorder {...props} addItemToNavBar={addItemToNavBar} />
               )}/>
-              <Route path="/new" component={AsyncContribute} />
-
+              <Route path="/new" render={props => (
+                <AsyncContribute {...props} addItemToNavBar={addItemToNavBar} />
+              )}/>
               <Route component={Error404} />
+              
             </Switch>
           )}/>
         </div>
