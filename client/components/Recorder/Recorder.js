@@ -4,7 +4,10 @@ import { connect } from 'react-redux';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import WaveformData from 'waveform-data';
 
-import { setStagedObjectUrl, setStagedSample } from '../../../shared/actions/recorder';
+import {
+  setStagedObjectUrl,
+  setCleanup,
+  setStagedSample } from '../../../shared/actions/recorder';
 import * as selectors from '../../../shared/reducers';
 
 import { getSampleCreator } from './SampleCreator';
@@ -201,6 +204,15 @@ class Recorder extends React.Component {
     });
     this.props.setStagedObjectUrl(objectUrl);
 
+    const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
+    const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
+    this.props.setCleanup({
+      leftSliderValue: initialStartValue,
+      rightSliderValue: initialEndValue,
+      clipStart: initialStartValue,
+      clipEnd: initialEndValue,
+    })
+
     this._navigateToCleanup()
   }
 
@@ -287,7 +299,8 @@ class Recorder extends React.Component {
 
 const mapActionsToProps = {
   setStagedObjectUrl,
-  setStagedSample
+  setStagedSample,
+  setCleanup
 };
 
 function mapStateToProps(state) {

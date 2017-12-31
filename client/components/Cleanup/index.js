@@ -8,7 +8,9 @@ import classnames from 'classnames';
 import { keyframes } from 'styled-components';
 
 import * as selectors from '../../../shared/reducers';
-import { setStagedObjectUrl } from '../../../shared/actions/recorder';
+import {
+  setStagedObjectUrl,
+  setCleanup } from '../../../shared/actions/recorder';
 
 import { getSampleCreator } from '../Recorder/SampleCreator';
 
@@ -39,14 +41,7 @@ class Cleanup extends React.Component {
       console.error(error)
     }
 
-    const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
-    const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
-
     this.state = {
-      leftSliderValue: initialStartValue,
-      rightSliderValue: initialEndValue,
-      clipStart: initialStartValue,
-      clipEnd: initialEndValue,
       isPlaying: false,
       duration: 0,
       isFirstRender: true
@@ -126,30 +121,31 @@ class Cleanup extends React.Component {
   }
 
   _onLeftSliderChange (value) {
-    this.setState({ leftSliderValue: value });
+    this.props.setCleanup({ leftSliderValue: value })
   }
 
   _onRightSliderChange (value) {
-    this.setState({ rightSliderValue: value });
+    this.props.setCleanup({ rightSliderValue: value })
   }
 
   _onLeftSliderFinish (value) {
-    this.setState({
+    this.props.setCleanup({
       clipStart: value,
       leftSliderValue: value
-    });
+    })
   }
 
   _onRightSliderFinish (value) {
-    this.setState({
+    this.props.setCleanup({
       clipEnd: value,
-      rightSliderValue: value });
+      rightSliderValue: value
+    });
   }
 
   _generateKeyFrames () {
     const maxClipValue = this.sampleCreator.getDataBufferLength();
-    const top = this.state.canvasHeight * (this.state.leftSliderValue/maxClipValue);
-    const keyframeBottom = this.state.canvasHeight * (this.state.rightSliderValue/maxClipValue)
+    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue/maxClipValue);
+    const keyframeBottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue/maxClipValue)
 
     const playAnimationKeyframeName = keyframes`
         0%   { top: ${Math.ceil(top)}px; }
@@ -159,10 +155,12 @@ class Cleanup extends React.Component {
     this.setState({ playAnimationKeyframeName })
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if (this.state.clipStart != nextState.clipStart || this.state.clipEnd != nextState.clipEnd) {
-      this._stopPlayback()
-      this._renderSample(nextState.clipStart, nextState.clipEnd)
+  componentWillReceiveProps(nextProps) {
+    if (this.props.cleanup.clipStart != nextProps.cleanup.clipStart || this.props.cleanup.clipEnd != nextProps.cleanup.clipEnd) {
+      if (this.state.isPlaying) {
+        this._stopPlayback()
+      }
+      this._renderSample(nextProps.cleanup.clipStart, nextProps.cleanup.clipEnd)
       this._generateKeyFrames();
     }
   }
@@ -192,7 +190,7 @@ class Cleanup extends React.Component {
           this.canvasContext.canvas.height = this.state.canvasHeight;
 
           this._drawWaveForm();
-          this._renderSample(this.state.clipStart, this.state.clipEnd);
+          this._renderSample(this.props.cleanup.clipStart, this.props.cleanup.clipEnd);
 
           this._generateKeyFrames();
 
@@ -213,9 +211,9 @@ class Cleanup extends React.Component {
     const maxClipValue = this.sampleCreator.getDataBufferLength();
     const stepValue = Math.ceil(maxClipValue / 1000)
 
-    const top = this.state.canvasHeight * (this.state.leftSliderValue/maxClipValue);
-    const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.state.rightSliderValue/maxClipValue));
-    const keyframeBottom = this.state.canvasHeight * (this.state.rightSliderValue/maxClipValue)
+    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue/maxClipValue);
+    const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.props.cleanup.rightSliderValue/maxClipValue));
+    const keyframeBottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue/maxClipValue)
 
     const playIndicatorStyles = this.state.isPlaying
       ? {
@@ -240,7 +238,7 @@ class Cleanup extends React.Component {
                     max={maxClipValue}
                     step={stepValue}
                     onAfterChange={this._onLeftSliderFinish}
-                    defaultValue={this.state.clipStart}
+                    defaultValue={this.props.cleanup.clipStart}
                   />
                   <ReactSlider
                     orientation='vertical'
@@ -250,7 +248,7 @@ class Cleanup extends React.Component {
                     max={maxClipValue}
                     step={stepValue}
                     onAfterChange={this._onRightSliderFinish}
-                    defaultValue={this.state.clipEnd}
+                    defaultValue={this.props.cleanup.clipEnd}
                   />
                 </div>
 
@@ -272,11 +270,15 @@ class Cleanup extends React.Component {
 }
 
 const mapActionsToProps = {
-  setStagedObjectUrl
+  setStagedObjectUrl,
+  setCleanup
 };
 
 function mapStateToProps(state) {
-  return { objectUrl: selectors.getStagedObjectUrl(state) }
+  return {
+    objectUrl: selectors.getStagedObjectUrl(state),
+    cleanup: selectors.getCleanup(state)
+  }
 }
 
 export default compose(

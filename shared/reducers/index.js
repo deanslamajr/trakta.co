@@ -57,6 +57,10 @@ export function getStagedSample(state) {
   return FromRecorder.getStagedSample(state.recorder);
 }
 
+export function getCleanup(state) {
+  return FromRecorder.getCleanup(state.recorder);
+}
+
 // -----------------------------------------------------------------------------
 // REDUCER EXPORT
 
