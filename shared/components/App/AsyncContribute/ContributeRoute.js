@@ -1,15 +1,26 @@
 import React from 'react';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import classnames from 'classnames';
 
 import config from '../../../../config';
 
+import * as selectors from '../../../reducers';
+
 import styles from './styles.css';
 
 class ContributeRoute extends React.Component {
   _navigateRecord() {
     this.props.history.push('/recorder');
+  }
+
+  componentWillMount () {
+    // if trakName exists, we just created a new trakTaco and should redirect to that traktaco
+    if (this.props.trakName) {
+      this.props.history.replace(`/e/${this.props.trakName}`);
+    }
   }
 
   render() {
@@ -32,4 +43,11 @@ class ContributeRoute extends React.Component {
   }
 }
 
-export default withStyles(styles)(ContributeRoute);
+function mapStateToProps(state) {
+  return { trakName: selectors.getTrakName(state) }
+}
+
+export default compose(
+  withStyles(styles),
+  connect(mapStateToProps)
+)(ContributeRoute);

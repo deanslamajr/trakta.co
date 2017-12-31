@@ -12,6 +12,7 @@ import * as selectors from '../../../reducers';
 
 import { fetchInstances, setName as setTrakName } from '../../../actions/trak';
 import { reset as resetSampleLoaderState } from '../../../actions/samples';
+import { setStagedSample, setStagedObjectUrl } from '../../../actions/recorder';
 
 import SampleInstances from '../../../../client/components/SampleInstances';
 import InstancePlaylist from '../../../../client/components/InstancePlaylist';
@@ -73,6 +74,12 @@ class MainRoute extends React.Component {
     this.props.addItemToNavBar(undefined, { type: 'ADD', cb: this._showContribute })
   }
 
+  componentWillUnmount() {
+    // clear any staged sample from store
+    this.props.setStagedSample({ duration: 0 });
+    this.props.setStagedObjectUrl(undefined)
+  }
+
   render() {
     const currentTrakName = this.props.trakName || '';
 
@@ -117,7 +124,9 @@ function mapStateToProps(state, ownProps) {
 const mapActionsToProps = {
   fetchInstances,
   setTrakName,
-  resetSampleLoaderState
+  resetSampleLoaderState,
+  setStagedSample,
+  setStagedObjectUrl
 };
 
 export default compose(

@@ -133,6 +133,9 @@ class InstancePlaylist extends React.Component {
     } = this.props.trackDimensions;
 
     if (instances) {
+      // remove 'play' button
+      this.props.addItemToNavBar(null)
+
       prepTransport(trackStartTime, trackLength)
 
       // Load the samples
@@ -146,6 +149,7 @@ class InstancePlaylist extends React.Component {
       return Promise.all(tasks)
         .then(() => {
           this.props.endFetchSample()
+          this.props.addItemToNavBar({ type: 'PLAY', cb: this._play})
         })
         .catch(error => {
           // @todo log error
@@ -155,15 +159,6 @@ class InstancePlaylist extends React.Component {
     }
     else {
       return Promise.resolve();
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const instancesHaveChanged = !isEqual(this.props.instances, nextProps.instances);
-    const stagedSamplePropsHaveChanged = !isEqual(this.props.stagedSample, nextProps.stagedSample);
-
-    if (instancesHaveChanged || stagedSamplePropsHaveChanged) {
-      this._debouncedDownloadAndArrangeSampleInstances(nextProps.instances);
     }
   }
 
@@ -179,9 +174,15 @@ class InstancePlaylist extends React.Component {
 
   componentDidMount() {
     this._downloadAndArrangeSampleInstances(this.props.instances)
-      .then(() => {
-        this.props.addItemToNavBar && this.props.addItemToNavBar({ type: 'PLAY', cb: this._play})
-      })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const instancesHaveChanged = !isEqual(this.props.instances, nextProps.instances);
+    const stagedSamplePropsHaveChanged = !isEqual(this.props.stagedSample, nextProps.stagedSample);
+
+    if (instancesHaveChanged || stagedSamplePropsHaveChanged) {
+      this._debouncedDownloadAndArrangeSampleInstances(nextProps.instances);
+    }
   }
 
   componentWillUnmount() {

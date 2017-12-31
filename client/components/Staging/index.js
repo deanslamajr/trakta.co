@@ -15,7 +15,10 @@ import SampleInstances from '../SampleInstances';
 import * as selectors from '../../../shared/reducers';
 
 import { setStagedSample, setStagedObjectUrl } from '../../../shared/actions/recorder';
-import { reset as resetTrak, updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak';
+import {
+  setName as setTrakName,
+  reset as resetTrak,
+  updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak';
 import { reset as resetSampleLoaderState } from '../../../shared/actions/samples';
 
 import styles from './staging.css'
@@ -100,13 +103,13 @@ class Staging extends React.Component {
 
     const trakName = this.props.trakName || '';
 
+    // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
+    // e.g. user is actually looking at the page and is not a robot
     const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
     
     this._getBlobFromObjectUrl()
       .then((data) => axios.post(`/api/sample${queryString}`, data, config))
-      .then(response => {
-        const trakName = response.data.trakName;
-    
+      .then(response => {    
         this.props.setStagedSample({
           startTime: 0,
           volume: 0,
@@ -115,9 +118,17 @@ class Staging extends React.Component {
         });
 
         this.props.resetSampleLoaderState();
-        this.props.resetTrak();
+        // reset staged ObjectUrl
+        this.props.setStagedObjectUrl(undefined)
         
-        this.props.history.goBack();
+        const isANewTrak = response.data.trakName !== this.props.trakName;
+        if (response.data.trakName && isANewTrak) {
+          this.props.setTrakName(response.data.trakName)
+        }
+
+        // jump back to /e/:name
+        // doing it like this 'clears' the recording steps from the browser history
+        this.props.history.go(-3)
       })
       .catch((err) => {
         // @todo log error
@@ -197,12 +208,6 @@ class Staging extends React.Component {
     );
   }
 
-  componentWillUnmount() {
-    // this effectively disables the drawing of a staged sample rectangle in <SampleInstances />
-    this.props.setStagedSample({ duration: 0 });
-    this.props.setStagedObjectUrl(undefined)
-  }
-
   render () {
     const {
       startTime,
@@ -268,6 +273,7 @@ const mapActionsToProps = {
   updateTrackDimensionsWithAdditionalSample,
   resetSampleLoaderState,
   resetTrak,
+  setTrakName,
   setStagedObjectUrl
 };
 
