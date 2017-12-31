@@ -53,7 +53,6 @@ class Recorder extends React.Component {
     this._beginDrawingWaves = this._beginDrawingWaves.bind(this);
     this._drawWave = this._drawWave.bind(this);
     this._drawSample = this._drawSample.bind(this);
-    this._clickedRetry = this._clickedRetry.bind(this);
   }
 
   _beginDrawingWaves() {
@@ -98,12 +97,6 @@ class Recorder extends React.Component {
     this.canvasContext.moveTo((values[0] / 255) * canvasWidth, canvasHeight);
 
     const now = Date.now();
-
-    if(this.state.isRecording) {
-      for (let i = 0; i < values.length; i++){
-          this.sampleCreator.addRawDataToDrawSet(values[i])
-      }
-    }
     
     for (let i = values.length; i > 0; i--){
       if(this.state.isRecording) {
@@ -209,17 +202,6 @@ class Recorder extends React.Component {
     this.props.setStagedObjectUrl(objectUrl);
 
     this._navigateToCleanup()
-  }
-
-  _clickedRetry() {
-    this.sampleCreator.resetRecorder();
-
-    this.setState(
-      { 
-        currentPrompt: this.prompts.START,
-        drawWave: true 
-      }, 
-      () => this._drawWave())
   }
 
   _renderUSER_MEDIA_DENIED() {

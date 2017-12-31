@@ -33,6 +33,12 @@ function processAudioEvent (event) {
   const arrayBuffer = float32Array.buffer.slice();
 
   audioBuffers.push(arrayBuffer);
+
+  // Uint8Array
+  const valuesTypedArray = analyser.analyse()
+  for (let i = 0; i < valuesTypedArray.length; i++){
+    drawSet.push(valuesTypedArray[i])
+  }
 }
 
 function combineBuffers() {
@@ -154,10 +160,6 @@ export default class SampleCreator {
       // @todo do this better
       throw new Error('Tone.UserMedia is not supported')
     }
-  }
-
-  addRawDataToDrawSet (aNumber) {
-    drawSet.push(aNumber)
   }
 
   getReducedSet (canvasHeight) {
