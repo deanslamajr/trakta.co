@@ -2,11 +2,7 @@
 
 .container {
   position: fixed;
-  bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.1);
+  top: 100%;
 }
 
 .button {
@@ -17,6 +13,25 @@
   width: 5rem;
   margin: .75rem;
   box-shadow: 0 2px 1px #333;
+}
+
+.left {
+  position: fixed;
+  bottom: 0;
+}
+
+.center {
+  margin: .75rem auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.right {
+  position: fixed;
+  bottom: 0;
+  right: 0;
 }
 
 .icon {
