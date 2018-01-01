@@ -42,14 +42,6 @@ function playArrangement() {
   }
 }
 
-function renderPlayComponent() {
-  return (
-    <div className={classnames(styles.play, styles.button, styles.topButton)} onClick={playArrangement}>
-      <span className={styles.icon}>play trak</span>
-    </div>
-  );
-}
-
 function prepTransport(trackStartTime, trackLength) {
   Tone.Transport.loop = true;
   Tone.Transport.position = Tone.Transport.loopStart = trackStartTime >= 0
@@ -134,7 +126,9 @@ class InstancePlaylist extends React.Component {
 
     if (instances) {
       // remove 'play' button
-      this.props.addItemToNavBar(null)
+      if (!this.state.isPlaying) {
+        this.props.addItemToNavBar(null)
+      }
 
       prepTransport(trackStartTime, trackLength)
 
@@ -149,7 +143,9 @@ class InstancePlaylist extends React.Component {
       return Promise.all(tasks)
         .then(() => {
           this.props.endFetchSample()
-          this.props.addItemToNavBar({ type: 'PLAY', cb: this._play})
+          if (!this.state.isPlaying) {
+            this.props.addItemToNavBar({ type: 'PLAY', cb: this._play})
+          }
         })
         .catch(error => {
           // @todo log error
@@ -164,11 +160,13 @@ class InstancePlaylist extends React.Component {
 
   _stop() {
     playArrangement();
+    this.setState({ isPlaying: false })
     this.props.addItemToNavBar({ type: 'PLAY', cb: this._play})
   }
 
   _play() {
     playArrangement();
+    this.setState({ isPlaying: true })
     this.props.addItemToNavBar({ type: 'STOP', cb: this._stop})
   }
 
