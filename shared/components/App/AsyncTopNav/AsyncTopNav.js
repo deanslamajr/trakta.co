@@ -12,34 +12,36 @@ import {
 
 import styles from './styles.css';
 
-const color = 'rgba(0, 0, 0, .4)';
+const red = 'rgb(246, 81, 29)'
+const green = 'rgb(151, 204, 4)'
+const blue = 'rgb(0, 138, 206)'
 
 function renderBackButton () {
-  return (<MdArrowBack className={styles.icon} size={50} color={color} />)
+  return (<MdArrowBack className={styles.icon} size={50} color={red} />)
 }
 
 function renderRecordButton () {
-  return (<MdMic className={styles.icon} size={50} color={color} />)
+  return (<MdMic className={styles.icon} size={50} color={green} />)
 }
 
 function renderCheckButton () {
-  return (<MdCheck className={styles.icon} size={50} color={color} />)
+  return (<MdCheck className={styles.icon} size={50} color={green} />)
 }
 
 function renderPlayButton () {
-  return (<MdPlayArrow className={styles.playIcon} size={60} color={color} />)
+  return (<MdPlayArrow className={styles.playIcon} size={60} color={blue} />)
 }
 
 function renderStopButton () {
-  return (<MdStop className={styles.playIcon} size={60} color={color} />)
+  return (<MdStop className={styles.playIcon} size={60} color={red} />)
 }
 
 function renderAddButton () {
-  return (<MdAdd className={styles.icon} size={50} color={color} />)
+  return (<MdAdd className={styles.icon} size={50} color={green} />)
 }
 
 /**
- * Buttons
+ * render a button
  * @param {oneOf[buttonMappings]} type the content definition enum
  * @param {oneOf['left', 'center', 'right']} position where to position the button on the navbar
  * @param {function} cb function to invoke on a click action

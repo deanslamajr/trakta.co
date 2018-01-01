@@ -6,7 +6,7 @@
 }
 
 .button {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: white;
   cursor: pointer;
   z-index: 1;
   height: 5rem;
