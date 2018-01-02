@@ -258,7 +258,7 @@ class Staging extends React.Component {
         </form>
 
         {
-           this.state.buffer
+          this.state.buffer
             ? this._renderTrackPlayer()
             : null 
         }

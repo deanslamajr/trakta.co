@@ -55,7 +55,6 @@ class Cleanup extends React.Component {
     this._stopPlayback = this._stopPlayback.bind(this)
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
     this._generateKeyFrames = this._generateKeyFrames.bind(this)
-
     this._renderSample = this._renderSample.bind(this);
   }
 

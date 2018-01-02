@@ -235,25 +235,25 @@ class Recorder extends React.Component {
       canvasHeight: height
     }, () => {
       // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
-        // don't do this stuff
-        if (this.canvas) {
-          this.sampleCreator.openMic()
-            .then(() => {
-              // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
-              // don't do this stuff
-              if (this.canvas) {
-                this.props.addItemToNavBar(null, { type: 'RECORD', cb: this._startRecording })
-                // overlay 'start recording' mask
-                this.setState({ disableRecording: false });
-                this._beginDrawingWaves();
-              }
-            })
-            .catch(err => {
-              console.error(err);
-              // @todo log and metric
-              this.setState({ currentPrompt: this.prompts.USER_MEDIA_DENIED });
-            });
-        }
+      // don't do this stuff
+      if (this.canvas) {
+        this.sampleCreator.openMic()
+          .then(() => {
+            // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
+            // don't do this stuff
+            if (this.canvas) {
+              this.props.addItemToNavBar(null, { type: 'RECORD', cb: this._startRecording })
+              // overlay 'start recording' mask
+              this.setState({ disableRecording: false });
+              this._beginDrawingWaves();
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            // @todo log and metric
+            this.setState({ currentPrompt: this.prompts.USER_MEDIA_DENIED });
+          });
+      }
     });
   }
 

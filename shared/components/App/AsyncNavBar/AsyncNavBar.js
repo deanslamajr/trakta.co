@@ -65,7 +65,7 @@ const buttonMappings = {
   BACK: renderBackButton
 }
 
-class TopNav extends React.Component {
+class NavBar extends React.Component {
   constructor() {
     super();
 
@@ -122,7 +122,6 @@ class TopNav extends React.Component {
         }
 
         <div className={styles.container} >
-          {/* { renderBackButton('left', this.onBackClick) } */}
           { renderButton('BACK', 'left', this.onBackClick) }
 
            { centerButtonConfig && renderButton(centerButtonConfig.type, 'center', centerButtonConfig.cb) }  
@@ -134,6 +133,6 @@ class TopNav extends React.Component {
   }
 }
 
-export { TopNav }
+export { NavBar }
 
-export default withStyles(styles)(TopNav);
+export default withStyles(styles)(NavBar);

@@ -10,7 +10,7 @@ import config from '../../../config';
 
 import './globals.css';
 
-import AsyncTopNav from './AsyncTopNav';
+import AsyncNavBar from './AsyncNavBar';
 import AsyncList from './AsyncList';
 import AsyncMain from './AsyncMain';
 import AsyncRecorder from './AsyncRecorder';
@@ -106,7 +106,7 @@ class App extends React.Component {
           <link rel="manifest" href="/manifest.json" />
         </Helmet>
         <div>
-          <AsyncTopNav render={addItemToNavBar => (
+          <AsyncNavBar render={addItemToNavBar => (
             <Switch>
               
               <Route exact path="/" render={props => (

@@ -1,5 +1,5 @@
 import { asyncComponent } from 'react-async-component';
 
 export default asyncComponent({
-  resolve: () => System.import(/* webpackChunkName: "topNav" */ './AsyncTopNav'),
+  resolve: () => System.import(/* webpackChunkName: "navBar" */ './AsyncNavBar'),
 });
