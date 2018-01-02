@@ -1,38 +1,37 @@
-import React from 'react';
-import Helmet from 'react-helmet';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Switch from 'react-router-dom/Switch';
-import Route from 'react-router-dom/Route';
-import Redirect from 'react-router/Redirect';
+import React from 'react'
+import Helmet from 'react-helmet'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
+import Switch from 'react-router-dom/Switch'
+import Route from 'react-router-dom/Route'
+import Redirect from 'react-router/Redirect'
 
-import config from '../../../../config';
+import config from '../../../../config'
 
-import Recorder from '../../../../client/components/Recorder';
-import Staging from './AsyncStaging';
-import Cleanup from './AsyncCleanup';
+import Recorder from '../../../../client/components/Recorder'
+import Staging from './AsyncStaging'
+import Cleanup from './AsyncCleanup'
 
-import * as selectors from '../../../reducers';
+import * as selectors from '../../../reducers'
 
-import styles from './styles.css';
-
+import styles from './styles.css'
 
 class RecorderRoute extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
     this.state = {
       isClient: false
-    };
+    }
   }
 
-  componentDidMount() {
-    this.setState({ isClient: true });
+  componentDidMount () {
+    this.setState({ isClient: true })
   }
 
-  render() {
-    const currentTrakName = this.props.trakName || '';
+  render () {
+    const currentTrakName = this.props.trakName || ''
 
     return (
       <div className={styles.container}>
@@ -44,8 +43,8 @@ class RecorderRoute extends React.Component {
           this.state.isClient
             ? (
               <Switch>
-                <Route 
-                  exact 
+                <Route
+                  exact
                   path={this.props.match.url}
                   render={props => (
                     <Recorder {...props} addItemToNavBar={this.props.addItemToNavBar} />
@@ -55,16 +54,16 @@ class RecorderRoute extends React.Component {
                 { // If a recording does not exist, we shouldn't be able to route to /staging
                   this.props.objectUrl
                     ? (
-                      [
-                        <Route key={1} path={`${this.props.match.url}/staging`} render={props => (
-                          <Staging {...props} addItemToNavBar={this.props.addItemToNavBar} />
-                        )}/>,
-                        <Route key={2} path={`${this.props.match.url}/cleanup`} render={props => (
-                          <Cleanup {...props} addItemToNavBar={this.props.addItemToNavBar} />
-                        )}/>
-                      ]
+                  [
+                    <Route key={1} path={`${this.props.match.url}/staging`} render={props => (
+                      <Staging {...props} addItemToNavBar={this.props.addItemToNavBar} />
+                        )} />,
+                    <Route key={2} path={`${this.props.match.url}/cleanup`} render={props => (
+                      <Cleanup {...props} addItemToNavBar={this.props.addItemToNavBar} />
+                        )} />
+                  ]
                     )
-                    : <Redirect to={{ pathname: `${this.props.match.url}` }}/>
+                    : <Redirect to={{ pathname: `${this.props.match.url}` }} />
                 }
               </Switch>
             )
@@ -74,13 +73,13 @@ class RecorderRoute extends React.Component {
               </div>
             )
         }
-        
+
       </div>
-    );
+    )
   }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
   return {
     objectUrl: selectors.getStagedObjectUrl(state),
     trakName: selectors.getTrakName(state)
@@ -92,4 +91,4 @@ export { RecorderRoute }
 export default compose(
   withStyles(styles),
   connect(mapStateToProps)
-)(RecorderRoute);
+)(RecorderRoute)

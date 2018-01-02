@@ -5,7 +5,7 @@
  * absolute paths should be resolved during runtime by our build internal/server.
  */
 
-import * as EnvVars from './utils/envVars';
+import * as EnvVars from './utils/envVars'
 
 const values = {
   ENV: EnvVars.string('ENV'),
@@ -20,13 +20,13 @@ const values = {
     appTitle: true,
     // We only need to expose the enabled flag of the service worker.
     serviceWorker: {
-      enabled: true,
+      enabled: true
     },
     // We need to expose all the polyfill.io settings.
     polyfillIO: true,
     // We need to expose all the htmlPage settings.
     htmlPage: true,
-    
+
     s3SampleBucket: true
   },
 
@@ -81,8 +81,8 @@ const values = {
     features: [
       // The default list.
       'default',
-      'es6',
-    ],
+      'es6'
+    ]
   },
 
   // Basic configuration for the HTML page that hosts our application.
@@ -91,7 +91,7 @@ const values = {
   htmlPage: {
     titleTemplate: 'trakta.co - %s',
     defaultTitle: 'trakta.co',
-    description: 'make a sound',
+    description: 'make a sound'
   },
 
   // Content Security Policy (CSP)
@@ -108,9 +108,9 @@ const values = {
     scriptSrc: [
       // Allow scripts from cdn.polyfill.io so that we can import the
       // polyfill.
-      'cdn.polyfill.io',
+      'cdn.polyfill.io'
     ],
-    styleSrc: [],
+    styleSrc: []
   },
 
   // Path to the public assets that will be served off the root of the
@@ -142,7 +142,7 @@ const values = {
     'ttf',
     'woff',
     'woff2',
-    'otf',
+    'otf'
   ],
 
   // What should we name the json output file that webpack generates
@@ -159,7 +159,7 @@ const values = {
     /\.(eot|woff|woff2|ttf|otf)$/,
     /\.(svg|png|jpg|jpeg|gif|ico)$/,
     /\.(mp4|mp3|ogg|swf|webp)$/,
-    /\.(css|scss|sass|sss|less)$/,
+    /\.(css|scss|sass|sss|less)$/
   ],
 
   // Note: you can only have a single service worker instance.  Our service
@@ -181,10 +181,10 @@ const values = {
       // You may or may not want to be including these assets.  Feel free
       // to remove this or instead include only a very specific set of
       // assets.
-      './**/*',
+      './**/*'
     ],
     // Offline page file name.
-    offlinePageFileName: 'offline.html',
+    offlinePageFileName: 'offline.html'
   },
 
   bundles: {
@@ -199,7 +199,7 @@ const values = {
         // The service worker offline page generation needs access to the
         // config folder.  Don't worry we have guards within the config files
         // to ensure they never get included in a client bundle.
-        './config',
+        './config'
       ],
 
       // Where does the client bundle output live?
@@ -230,12 +230,12 @@ const values = {
           'react',
           'react-dom',
           'react-helmet',
-          'react-router-dom',
+          'react-router-dom'
         ],
 
         // The name of the vendor DLL.
-        name: '__dev_vendor_dll__',
-      },
+        name: '__dev_vendor_dll__'
+      }
     },
 
     server: {
@@ -245,14 +245,14 @@ const values = {
       // Src paths.
       srcPaths: [
         './client',
-        './server', 
-        './shared', 
+        './server',
+        './shared',
         './config'
       ],
 
       // Where does the server bundle output live?
-      outputPath: './build/server',
-    },
+      outputPath: './build/server'
+    }
   },
 
   additionalNodeBundles: {
@@ -296,7 +296,7 @@ const values = {
     // detail which bundle and mode is being targetted for the current function run.
     babelConfig: (babelConfig, buildOptions) => {
       // eslint-disable-next-line no-unused-vars
-      const { target, mode } = buildOptions;
+      const { target, mode } = buildOptions
 
       // Example
       /*
@@ -305,7 +305,7 @@ const values = {
       }
      */
 
-      return babelConfig;
+      return babelConfig
     },
 
     // This plugin allows you to provide final adjustments your webpack
@@ -319,7 +319,7 @@ const values = {
     // detail which bundle and mode is being targetted for the current function run.
     webpackConfig: (webpackConfig, buildOptions) => {
       // eslint-disable-next-line no-unused-vars
-      const { target, mode } = buildOptions;
+      const { target, mode } = buildOptions
 
       // Example:
       /*
@@ -335,17 +335,17 @@ const values = {
       }
       */
 
-      return webpackConfig;
-    },
-  },
-};
+      return webpackConfig
+    }
+  }
+}
 
 // This protects us from accidentally including this configuration in our
 // client bundle. That would be a big NO NO to do. :)
 if (process.env.BUILD_FLAG_IS_CLIENT === 'true') {
   throw new Error(
-    "You shouldn't be importing the `<projectroot>/config/values.js` directly into code that will be included in your 'client' bundle as the configuration object will be sent to user's browsers. This could be a security risk! Instead, use the `config` helper function located at `<projectroot>/config/index.js`.",
-  );
+    "You shouldn't be importing the `<projectroot>/config/values.js` directly into code that will be included in your 'client' bundle as the configuration object will be sent to user's browsers. This could be a security risk! Instead, use the `config` helper function located at `<projectroot>/config/index.js`."
+  )
 }
 
-export default values;
+export default values

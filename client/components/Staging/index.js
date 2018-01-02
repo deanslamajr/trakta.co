@@ -1,33 +1,30 @@
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import Helmet from 'react-helmet';
-import axios from 'axios';
-import classnames from 'classnames';
-import Tone from 'tone';
+import React from 'react'
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
+import axios from 'axios'
+import classnames from 'classnames'
+import Tone from 'tone'
 
-import config from '../../../config';
+import InstancePlaylist from '../InstancePlaylist'
+import SampleInstances from '../SampleInstances'
 
-import InstancePlaylist from '../InstancePlaylist';
-import SampleInstances from '../SampleInstances';
+import * as selectors from '../../../shared/reducers'
 
-import * as selectors from '../../../shared/reducers';
-
-import { setStagedSample, setStagedObjectUrl } from '../../../shared/actions/recorder';
+import { setStagedSample, setStagedObjectUrl } from '../../../shared/actions/recorder'
 import {
   setName as setTrakName,
   reset as resetTrak,
-  updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak';
-import { reset as resetSampleLoaderState } from '../../../shared/actions/samples';
+  updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak'
+import { reset as resetSampleLoaderState } from '../../../shared/actions/samples'
 
 import styles from './staging.css'
 
-function isNotANumber(unknown) {
+function isNotANumber (unknown) {
   return isNaN(parseFloat(unknown))
 }
 
-function validateData(absoluteStartTime, duration, volume, panning) {
+function validateData (absoluteStartTime, duration, volume, panning) {
   if (isNotANumber(absoluteStartTime) || isNotANumber(duration) || isNotANumber(volume) || isNotANumber(panning)) {
     throw new Error('Malformed submit data')
   }
@@ -41,13 +38,13 @@ class Staging extends React.Component {
       isSaving: false
     }
 
-    this._saveRecording = this._saveRecording.bind(this);
-    this._renderTrackPlayer = this._renderTrackPlayer.bind(this);
-    this._getBlobFromObjectUrl = this._getBlobFromObjectUrl.bind(this);
-    this._updateTrack = this._updateTrack.bind(this);
+    this._saveRecording = this._saveRecording.bind(this)
+    this._renderTrackPlayer = this._renderTrackPlayer.bind(this)
+    this._getBlobFromObjectUrl = this._getBlobFromObjectUrl.bind(this)
+    this._updateTrack = this._updateTrack.bind(this)
   }
 
-  _updateTrack(stagedSample) {
+  _updateTrack (stagedSample) {
     const latestStagedSample = stagedSample || this.props.stagedSample
 
     this.props.updateTrackDimensionsWithAdditionalSample({
@@ -58,9 +55,9 @@ class Staging extends React.Component {
   }
 
   _handleChange (type, event) {
-    let parsedValue = parseFloat(event.target.value);
+    let parsedValue = parseFloat(event.target.value)
     if (Number.isNaN(parsedValue)) {
-      return;
+      return
     }
 
     if (type === 'startTime') {
@@ -69,22 +66,21 @@ class Staging extends React.Component {
       }, () => {
         this.props.setStagedSample({ [type]: parsedValue })
       })
-    }
-    else {
+    } else {
       this.props.setStagedSample({ [type]: parsedValue })
     }
   }
 
-  _saveRecording(event) {
+  _saveRecording (event) {
     const {
       startTime: stagedSampleStartTime,
       volume,
       panning,
       duration
-    } = this.props.stagedSample;
+    } = this.props.stagedSample
 
     // prevent page refresh
-    event.preventDefault();
+    event.preventDefault()
 
     // show save animation
     this.setState({ isSaving: true })
@@ -92,36 +88,36 @@ class Staging extends React.Component {
     const config = {
       onUploadProgress: (progressEvent) => {
         console.log(
-          `upload progress: ${Math.round(progressEvent.loaded * 100 / progressEvent.total)}`,
-        );
-      },
-    };
+          `upload progress: ${Math.round(progressEvent.loaded * 100 / progressEvent.total)}`
+        )
+      }
+    }
 
     // validate that data is properly formatted
     // @todo handle invalid data state gracefully
     validateData(stagedSampleStartTime, duration, volume, panning)
 
-    const trakName = this.props.trakName || '';
+    const trakName = this.props.trakName || ''
 
     // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
     // e.g. user is actually looking at the page and is not a robot
-    const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`;
-    
+    const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`
+
     this._getBlobFromObjectUrl()
       .then((data) => axios.post(`/api/sample${queryString}`, data, config))
-      .then(response => {    
+      .then(response => {
         this.props.setStagedSample({
           startTime: 0,
           volume: 0,
           panning: 0,
           duration: 0
-        });
+        })
 
-        this.props.resetSampleLoaderState();
+        this.props.resetSampleLoaderState()
         // reset staged ObjectUrl
         this.props.setStagedObjectUrl(undefined)
-        
-        const isANewTrak = response.data.trakName !== this.props.trakName;
+
+        const isANewTrak = response.data.trakName !== this.props.trakName
         if (response.data.trakName && isANewTrak) {
           this.props.setTrakName(response.data.trakName)
         }
@@ -133,30 +129,30 @@ class Staging extends React.Component {
       .catch((err) => {
         // @todo log error
         // @todo handle this gracefully
-        console.error(err);
+        console.error(err)
         // this.props.failureCB
-      });
+      })
   }
 
   /**
    * getting a blob from an objectUrl is tricky :)
    * this method contains the trick
    */
-  _getBlobFromObjectUrl() {
+  _getBlobFromObjectUrl () {
     return axios.get(this.props.objectUrl, { responseType: 'blob' })
       .then(({ data }) => data)
   }
 
-  _renderErrorComponent(clickHandler) {
+  _renderErrorComponent (clickHandler) {
     return (
       <div onClick={clickHandler} className={classnames()}>
         <div className={classnames(styles.icon)}>&#9888;</div>
       </div>
-    );
+    )
   }
 
-  _renderTrackPlayer() {
-    const { buffer } = this.state;
+  _renderTrackPlayer () {
+    const { buffer } = this.state
 
     return (
       <div>
@@ -170,14 +166,14 @@ class Staging extends React.Component {
         </div>
 
         <SampleInstances />
-        
+
       </div>
-    );
+    )
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (this.state.updateTrack) {
-      this._updateTrack(nextProps.stagedSample);
+      this._updateTrack(nextProps.stagedSample)
 
       this.setState({
         updateTrack: false
@@ -186,12 +182,12 @@ class Staging extends React.Component {
   }
 
   // initialize the buffer everytime the user navigates to this page
-  componentDidMount() {
-    new Tone.Buffer(this.props.objectUrl,
+  componentDidMount () {
+    new Tone.Buffer(this.props.objectUrl, // eslint-disable-line 
       // success
       buffer => {
-        const duration = buffer.get().duration;
-        this.props.setStagedSample({ duration });
+        const duration = buffer.get().duration
+        this.props.setStagedSample({ duration })
 
         this._updateTrack()
 
@@ -203,9 +199,9 @@ class Staging extends React.Component {
       // error
       // @todo log, set error view state (w/ try again functionality)
       error => {
-        console.error(error);
+        console.error(error)
       }
-    );
+    )
   }
 
   render () {
@@ -213,29 +209,29 @@ class Staging extends React.Component {
       startTime,
       volume,
       panning
-    } = this.props.stagedSample;
+    } = this.props.stagedSample
 
     return (
       <div>
         <form className={styles.container} onSubmit={this._saveRecording}>
-          { 
+          {
             this.props.instances && this.props.instances.length
               ? (
-                  <div>
-                    <label htmlFor='startTime'>startTime</label>
-                    <input 
-                      id='startTime'
-                      type='number'
-                      step='0.01'
-                      value={startTime}
-                      onChange={this._handleChange.bind(this, 'startTime')}
-                      placeholder='startTime'
-                      className={styles.formInput} />
-                  </div>
+                <div>
+                  <label htmlFor='startTime'>startTime</label>
+                  <input
+                    id='startTime'
+                    type='number'
+                    step='0.01'
+                    value={startTime}
+                    onChange={this._handleChange.bind(this, 'startTime')}
+                    placeholder='startTime'
+                    className={styles.formInput} />
+                </div>
                 )
               : null
           }
-          
+
           <label htmlFor='volume'>volume (-infinity to +infinity)</label>
           <input id='volume'
             type='number'
@@ -244,7 +240,7 @@ class Staging extends React.Component {
             onChange={this._handleChange.bind(this, 'volume')}
             placeholder='volume'
             className={styles.formInput} />
-          
+
           <label htmlFor='panning'>panning (-1 to 1)</label>
           <input id='panning'
             type='number'
@@ -254,15 +250,15 @@ class Staging extends React.Component {
             placeholder='panning'
             className={styles.formInput} />
 
-          <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} /> 
+          <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} />
         </form>
 
         {
           this.state.buffer
             ? this._renderTrackPlayer()
-            : null 
+            : null
         }
-         
+
       </div>
     )
   }
@@ -275,10 +271,10 @@ const mapActionsToProps = {
   resetTrak,
   setTrakName,
   setStagedObjectUrl
-};
+}
 
-function mapStateToProps(state) {
-  return { 
+function mapStateToProps (state) {
+  return {
     objectUrl: selectors.getStagedObjectUrl(state),
     stagedSample: selectors.getStagedSample(state),
     trackDimensions: selectors.getTrackDimensions(state),
@@ -292,4 +288,4 @@ export { Staging }
 export default compose(
   withStyles(styles),
   connect(mapStateToProps, mapActionsToProps)
-)(Staging);
+)(Staging)

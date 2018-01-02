@@ -14,7 +14,7 @@
     "clean": "cross-env babel-node internal/scripts/clean",
     "deploy": "babel-node internal/scripts/deploy",
     "develop": "cross-env DEPLOYMENT=development babel-node internal/development",
-    "lint": "eslint client server shared config internal",
+    "lint": "standard --fix",
     "prestart": "babel-node internal/scripts/build --optimize",
     "start": "cross-env NODE_ENV=production node build/server",
     "test": "jest",
@@ -23,6 +23,14 @@
     "migrate:undo": "sequelize db:migrate:undo",
     "migrate:add": "sequelize migration:create",
     "generate": "all-contributors generate"
+  },
+  "standard": {
+    "globals": [
+      "sinon"
+    ],
+    "ignore": [
+      "/internal/scripts/preinstall.js"
+    ]
   },
   "jest": {
     "collectCoverageFrom": [
@@ -153,6 +161,7 @@
     "semver": "5.3.0",
     "sequelize-cli": "^2.7.0",
     "source-map-support": "0.4.14",
+    "standard": "^10.0.3",
     "style-loader": "0.16.1",
     "webpack": "2.4.1",
     "webpack-bundle-analyzer": "2.4.0",

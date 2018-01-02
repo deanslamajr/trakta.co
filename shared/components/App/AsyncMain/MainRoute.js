@@ -1,43 +1,42 @@
-import React from 'react';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import Helmet from 'react-helmet';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import axios from 'axios';
-import classnames from 'classnames';
+import React from 'react'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
+import Helmet from 'react-helmet'
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
+import classnames from 'classnames'
 
-import config from '../../../../config';
+import config from '../../../../config'
 
-import * as selectors from '../../../reducers';
+import * as selectors from '../../../reducers'
 
-import { fetchInstances, setName as setTrakName } from '../../../actions/trak';
-import { reset as resetSampleLoaderState } from '../../../actions/samples';
-import { setStagedSample, setStagedObjectUrl } from '../../../actions/recorder';
+import { fetchInstances, setName as setTrakName } from '../../../actions/trak'
+import { reset as resetSampleLoaderState } from '../../../actions/samples'
+import { setStagedSample, setStagedObjectUrl } from '../../../actions/recorder'
 
-import SampleInstances from '../../../../client/components/SampleInstances';
-import InstancePlaylist from '../../../../client/components/InstancePlaylist';
+import SampleInstances from '../../../../client/components/SampleInstances'
+import InstancePlaylist from '../../../../client/components/InstancePlaylist'
 
 import ProgressRing from '../AsyncProgressRing'
 
-import styles from './styles.css';
+import styles from './styles.css'
 
 class MainRoute extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
-    this._showContribute = this._showContribute.bind(this);
-    this._renderLoadingComponent = this._renderLoadingComponent.bind(this);
-    this._renderErrorComponent = this._renderErrorComponent.bind(this);
+    this._showContribute = this._showContribute.bind(this)
+    this._renderLoadingComponent = this._renderLoadingComponent.bind(this)
+    this._renderErrorComponent = this._renderErrorComponent.bind(this)
   }
 
-  _showContribute() {
-    //@todo have this show a menu of contribution options, which would include <Recorder> among others
-    this.props.resetSampleLoaderState();
-    this.props.history.push('/recorder');
+  _showContribute () {
+    // @todo have this show a menu of contribution options, which would include <Recorder> among others
+    this.props.resetSampleLoaderState()
+    this.props.history.push('/recorder')
   }
 
-  _renderLoadingComponent() {
-    const progress = this.props.finishedTasks / this.props.totalTasks;
+  _renderLoadingComponent () {
+    const progress = this.props.finishedTasks / this.props.totalTasks
 
     return (
       <div className={styles.spinner}>
@@ -46,42 +45,41 @@ class MainRoute extends React.Component {
     )
   }
 
-  _renderErrorComponent(clickHandler) {
+  _renderErrorComponent (clickHandler) {
     return (
       <div onClick={clickHandler} className={classnames(styles.error, styles.button, styles.centerButton)}>
         <div className={classnames(styles.icon)}>&#9888;</div>
       </div>
-    );
+    )
   }
 
-  componentDidMount() {
+  componentDidMount () {
     if (this.props.match.params.trakName) {
       // @todo handle the case where a non existant trakName is passed
 
       // verify that we have updated the store to the correct trakName
-      if(this.props.trakName !== this.props.match.params.trakName) {
-        this.props.setTrakName(this.props.match.params.trakName);
+      if (this.props.trakName !== this.props.match.params.trakName) {
+        this.props.setTrakName(this.props.match.params.trakName)
       }
-      this.props.fetchInstances();
-    }
-    // @case - url navigation without trakName in path
-    else {
+      this.props.fetchInstances()
+    } else {
+      // @case - url navigation without trakName in path
       // @todo
       // fetch a random track??
-      return this.props.history.push('/new');
+      return this.props.history.push('/new')
     }
 
     this.props.addItemToNavBar(undefined, { type: 'ADD', cb: this._showContribute })
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     // clear any staged sample from store
-    this.props.setStagedSample({ duration: 0 });
+    this.props.setStagedSample({ duration: 0 })
     this.props.setStagedObjectUrl(undefined)
   }
 
-  render() {
-    const currentTrakName = this.props.trakName || '';
+  render () {
+    const currentTrakName = this.props.trakName || ''
 
     return (
       <div className={styles.container}>
@@ -101,16 +99,16 @@ class MainRoute extends React.Component {
               addItemToNavBar={this.props.addItemToNavBar}
               renderErrorComponent={this._renderErrorComponent} />
           </div>
-          
+
           <SampleInstances />
         </div>
-         { this.props.isLoading && this._renderLoadingComponent() } 
+        { this.props.isLoading && this._renderLoadingComponent() }
       </div>
-    );
+    )
   }
 }
 
-function mapStateToProps(state, ownProps) {
+function mapStateToProps (state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
     trackDimensions: selectors.getTrackDimensions(state),
@@ -118,7 +116,7 @@ function mapStateToProps(state, ownProps) {
     finishedTasks: selectors.getFinishedTasks(state),
     instances: selectors.getInstances(state),
     trakName: selectors.getTrakName(state)
-  };
+  }
 };
 
 const mapActionsToProps = {
@@ -127,11 +125,11 @@ const mapActionsToProps = {
   resetSampleLoaderState,
   setStagedSample,
   setStagedObjectUrl
-};
+}
 
 export default compose(
   withStyles(styles),
   connect(mapStateToProps, mapActionsToProps)
-)(MainRoute);
+)(MainRoute)
 
 export { MainRoute }

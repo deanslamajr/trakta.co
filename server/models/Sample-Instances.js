@@ -31,6 +31,6 @@ const SampleInstances = sequelize.define('sample_instances',
     freezeTableName: true,
     underscored: true
   }
-);
+)
 
 export default SampleInstances

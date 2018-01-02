@@ -8,14 +8,14 @@
  * NOTE: We only enable the service worker for non-development environments.
  */
 
-import config from '../config';
+import config from '../config'
 
 if (process.env.BUILD_FLAG_IS_DEV === 'false') {
   // We check the shared config, ensuring that the service worker has been
   // enabled.
   if (config('serviceWorker.enabled')) {
     // eslint-disable-next-line global-require
-    const OfflinePluginRuntime = require('offline-plugin/runtime');
+    const OfflinePluginRuntime = require('offline-plugin/runtime')
 
     // Install the offline plugin, which instantiates our service worker and app
     // cache to support precaching of assets and offline support.
@@ -27,7 +27,7 @@ if (process.env.BUILD_FLAG_IS_DEV === 'false') {
       // to ensure they are using the latest assets.
       // This only gets run if there were updates available for our cached assets.
       onUpdated: () => window.location.reload(),
-      onUpdateFailed: () => undefined,
-    });
+      onUpdateFailed: () => undefined
+    })
   }
 }

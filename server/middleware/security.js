@@ -1,25 +1,25 @@
-import uuid from 'uuid';
-import hpp from 'hpp';
-import helmet from 'helmet';
-import config from '../../config';
+import uuid from 'uuid'
+import hpp from 'hpp'
+import helmet from 'helmet'
+import config from '../../config'
 
 const cspConfig = {
   directives: {
     childSrc: [
       "'self'",
-      'blob:',
+      'blob:'
     ],
     // Note: Setting this to stricter than * breaks the service worker. :(
     // I can't figure out how to get around this, so if you know of a safer
     // implementation that is kinder to service workers please let me know.
     connectSrc: [
       // ["'self'", 'ws:'],
-      '*',  
+      '*',
       'blob:' // new Tone.buffer('blob:something')
     ],
     defaultSrc: ["'self'"],
     imgSrc: [
-      "'self'",
+      "'self'"
       // If you use Base64 encoded images (i.e. inlined images), then you will
       // need the following:
       // 'data:',
@@ -29,7 +29,7 @@ const cspConfig = {
     mediaSrc: [
       "'self'",
       // @todo This is needed for displaying recordings from blobs, can remove after prototype is finished
-      'blob:',
+      'blob:'
     ],
     manifestSrc: ["'self'"],
     scriptSrc: [
@@ -45,42 +45,42 @@ const cspConfig = {
       // It will be ignored by browsers that do support nonces as they will
       // recognise that we have also provided a nonce configuration and
       // use the stricter rule.
-      "'unsafe-inline'",
+      "'unsafe-inline'"
     ],
     styleSrc: [
       "'self'",
       // Webpack generates JS that loads our CSS, so this is needed:
       "'unsafe-inline'",
-      'blob:',
-    ],
-  },
-};
+      'blob:'
+    ]
+  }
+}
 
 // Add any additional CSP from the static config.
-const cspExtensions = config('cspExtensions');
+const cspExtensions = config('cspExtensions')
 Object.keys(cspExtensions).forEach((key) => {
   if (cspConfig.directives[key]) {
-    cspConfig.directives[key] = cspConfig.directives[key].concat(cspExtensions[key]);
+    cspConfig.directives[key] = cspConfig.directives[key].concat(cspExtensions[key])
   } else {
-    cspConfig.directives[key] = cspExtensions[key];
+    cspConfig.directives[key] = cspExtensions[key]
   }
-});
+})
 
 if (process.env.BUILD_FLAG_IS_DEV === 'true') {
   // When in development mode we need to add our secondary express server that
   // is used to host our client bundle to our csp config.
   Object.keys(cspConfig.directives).forEach((directive) => {
-    cspConfig.directives[directive].push(`${config('host')}:${config('clientDevServerPort')}`);
-  });
+    cspConfig.directives[directive].push(`${config('host')}:${config('clientDevServerPort')}`)
+  })
 }
 
 // Attach a unique "nonce" to every response.  This allows use to declare
 // inline scripts as being safe for execution against our content security policy.
 // @see https://helmetjs.github.io/docs/csp/
-function nonceMiddleware(req, res, next) {
+function nonceMiddleware (req, res, next) {
   // eslint-disable-next-line no-param-reassign
-  res.locals.nonce = uuid.v4();
-  next();
+  res.locals.nonce = uuid.v4()
+  next()
 }
 
 const securityMiddleware = [
@@ -130,7 +130,7 @@ const securityMiddleware = [
   // The CSP configuration is an optional item for helmet, however you should
   // not remove it without making a serious consideration that you do not
   // require the added security.
-  helmet.contentSecurityPolicy(cspConfig),
-];
+  helmet.contentSecurityPolicy(cspConfig)
+]
 
-export default securityMiddleware;
+export default securityMiddleware

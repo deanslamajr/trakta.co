@@ -1,13 +1,13 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-env jest */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+import React from 'react'
+import { shallow } from 'enzyme'
 
-import { MainRoute } from '../MainRoute';
+import { MainRoute } from '../MainRoute'
 
 describe('<MainRoute />', () => {
   test('renders', () => {
-    const wrapper = shallow(<MainRoute />);
-    expect(wrapper).toMatchSnapshot();
-  });
-});
+    const wrapper = shallow(<MainRoute />)
+    expect(wrapper).toMatchSnapshot()
+  })
+})

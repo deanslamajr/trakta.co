@@ -1,8 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import serialize from 'serialize-javascript';
-import filterWithRules from '../../shared/utils/objects/filterWithRules';
-import values from '../values';
+import React from 'react'
+import PropTypes from 'prop-types'
+import serialize from 'serialize-javascript'
+import filterWithRules from '../../shared/utils/objects/filterWithRules'
+import values from '../values'
 
 // Filter the config down to the properties that are allowed to be included
 // in the HTML response.
@@ -10,10 +10,10 @@ const clientConfig = filterWithRules(
   // These are the rules used to filter the config.
   values.clientConfigFilter,
   // The config values to filter.
-  values,
-);
+  values
+)
 
-const serializedClientConfig = serialize(clientConfig);
+const serializedClientConfig = serialize(clientConfig)
 
 /**
  * A react component that generates a script tag that binds the allowed
@@ -22,21 +22,21 @@ const serializedClientConfig = serialize(clientConfig);
  *
  * They get bound to window.__CLIENT_CONFIG__
  */
-function ClientConfig({ nonce }) {
+function ClientConfig ({ nonce }) {
   return (
     <script
-      type="text/javascript"
+      type='text/javascript'
       nonce={nonce}
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{
-        __html: `window.__CLIENT_CONFIG__=${serializedClientConfig}`,
+        __html: `window.__CLIENT_CONFIG__=${serializedClientConfig}`
       }}
     />
-  );
+  )
 }
 
 ClientConfig.propTypes = {
-  nonce: PropTypes.string.isRequired,
-};
+  nonce: PropTypes.string.isRequired
+}
 
-export default ClientConfig;
+export default ClientConfig

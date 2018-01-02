@@ -1,41 +1,39 @@
-import React from 'react';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Tone from 'tone';
-import ReactSlider from 'react-slider';
-import classnames from 'classnames';
-import { keyframes } from 'styled-components';
+import React from 'react'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
+import ReactSlider from 'react-slider'
+import classnames from 'classnames'
+import { keyframes } from 'styled-components'
 
-import * as selectors from '../../../shared/reducers';
+import * as selectors from '../../../shared/reducers'
 import {
   setStagedObjectUrl,
-  setCleanup } from '../../../shared/actions/recorder';
+  setCleanup } from '../../../shared/actions/recorder'
 
-import { getSampleCreator } from '../Recorder/SampleCreator';
+import { getSampleCreator } from '../Recorder/SampleCreator'
 
 import styles from './cleanup.css'
 
 let audioElement
 
 function getRootPath (fullPath) {
-  const pathTokens = fullPath.split('/');
+  const pathTokens = fullPath.split('/')
   return pathTokens[1] || ''
 }
 
 function stopPlayback () {
-  audioElement.pause();
-  audioElement.currentTime = 0.0;
+  audioElement.pause()
+  audioElement.currentTime = 0.0
 }
 
 class Cleanup extends React.Component {
   constructor (props) {
-    super(props);
+    super(props)
 
     try {
-      this.sampleCreator = getSampleCreator();
-    }
-    catch(error) {
+      this.sampleCreator = getSampleCreator()
+    } catch (error) {
       // Tone.UserMedia is not supported
       // @todo catch this earlier
       console.error(error)
@@ -55,63 +53,63 @@ class Cleanup extends React.Component {
     this._stopPlayback = this._stopPlayback.bind(this)
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
     this._generateKeyFrames = this._generateKeyFrames.bind(this)
-    this._renderSample = this._renderSample.bind(this);
+    this._renderSample = this._renderSample.bind(this)
   }
 
   _clickUseThisSelection () {
-    const rootPath = getRootPath(this.props.match.path);
+    const rootPath = getRootPath(this.props.match.path)
 
-    this.props.history.push(`/${rootPath}/staging`);
+    this.props.history.push(`/${rootPath}/staging`)
   }
 
-  _renderSample(start, stop) {
+  _renderSample (start, stop) {
     this.sampleCreator.createBlob(start, stop)
 
-    const objectUrl = this.sampleCreator.createBlobObjectUrl();
+    const objectUrl = this.sampleCreator.createBlobObjectUrl()
 
-    audioElement = new Audio([objectUrl]);
+    audioElement = new Audio([objectUrl]) // eslint-disable-line
     audioElement.loop = true
 
     this.props.setStagedObjectUrl(objectUrl)
   }
 
-  _drawWaveForm() {
-    const canvasWidth = this.canvasContext.canvas.width;
-    const canvasHeight = this.canvasContext.canvas.height;
+  _drawWaveForm () {
+    const canvasWidth = this.canvasContext.canvas.width
+    const canvasHeight = this.canvasContext.canvas.height
 
-    let x;
+    let x
 
     // draw the waveform
     const values = this.sampleCreator.getReducedSet(this.state.canvasHeight)
 
-    this.canvasContext.beginPath();
-    this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
-    this.canvasContext.lineJoin = 'round';
-    this.canvasContext.lineWidth = 1;
-    this.canvasContext.strokeStyle = '#CCCCCC';
+    this.canvasContext.beginPath()
+    this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight)
+    this.canvasContext.lineJoin = 'round'
+    this.canvasContext.lineWidth = 1
+    this.canvasContext.strokeStyle = '#CCCCCC'
 
-    this.canvasContext.moveTo((values[0] / 255) * canvasWidth, canvasHeight);
-    
-    for (let i = values.length; i > 0; i--){
-      const val = values[i]/ (this.sampleCreator.resolution - 1);
-      x = val * canvasWidth;
-      this.canvasContext.lineTo(x, i);
+    this.canvasContext.moveTo((values[0] / 255) * canvasWidth, canvasHeight)
+
+    for (let i = values.length; i > 0; i--) {
+      const val = values[i] / (this.sampleCreator.resolution - 1)
+      x = val * canvasWidth
+      this.canvasContext.lineTo(x, i)
     }
 
-    this.canvasContext.stroke();
-    this.canvasContext.closePath();
+    this.canvasContext.stroke()
+    this.canvasContext.closePath()
   }
 
-  _stopPlayback() {
+  _stopPlayback () {
     stopPlayback()
 
-    this.props.addItemToNavBar({ type: 'PLAY', cb: this._startPlayback});
+    this.props.addItemToNavBar({ type: 'PLAY', cb: this._startPlayback })
     this.setState({ isPlaying: false })
   }
 
-  _startPlayback() {
+  _startPlayback () {
     audioElement.play()
-    this.props.addItemToNavBar({ type: 'STOP', cb: this._stopPlayback})
+    this.props.addItemToNavBar({ type: 'STOP', cb: this._stopPlayback })
 
     this.setState({
       isPlaying: true,
@@ -138,13 +136,13 @@ class Cleanup extends React.Component {
     this.props.setCleanup({
       clipEnd: value,
       rightSliderValue: value
-    });
+    })
   }
 
   _generateKeyFrames () {
-    const maxClipValue = this.sampleCreator.getDataBufferLength();
-    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue/maxClipValue);
-    const keyframeBottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue/maxClipValue)
+    const maxClipValue = this.sampleCreator.getDataBufferLength()
+    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
+    const keyframeBottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue)
 
     const playAnimationKeyframeName = keyframes`
         0%   { top: ${Math.ceil(top)}px; }
@@ -154,65 +152,64 @@ class Cleanup extends React.Component {
     this.setState({ playAnimationKeyframeName })
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.cleanup.clipStart != nextProps.cleanup.clipStart || this.props.cleanup.clipEnd != nextProps.cleanup.clipEnd) {
+  componentWillReceiveProps (nextProps) {
+    if (this.props.cleanup.clipStart !== nextProps.cleanup.clipStart || this.props.cleanup.clipEnd !== nextProps.cleanup.clipEnd) {
       if (this.state.isPlaying) {
         this._stopPlayback()
       }
       this._renderSample(nextProps.cleanup.clipStart, nextProps.cleanup.clipEnd)
-      this._generateKeyFrames();
+      this._generateKeyFrames()
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     const height = this.container
         ? this.container.parentNode.clientHeight
-        : 0;
+        : 0
     const width = this.container
         ? this.container.parentNode.clientWidth
-        : 0;
+        : 0
 
     // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
     // don't do this stuff
     if (this.canvas) {
       this.setState({
-        canvasWidth: width * .7,
+        canvasWidth: width * 0.7,
         canvasHeight: height
       }, () => {
         // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
         // don't do this stuff
         if (this.canvas) {
-          this.canvasContext = this.canvas.getContext('2d');
+          this.canvasContext = this.canvas.getContext('2d')
 
           // @todo have these resize with window resize
-          this.canvasContext.canvas.width = this.state.canvasWidth;
-          this.canvasContext.canvas.height = this.state.canvasHeight;
+          this.canvasContext.canvas.width = this.state.canvasWidth
+          this.canvasContext.canvas.height = this.state.canvasHeight
 
-          this._drawWaveForm();
-          this._renderSample(this.props.cleanup.clipStart, this.props.cleanup.clipEnd);
+          this._drawWaveForm()
+          this._renderSample(this.props.cleanup.clipStart, this.props.cleanup.clipEnd)
 
-          this._generateKeyFrames();
+          this._generateKeyFrames()
 
           this.props.addItemToNavBar(
-            { type: 'PLAY', cb: this._startPlayback},
-            { type: 'CHECK', cb: this._clickUseThisSelection}
-          );
+            { type: 'PLAY', cb: this._startPlayback },
+            { type: 'CHECK', cb: this._clickUseThisSelection }
+          )
         }
       })
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     stopPlayback()
   }
 
-  render() {
-    const maxClipValue = this.sampleCreator.getDataBufferLength();
+  render () {
+    const maxClipValue = this.sampleCreator.getDataBufferLength()
     const stepValue = Math.ceil(maxClipValue / 1000)
 
-    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue/maxClipValue);
-    const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.props.cleanup.rightSliderValue/maxClipValue));
-    const keyframeBottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue/maxClipValue)
+    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
+    const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue))
 
     const playIndicatorStyles = this.state.isPlaying
       ? {
@@ -222,10 +219,10 @@ class Cleanup extends React.Component {
       : {}
 
     return (
-      <div ref={(container) => { this.container = container; }}>
+      <div ref={(container) => { this.container = container }}>
         <div className={styles.label}>
           {
-            this.props.objectUrl && 
+            this.props.objectUrl &&
             (
               <div>
                 <div>
@@ -251,14 +248,14 @@ class Cleanup extends React.Component {
                   />
                 </div>
 
-                <canvas 
+                <canvas
                   className={styles.canvas}
-                  width={ this.state.canvasWidth || 0} 
-                  height= { this.state.canvasHeight || 0} 
-                  ref={(canvas) => { this.canvas = canvas; }}
+                  width={this.state.canvasWidth || 0}
+                  height={this.state.canvasHeight || 0}
+                  ref={(canvas) => { this.canvas = canvas }}
                 />
-                <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask}></div>
-                <div style={playIndicatorStyles} className={styles.playIndicator}></div>
+                <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
+                <div style={playIndicatorStyles} className={styles.playIndicator} />
               </div>
             )
           }
@@ -271,9 +268,9 @@ class Cleanup extends React.Component {
 const mapActionsToProps = {
   setStagedObjectUrl,
   setCleanup
-};
+}
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
   return {
     objectUrl: selectors.getStagedObjectUrl(state),
     cleanup: selectors.getCleanup(state)
@@ -283,4 +280,4 @@ function mapStateToProps(state) {
 export default compose(
   withStyles(styles),
   connect(mapStateToProps, mapActionsToProps)
-)(Cleanup);
+)(Cleanup)

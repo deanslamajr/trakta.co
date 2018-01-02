@@ -9,8 +9,8 @@ const errorHandlersMiddleware = [
    * have this backup for paths not handled by the react middleware. For
    * example you may bind a /api path to express.
    */
-  function notFoundMiddlware(req, res, next) {
-    res.status(404).send('Sorry, that resource was not found.');
+  function notFoundMiddlware (req, res, next) {
+    res.status(404).send('Sorry, that resource was not found.')
   },
 
   /**
@@ -19,13 +19,13 @@ const errorHandlersMiddleware = [
    * NOTE: You must provide specify all 4 parameters on this callback function
    * even if they aren't used, otherwise it won't be used.
    */
-  function unexpectedErrorMiddleware(err, req, res, next) {
+  function unexpectedErrorMiddleware (err, req, res, next) {
     if (err) {
-      console.log(err);
-      console.log(err.stack);
+      console.log(err)
+      console.log(err.stack)
     }
-    res.status(500).send('Sorry, an unexpected error occurred.');
-  },
-];
+    res.status(500).send('Sorry, an unexpected error occurred.')
+  }
+]
 
-export default errorHandlersMiddleware;
+export default errorHandlersMiddleware

@@ -1,39 +1,39 @@
-import React from 'react';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import WaveformData from 'waveform-data';
+import React from 'react'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
+import WaveformData from 'waveform-data'
 
 import {
   setStagedObjectUrl,
   setCleanup,
-  setStagedSample } from '../../../shared/actions/recorder';
-import * as selectors from '../../../shared/reducers';
+  setStagedSample } from '../../../shared/actions/recorder'
+import * as selectors from '../../../shared/reducers'
 
-import { getSampleCreator } from './SampleCreator';
+import { getSampleCreator } from './SampleCreator'
 
 import styles from './Recorder.css'
 
-function clearCanvas(ctx) {
-  requestAnimationFrame(() => {
-    const canvasWidth = ctx.canvas.width;
-    const canvasHeight = ctx.canvas.height;
-    
-    ctx.beginPath();
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.closePath();
+function clearCanvas (ctx) {
+  requestAnimationFrame(() => { // eslint-disable-line
+    const canvasWidth = ctx.canvas.width
+    const canvasHeight = ctx.canvas.height
+
+    ctx.beginPath()
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+    ctx.closePath()
   })
 }
 
 class Recorder extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
     this.prompts = {
       START: this._renderSTART.bind(this),
       STOP: this._renderSTOP.bind(this),
       USER_MEDIA_DENIED: this._renderUSER_MEDIA_DENIED.bind(this)
-    };
+    }
 
     this.state = {
       isRecording: false,
@@ -41,119 +41,116 @@ class Recorder extends React.Component {
       currentPrompt: this.prompts.START,
       drawWave: false,
       duration: undefined
-    };
+    }
 
     try {
-      this.sampleCreator = getSampleCreator();
-    }
-    catch(error) {
+      this.sampleCreator = getSampleCreator()
+    } catch (error) {
       // Tone.UserMedia is not supported
       // @todo catch this earlier
     }
 
-    this._startRecording = this._startRecording.bind(this);
-    this._stopRecording = this._stopRecording.bind(this);
-    this._beginDrawingWaves = this._beginDrawingWaves.bind(this);
-    this._drawWave = this._drawWave.bind(this);
-    this._drawSample = this._drawSample.bind(this);
+    this._startRecording = this._startRecording.bind(this)
+    this._stopRecording = this._stopRecording.bind(this)
+    this._beginDrawingWaves = this._beginDrawingWaves.bind(this)
+    this._drawWave = this._drawWave.bind(this)
+    this._drawSample = this._drawSample.bind(this)
   }
 
-  _beginDrawingWaves() {
-    this.canvasContext = this.canvas.getContext('2d'); 
+  _beginDrawingWaves () {
+    this.canvasContext = this.canvas.getContext('2d')
 
     // @todo have these resize with window resize
-    this.canvasContext.canvas.width = this.canvas.width;
-    this.canvasContext.canvas.height = this.canvas.height;
+    this.canvasContext.canvas.width = this.canvas.width
+    this.canvasContext.canvas.height = this.canvas.height
 
     // draw waves
     this.setState({ drawWave: true })
 
-    this._drawWave();
+    this._drawWave()
   }
 
-  _drawWave() {
-    const canvasWidth = this.canvasContext.canvas.width;
-    const canvasHeight = this.canvasContext.canvas.height;
+  _drawWave () {
+    const canvasWidth = this.canvasContext.canvas.width
+    const canvasHeight = this.canvasContext.canvas.height
 
-    let x;
-    let y;
-    let isWhite = false;
+    let x
+    let y
+    let isWhite = false
 
     if (this.state.drawWave) {
-      requestAnimationFrame(this._drawWave);
+      requestAnimationFrame(this._drawWave) // eslint-disable-line
     }
 
     // draw the waveform
     const values = this.sampleCreator.getValues()
 
-    this.canvasContext.beginPath();
-    this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
-    this.canvasContext.lineJoin = 'round';
-    if(this.state.isRecording) {
-      this.canvasContext.lineWidth = 5;
-      this.canvasContext.strokeStyle = 'red';
+    this.canvasContext.beginPath()
+    this.canvasContext.clearRect(0, 0, canvasWidth, canvasHeight)
+    this.canvasContext.lineJoin = 'round'
+    if (this.state.isRecording) {
+      this.canvasContext.lineWidth = 5
+      this.canvasContext.strokeStyle = 'red'
+    } else {
+      this.canvasContext.lineWidth = 2
+      this.canvasContext.strokeStyle = '#CCCCCC'
     }
-    else {
-      this.canvasContext.lineWidth = 2;
-      this.canvasContext.strokeStyle = '#CCCCCC';
-    }
-    this.canvasContext.moveTo((values[0] / 255) * canvasWidth, canvasHeight);
+    this.canvasContext.moveTo((values[0] / 255) * canvasWidth, canvasHeight)
 
-    const now = Date.now();
-    
-    for (let i = values.length; i > 0; i--){
-      if(this.state.isRecording) {
-        if ((1-i/values.length) > ((now - this.state.recordingStartTime)/10000) && !isWhite) {
-          isWhite = true;
-          this.canvasContext.stroke();
-          this.canvasContext.closePath();
-          this.canvasContext.lineWidth = 2;
-          this.canvasContext.strokeStyle = '#CCCCCC';
-          this.canvasContext.beginPath();
-          this.canvasContext.moveTo(x, y);
-          this.canvasContext.lineJoin = 'round';
+    const now = Date.now()
+
+    for (let i = values.length; i > 0; i--) {
+      if (this.state.isRecording) {
+        if ((1 - i / values.length) > ((now - this.state.recordingStartTime) / 10000) && !isWhite) {
+          isWhite = true
+          this.canvasContext.stroke()
+          this.canvasContext.closePath()
+          this.canvasContext.lineWidth = 2
+          this.canvasContext.strokeStyle = '#CCCCCC'
+          this.canvasContext.beginPath()
+          this.canvasContext.moveTo(x, y)
+          this.canvasContext.lineJoin = 'round'
         }
       }
-      const val = values[i] / (this.sampleCreator.resolution - 1);
-      x = val * canvasWidth;
-      y = (i / (this.sampleCreator.resolution - 1)) * canvasHeight;
-      this.canvasContext.lineTo(x, y);
+      const val = values[i] / (this.sampleCreator.resolution - 1)
+      x = val * canvasWidth
+      y = (i / (this.sampleCreator.resolution - 1)) * canvasHeight
+      this.canvasContext.lineTo(x, y)
     }
 
-    this.canvasContext.stroke();
-    this.canvasContext.closePath();
+    this.canvasContext.stroke()
+    this.canvasContext.closePath()
   }
 
-  _drawSample(buffer) {
-    const waveFormData = WaveformData.create(buffer);
-    waveFormData.offset(0, buffer.byteLength/4);
+  _drawSample (buffer) {
+    const waveFormData = WaveformData.create(buffer)
+    waveFormData.offset(0, buffer.byteLength / 4)
 
-    const ctx = this.canvasContext;
+    const ctx = this.canvasContext
 
-    const canvasWidth = ctx.canvas.width;
-    const canvasHeight = ctx.canvas.height;
+    const canvasHeight = ctx.canvas.height
 
-    const interpolateHeight = (total_height) => {
-      const amplitude = 256;
-      return (size) => total_height - ((size + 128) * total_height) / amplitude;
-    };
-    const y = interpolateHeight(canvasHeight);
+    const interpolateHeight = (totalHeight) => {
+      const amplitude = 256
+      return (size) => totalHeight - ((size + 128) * totalHeight) / amplitude
+    }
+    const y = interpolateHeight(canvasHeight)
 
-    ctx.beginPath();
+    ctx.beginPath()
 
     // from 0 to 100
-    waveFormData.min.forEach((val, x) => ctx.lineTo(x + 0.5, y(val) + 0.5));
+    waveFormData.min.forEach((val, x) => ctx.lineTo(x + 0.5, y(val) + 0.5))
 
     // then looping back from 100 to 0
     waveFormData.max.reverse().forEach((val, x) => {
-      ctx.lineTo((waveFormData.offset_length - x) + 0.5, y(val) + 0.5);
-    });
+      ctx.lineTo((waveFormData.offset_length - x) + 0.5, y(val) + 0.5)
+    })
 
-    ctx.closePath();
-    ctx.stroke();
+    ctx.closePath()
+    ctx.stroke()
   }
 
-  _renderSTART() {
+  _renderSTART () {
     return (
       <div>
         {
@@ -162,47 +159,47 @@ class Recorder extends React.Component {
             : <div className={styles.blueMask} />
         }
       </div>
-    );
+    )
   }
 
-  _startRecording() {
+  _startRecording () {
     this.sampleCreator.startRecording()
 
-    this.props.addItemToNavBar(null, { type: 'CHECK', cb:this._stopRecording })
+    this.props.addItemToNavBar(null, { type: 'CHECK', cb: this._stopRecording })
 
-    this.setState({ 
+    this.setState({
       recordingStartTime: Date.now(),
       isRecording: true,
       currentPrompt: this.prompts.STOP
-    });
+    })
   }
 
-  _renderSTOP() {
-    return (<div className={styles.redMask} />);
+  _renderSTOP () {
+    return (<div className={styles.redMask} />)
   }
 
-  _navigateToCleanup() {
-    this.props.history.push(`${this.props.match.url}/cleanup`);
+  _navigateToCleanup () {
+    this.props.history.push(`${this.props.match.url}/cleanup`)
   }
 
-  _stopRecording() {
-    this.setState({ 
+  _stopRecording () {
+    this.setState({
       isRecording: false,
       drawWave: false
-    });
+    })
 
-    clearCanvas(this.canvasContext);
+    clearCanvas(this.canvasContext)
 
-    this.sampleCreator.stopAndFinishRecording();
-    const objectUrl = this.sampleCreator.createBlobObjectUrl();
+    this.sampleCreator.stopAndFinishRecording()
+    const objectUrl = this.sampleCreator.createBlobObjectUrl()
 
     this.props.setStagedSample({
       startTime: 0,
       volume: 0,
       panning: 0,
       duration: 0
-    });
-    this.props.setStagedObjectUrl(objectUrl);
+    })
+    this.props.setStagedObjectUrl(objectUrl)
 
     const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
     const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
@@ -210,25 +207,25 @@ class Recorder extends React.Component {
       leftSliderValue: initialStartValue,
       rightSliderValue: initialEndValue,
       clipStart: initialStartValue,
-      clipEnd: initialEndValue,
+      clipEnd: initialEndValue
     })
 
     this._navigateToCleanup()
   }
 
-  _renderUSER_MEDIA_DENIED() {
+  _renderUSER_MEDIA_DENIED () { // eslint-disable-line
     return (
       <div>Welp, you blew it!</div>
-    );
+    )
   }
 
-  componentDidMount() {
+  componentDidMount () {
     const height = this.container
         ? this.container.parentNode.clientHeight
-        : 0;
+        : 0
     const width = this.container
         ? this.container.parentNode.clientWidth
-        : 0;
+        : 0
 
     this.setState({
       canvasWidth: width,
@@ -244,31 +241,24 @@ class Recorder extends React.Component {
             if (this.canvas) {
               this.props.addItemToNavBar(null, { type: 'RECORD', cb: this._startRecording })
               // overlay 'start recording' mask
-              this.setState({ disableRecording: false });
-              this._beginDrawingWaves();
+              this.setState({ disableRecording: false })
+              this._beginDrawingWaves()
             }
           })
           .catch(err => {
-            console.error(err);
+            console.error(err)
             // @todo log and metric
-            this.setState({ currentPrompt: this.prompts.USER_MEDIA_DENIED });
-          });
+            this.setState({ currentPrompt: this.prompts.USER_MEDIA_DENIED })
+          })
       }
-    });
+    })
   }
 
-  render() {
-    const height = this.container
-        ? this.container.parentNode.clientHeight
-        : 0;
-    const width = this.container
-        ? this.container.parentNode.clientWidth
-        : 0;
-
+  render () {
     return (
       // @todo replace with imported css
-      <div ref={(container) => { this.container = container; }}>
-        { 
+      <div ref={(container) => { this.container = container }}>
+        {
           this.sampleCreator
             ? (
               <div>
@@ -278,22 +268,22 @@ class Recorder extends React.Component {
             : (
               <div className={styles.notSupportedMessage}>
                 WebAudio is not supported by this browser.
-                <br/>
+                <br />
                 Please upgrade this browser's version or switch to a browser that supports this technology.
-                <br/>
+                <br />
                 i.e. internet explorer, safari, and all iOS-based browsers will not be able to run this application
               </div>
             )
         }
 
-        <canvas 
+        <canvas
           className={styles.container}
-          width={ this.state.canvasWidth || 0} 
-          height= { this.state.canvasHeight || 0}
-          ref={(canvas) => { this.canvas = canvas; }}
+          width={this.state.canvasWidth || 0}
+          height={this.state.canvasHeight || 0}
+          ref={(canvas) => { this.canvas = canvas }}
         />
       </div>
-    );
+    )
   }
 }
 
@@ -301,13 +291,13 @@ const mapActionsToProps = {
   setStagedObjectUrl,
   setStagedSample,
   setCleanup
-};
+}
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
   return { objectUrl: selectors.getStagedObjectUrl(state) }
 }
 
 export default compose(
   withStyles(styles),
   connect(mapStateToProps, mapActionsToProps)
-)(Recorder);
+)(Recorder)

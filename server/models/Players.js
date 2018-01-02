@@ -24,7 +24,7 @@ const Player = sequelize.define('players',
     freezeTableName: true,
     underscored: true
   }
-);
+)
 
 const ANONYMOUS_PLAYER_ID = '014f476a-6c9c-403c-9b43-c1448a4b29a6'
 

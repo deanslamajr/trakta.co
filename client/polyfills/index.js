@@ -1,3 +1,3 @@
 /* eslint-disable no-console */
 
-//import Modernizr from 'modernizr';
+// import Modernizr from 'modernizr';

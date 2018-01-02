@@ -1,32 +1,32 @@
-import React from 'react';
-import Helmet from 'react-helmet';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
+import React from 'react'
+import Helmet from 'react-helmet'
+import { compose } from 'redux'
+import { connect } from 'react-redux'
 
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import classnames from 'classnames';
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
+import classnames from 'classnames'
 
-import config from '../../../../config';
+import config from '../../../../config'
 
-import { fetchAll as fetchTraks } from '../../../actions/traklist';
-import { reset as resetSampleLoaderState } from '../../../actions/samples';
-import { reset as resetTrakState } from '../../../actions/trak';
+import { fetchAll as fetchTraks } from '../../../actions/traklist'
+import { reset as resetSampleLoaderState } from '../../../actions/samples'
+import { reset as resetTrakState } from '../../../actions/trak'
 
-import * as selectors from '../../../reducers';
+import * as selectors from '../../../reducers'
 
-import styles from './listRoute.css';
+import styles from './listRoute.css'
 
 class ListRoute extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this._renderListItem = this._renderListItem.bind(this)
   }
 
-  _navigateToTrak(name) {
-    this.props.history.push(`/e/${name}`);
+  _navigateToTrak (name) {
+    this.props.history.push(`/e/${name}`)
   }
 
-  _renderListItem(trak) {
+  _renderListItem (trak) {
     return (
       <div
         className={classnames(styles.card, styles.trak)}
@@ -37,7 +37,7 @@ class ListRoute extends React.Component {
     )
   }
 
-  _renderNewTrakItem() {
+  _renderNewTrakItem () {
     return (
       <div
         key='new-trak-item'
@@ -48,14 +48,14 @@ class ListRoute extends React.Component {
     )
   }
 
-  componentDidMount() {
-    this.props.fetchTraks();
-    this.props.resetSampleLoaderState();
+  componentDidMount () {
+    this.props.fetchTraks()
+    this.props.resetSampleLoaderState()
     this.props.resetTrakState()
     this.props.addItemToNavBar(null, null)
   }
 
-  render() {
+  render () {
     return (
       <div className={styles.container}>
         <Helmet>
@@ -68,24 +68,23 @@ class ListRoute extends React.Component {
         </div>
 
       </div>
-    );
+    )
   }
 }
-
 
 const mapActionsToProps = {
   fetchTraks,
   resetSampleLoaderState,
   resetTrakState
-};
+}
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
   return { traks: selectors.getTraks(state) }
 }
 
 export default compose(
   withStyles(styles),
   connect(mapStateToProps, mapActionsToProps)
-)(ListRoute);
+)(ListRoute)
 
 export { ListRoute }

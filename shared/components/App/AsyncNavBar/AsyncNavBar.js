@@ -1,6 +1,6 @@
-import React from 'react';
-import classnames from 'classnames';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import React from 'react'
+import classnames from 'classnames'
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import {
   MdArrowBack,
   MdMic,
@@ -10,7 +10,7 @@ import {
   MdAdd
 } from 'react-icons/lib/md'
 
-import styles from './styles.css';
+import styles from './styles.css'
 
 const red = 'rgb(246, 81, 29)'
 const green = 'rgb(151, 204, 4)'
@@ -66,42 +66,38 @@ const buttonMappings = {
 }
 
 class NavBar extends React.Component {
-  constructor() {
-    super();
+  constructor () {
+    super()
 
     this.state = {
       right: null,
       center: null
-    };
+    }
 
-    this.onBackClick = this.onBackClick.bind(this);
-    this.addItemToNavBar = this.addItemToNavBar.bind(this);
+    this.onBackClick = this.onBackClick.bind(this)
+    this.addItemToNavBar = this.addItemToNavBar.bind(this)
   }
 
-  onBackClick() {
-    window.history.back();
+  onBackClick () {
+    window.history.back()
   }
 
-  addItemToNavBar(newCenterNode, newRightNode) {
+  addItemToNavBar (newCenterNode, newRightNode) {
     let centerNode
     if (newCenterNode === null) {
       centerNode = null
-    }
-    else if (newCenterNode === undefined) {
+    } else if (newCenterNode === undefined) {
       centerNode = this.state.center
-    }
-    else {
+    } else {
       centerNode = newCenterNode
     }
 
     let rightNode
     if (newRightNode === null) {
       rightNode = null
-    }
-    else if (newRightNode === undefined) {
+    } else if (newRightNode === undefined) {
       rightNode = this.state.right
-    }
-    else {
+    } else {
       rightNode = newRightNode
     }
 
@@ -111,9 +107,9 @@ class NavBar extends React.Component {
     })
   }
 
-  render() {
-    const rightButtonConfig = this.state.right;
-    const centerButtonConfig = this.state.center;
+  render () {
+    const rightButtonConfig = this.state.right
+    const centerButtonConfig = this.state.center
 
     return (
       <div>
@@ -124,15 +120,15 @@ class NavBar extends React.Component {
         <div className={styles.container} >
           { renderButton('BACK', 'left', this.onBackClick) }
 
-           { centerButtonConfig && renderButton(centerButtonConfig.type, 'center', centerButtonConfig.cb) }  
-           { rightButtonConfig && renderButton(rightButtonConfig.type, 'right', rightButtonConfig.cb) } 
+          { centerButtonConfig && renderButton(centerButtonConfig.type, 'center', centerButtonConfig.cb) }
+          { rightButtonConfig && renderButton(rightButtonConfig.type, 'right', rightButtonConfig.cb) }
 
         </div>
       </div>
-    );
+    )
   }
 }
 
 export { NavBar }
 
-export default withStyles(styles)(NavBar);
+export default withStyles(styles)(NavBar)

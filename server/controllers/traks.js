@@ -1,6 +1,6 @@
 import { Traks } from '../models'
 
-function getAll(req, res) {
+function getAll (req, res) {
   return Traks.findAll({})
     .then(traks => {
       res.json(traks)
@@ -8,9 +8,9 @@ function getAll(req, res) {
     .catch(error => {
       console.error(error)
       res.json(error)
-    });
+    })
 }
 
 export {
   getAll
-};
+}

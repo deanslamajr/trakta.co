@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -42,7 +42,7 @@ module.exports = {
           onDelete: 'cascade'
         },
         { transaction: t })
-      );
+      )
     })
   },
 
@@ -50,7 +50,7 @@ module.exports = {
     return queryInterface.sequelize.transaction(t => {
       return queryInterface.removeColumn('sample_instances', 'trak_id', { transaction: t })
         .then(() => queryInterface.bulkDelete('traks', {}, { transaction: t }))
-        .then(() => queryInterface.dropTable('traks', { transaction: t }));
-    });
+        .then(() => queryInterface.dropTable('traks', { transaction: t }))
+    })
   }
-};
+}

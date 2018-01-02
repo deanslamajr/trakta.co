@@ -5,6 +5,6 @@
  *
  * @return {Array} The filtered array.
  */
-export default function removeNil(as) {
-  return as.filter(a => a != null);
+export default function removeNil (as) {
+  return as.filter(a => a != null)
 }

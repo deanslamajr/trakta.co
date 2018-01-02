@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -35,8 +35,8 @@ module.exports = {
           defaultValue: 0.0
         },
         { transaction: t }
-      ));
-    });
+      ))
+    })
   },
 
   down: (queryInterface, Sequelize) => {
@@ -71,7 +71,7 @@ module.exports = {
             allowNull: false
           },
           { transaction: t }
-        ));
-    });
+        ))
+    })
   }
-};
+}

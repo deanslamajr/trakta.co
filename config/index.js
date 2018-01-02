@@ -15,7 +15,7 @@
 
 // PRIVATES
 
-let configCache;
+let configCache
 
 /**
  * This resolves the correct configuration source based on the execution
@@ -25,9 +25,9 @@ let configCache;
  *
  * @return {Object} The executing environment configuration object.
  */
-function resolveConfigForBrowserOrServer() {
+function resolveConfigForBrowserOrServer () {
   if (configCache) {
-    return configCache;
+    return configCache
   }
 
   // NOTE: By using the "process.env.BUILD_FLAG_IS_NODE" flag here this block of code
@@ -40,21 +40,21 @@ function resolveConfigForBrowserOrServer() {
   ) {
     // i.e. running in our server/node process.
     // eslint-disable-next-line global-require
-    configCache = require('./values').default;
-    return configCache;
+    configCache = require('./values').default
+    return configCache
   }
 
   // To get here we are likely running in the browser.
 
   if (typeof window !== 'undefined' && typeof window.__CLIENT_CONFIG__ === 'object') {
-    configCache = window.__CLIENT_CONFIG__;
+    configCache = window.__CLIENT_CONFIG__
   } else {
     // To get here we must be running in the browser.
-    console.warn('No client configuration object was bound to the window.');
-    configCache = {};
+    console.warn('No client configuration object was bound to the window.')
+    configCache = {}
   }
 
-  return configCache;
+  return configCache
 }
 
 // EXPORT
@@ -89,27 +89,27 @@ function resolveConfigForBrowserOrServer() {
  * an error will be thrown indicating that a respective configuration value
  * could not be found at the given path.
  */
-export default function configGet(path) {
-  const parts = typeof path === 'string' ? path.split('.') : path;
+export default function configGet (path) {
+  const parts = typeof path === 'string' ? path.split('.') : path
 
   if (parts.length === 0) {
     throw new Error(
-      'You must provide the path to the configuration value you would like to consume.',
-    );
+      'You must provide the path to the configuration value you would like to consume.'
+    )
   }
-  let result = resolveConfigForBrowserOrServer();
+  let result = resolveConfigForBrowserOrServer()
   for (let i = 0; i < parts.length; i += 1) {
     if (result === undefined) {
-      const errorMessage = `Failed to resolve configuration value at "${parts.join('.')}".`;
+      const errorMessage = `Failed to resolve configuration value at "${parts.join('.')}".`
       // This "if" block gets stripped away by webpack for production builds.
       if (process.env.BUILD_FLAG_IS_DEV === 'true' && process.env.BUILD_FLAG_IS_CLIENT === 'true') {
         throw new Error(
-          `${errorMessage} We have noticed that you are trying to access this configuration value from the client bundle (i.e. code that will be executed in a browser). For configuration values to be exposed to the client bundle you must ensure that the path is added to the client configuration filter in the project configuration values file.`,
-        );
+          `${errorMessage} We have noticed that you are trying to access this configuration value from the client bundle (i.e. code that will be executed in a browser). For configuration values to be exposed to the client bundle you must ensure that the path is added to the client configuration filter in the project configuration values file.`
+        )
       }
-      throw new Error(errorMessage);
+      throw new Error(errorMessage)
     }
-    result = result[parts[i]];
+    result = result[parts[i]]
   }
-  return result;
+  return result
 }

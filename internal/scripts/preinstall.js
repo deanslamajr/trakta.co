@@ -6,8 +6,6 @@
  * version of Node, which this script wants to test against.
  */
 
-/* eslint-disable */
-
 var exec = require('child_process').exec;
 var existsSync = require('fs').existsSync;
 var pathResolve = require('path').resolve;

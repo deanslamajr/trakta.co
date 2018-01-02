@@ -1,18 +1,18 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import viewportDimensions from 'viewport-dimensions';
+import React from 'react'
+import { connect } from 'react-redux'
+import viewportDimensions from 'viewport-dimensions'
 
-import * as selectors from '../../../shared/reducers';
+import * as selectors from '../../../shared/reducers'
 
 import {
   calculateInstanceRectangles,
-  generateRectangle } from './calculateInstanceRectangles';
+  generateRectangle } from './calculateInstanceRectangles'
 
-const padding = 5;
+const padding = 5
 
-function drawRectangles(rowsOfRectangles, stagedSampleRectangle, viewportWidth, viewportHeight) {
-  const rowsCount = rowsOfRectangles.length;
-  const rowHeight = viewportHeight / rowsCount;
+function drawRectangles (rowsOfRectangles, stagedSampleRectangle, viewportWidth, viewportHeight) {
+  const rowsCount = rowsOfRectangles.length
+  const rowHeight = viewportHeight / rowsCount
 
   const svgRectangles = rowsOfRectangles.reduce((rectangles, rowOfRectangles, index) => {
     const newRectangles = rowOfRectangles.map(({ scaledStartPos, scaledDuration, id }) => (
@@ -30,7 +30,7 @@ function drawRectangles(rowsOfRectangles, stagedSampleRectangle, viewportWidth, 
     ))
 
     return [...rectangles, ...newRectangles]
-  }, []);
+  }, [])
 
   // staged rectangle
   if (stagedSampleRectangle) {
@@ -52,14 +52,14 @@ function drawRectangles(rowsOfRectangles, stagedSampleRectangle, viewportWidth, 
 
   return (
     <svg style={{ display: 'block' }} width={viewportWidth} height={viewportHeight}>
-    { svgRectangles }
+      { svgRectangles }
     </svg>
-  );
+  )
 }
 
 const SampleInstances = ({ instances, trackDimensions, stagedSample }) => {
   if (instances.length === 0) {
-    return null;
+    return null
   }
 
   const {
@@ -67,12 +67,12 @@ const SampleInstances = ({ instances, trackDimensions, stagedSample }) => {
     length
   } = trackDimensions
 
-  const width = viewportDimensions 
+  const width = viewportDimensions
     ? viewportDimensions.width() && viewportDimensions.width()
-    : 300;
+    : 300
   const height = viewportDimensions
     ? viewportDimensions.height() && viewportDimensions.height()
-    : 300;
+    : 300
 
   const samples = instances.map(
     instance => {
@@ -82,29 +82,29 @@ const SampleInstances = ({ instances, trackDimensions, stagedSample }) => {
         id: instance.id
       }
     }
-  );
+  )
 
-  let stagedSampleRectangle;
+  let stagedSampleRectangle
   if (stagedSample && stagedSample.duration) {
     const stagedSampleRectangleIngredients = {
       start_time: stagedSample.startTime,
       duration: stagedSample.duration,
       id: 'staged-sample'
-    };
-    stagedSampleRectangle = generateRectangle(startTime, length, stagedSampleRectangleIngredients);
+    }
+    stagedSampleRectangle = generateRectangle(startTime, length, stagedSampleRectangleIngredients)
   }
 
-  const rowsOfRectangles = calculateInstanceRectangles(startTime, length, samples);
+  const rowsOfRectangles = calculateInstanceRectangles(startTime, length, samples)
 
-  return drawRectangles(rowsOfRectangles, stagedSampleRectangle, width, height);
+  return drawRectangles(rowsOfRectangles, stagedSampleRectangle, width, height)
 }
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
   return {
     instances: selectors.getInstances(state),
     trackDimensions: selectors.getTrackDimensions(state),
     stagedSample: selectors.getStagedSample(state)
-  };
+  }
 }
 
-export default connect(mapStateToProps)(SampleInstances);
+export default connect(mapStateToProps)(SampleInstances)

@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
@@ -14,14 +14,14 @@ module.exports = {
               allowNull: false
             },
             { transaction: t }
-          );
-        });
-    });
+          )
+        })
+    })
   },
 
   down: function (queryInterface, Sequelize) {
     return queryInterface.sequelize.transaction(t => {
-      return queryInterface.removeColumn('samples', 'duration'), { transaction: t };
-    });
+      return queryInterface.removeColumn('samples', 'duration', { transaction: t })
+    })
   }
-};
+}

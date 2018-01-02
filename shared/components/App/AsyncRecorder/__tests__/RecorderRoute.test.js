@@ -1,13 +1,13 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-env jest */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+import React from 'react'
+import { shallow } from 'enzyme'
 
-import { RecorderRoute } from '../RecorderRoute';
+import { RecorderRoute } from '../RecorderRoute'
 
 describe('<RecorderRoute />', () => {
   test('renders', () => {
-    const wrapper = shallow(<RecorderRoute />);
-    expect(wrapper).toMatchSnapshot();
-  });
-});
+    const wrapper = shallow(<RecorderRoute />)
+    expect(wrapper).toMatchSnapshot()
+  })
+})

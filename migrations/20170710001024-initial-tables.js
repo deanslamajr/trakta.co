@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -38,8 +38,8 @@ module.exports = {
             player_id: {
               type: Sequelize.UUID,
               references: {
-                  model: 'players',
-                  key: 'id'
+                model: 'players',
+                key: 'id'
               },
               onUpdate: 'cascade',
               onDelete: 'cascade'
@@ -76,8 +76,8 @@ module.exports = {
             originators_player_id: {
               type: Sequelize.UUID,
               references: {
-                  model: 'players',
-                  key: 'id'
+                model: 'players',
+                key: 'id'
               },
               onUpdate: 'cascade',
               onDelete: 'cascade'
@@ -99,8 +99,8 @@ module.exports = {
             player_id: {
               type: Sequelize.UUID,
               references: {
-                  model: 'players',
-                  key: 'id'
+                model: 'players',
+                key: 'id'
               },
               onUpdate: 'cascade',
               onDelete: 'cascade'
@@ -108,8 +108,8 @@ module.exports = {
             trak_id: {
               type: Sequelize.UUID,
               references: {
-                  model: 'traks',
-                  key: 'id'
+                model: 'traks',
+                key: 'id'
               },
               onUpdate: 'cascade',
               onDelete: 'cascade'
@@ -117,8 +117,8 @@ module.exports = {
             sample_id: {
               type: Sequelize.UUID,
               references: {
-                  model: 'samples',
-                  key: 'id'
+                model: 'samples',
+                key: 'id'
               },
               onUpdate: 'cascade',
               onDelete: 'cascade'
@@ -137,7 +137,7 @@ module.exports = {
             }
           },
           { transaction: t, underscored: true }
-        ));
+        ))
     })
   },
 
@@ -146,7 +146,7 @@ module.exports = {
       return queryInterface.dropTable('sample_instances')
         .then(() => queryInterface.dropTable('samples'))
         .then(() => queryInterface.dropTable('traks'))
-        .then(() => queryInterface.dropTable('players'));
-    });
+        .then(() => queryInterface.dropTable('players'))
+    })
   }
-};
+}

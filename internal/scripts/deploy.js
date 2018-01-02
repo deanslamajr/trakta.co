@@ -3,6 +3,6 @@
  * @see https://zeit.co/now
  */
 
-import { exec } from '../utils';
-const cmd = 'now';
-exec(cmd);
+import { exec } from '../utils'
+const cmd = 'now'
+exec(cmd)

@@ -1,16 +1,16 @@
-import { sync as globSync } from 'glob';
-import appRootDir from 'app-root-dir';
-import path from 'path';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import OfflinePlugin from 'offline-plugin';
+import { sync as globSync } from 'glob'
+import appRootDir from 'app-root-dir'
+import path from 'path'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import OfflinePlugin from 'offline-plugin'
 
-import config from '../../../config';
+import config from '../../../config'
 
-import ClientConfig from '../../../config/components/ClientConfig';
+import ClientConfig from '../../../config/components/ClientConfig'
 
-export default function withServiceWorker(webpackConfig, bundleConfig) {
+export default function withServiceWorker (webpackConfig, bundleConfig) {
   if (!config('serviceWorker.enabled')) {
-    return webpackConfig;
+    return webpackConfig
   }
 
   // Offline Page generation.
@@ -35,17 +35,17 @@ export default function withServiceWorker(webpackConfig, bundleConfig) {
         keepClosingSlash: true,
         minifyJS: true,
         minifyCSS: true,
-        minifyURLs: true,
+        minifyURLs: true
       },
       inject: true,
       // We pass our config and client config script compoent as it will
       // be needed by the offline template.
       custom: {
         config,
-        ClientConfig,
-      },
-    }),
-  );
+        ClientConfig
+      }
+    })
+  )
 
   // We use the offline-plugin to generate the service worker.  It also
   // provides a runtime installation script which gets executed within
@@ -97,7 +97,7 @@ export default function withServiceWorker(webpackConfig, bundleConfig) {
         // of injecting all of our client scripts into the body.
         // Please see the HtmlWebpackPlugin configuration above for more
         // information on this page.
-        navigateFallbackURL: `${bundleConfig.webPath}${config('serviceWorker.offlinePageFileName')}`,
+        navigateFallbackURL: `${bundleConfig.webPath}${config('serviceWorker.offlinePageFileName')}`
       },
       // According to the Mozilla docs, AppCache is considered deprecated.
       // @see https://mzl.la/1pOZ5wF
@@ -116,8 +116,8 @@ export default function withServiceWorker(webpackConfig, bundleConfig) {
             const publicAssetPathGlob = path.resolve(
               appRootDir.get(),
               config('publicAssetsPath'),
-              cur,
-            );
+              cur
+            )
             const publicFileWebPaths = acc.concat(
               // First get all the matching public folder files.
               globSync(publicAssetPathGlob, { nodir: true })
@@ -126,18 +126,18 @@ export default function withServiceWorker(webpackConfig, bundleConfig) {
                 .map(publicFile =>
                   path.relative(
                     path.resolve(appRootDir.get(), config('publicAssetsPath')),
-                    publicFile,
-                  ),
+                    publicFile
+                  )
                 )
                 // Add the leading "/" indicating the file is being hosted
                 // off the root of the application.
-                .map(relativePath => `/${relativePath}`),
-            );
-            return publicFileWebPaths;
-          }, []),
-        ),
-    }),
-  );
+                .map(relativePath => `/${relativePath}`)
+            )
+            return publicFileWebPaths
+          }, [])
+        )
+    })
+  )
 
-  return webpackConfig;
+  return webpackConfig
 }

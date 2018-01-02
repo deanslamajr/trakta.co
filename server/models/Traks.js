@@ -20,6 +20,6 @@ const Traks = sequelize.define('traks',
     freezeTableName: true,
     underscored: true
   }
-);
+)
 
 export default Traks

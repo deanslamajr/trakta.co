@@ -24,6 +24,6 @@ const Samples = sequelize.define('samples',
     freezeTableName: true,
     underscored: true
   }
-);
+)
 
 export default Samples

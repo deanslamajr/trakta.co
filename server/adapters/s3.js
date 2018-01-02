@@ -1,45 +1,45 @@
-import AWS from 'aws-sdk';
+import AWS from 'aws-sdk'
 // import zlib from 'zlib'
-import s3StreamFactory from 's3-upload-stream';
-import uuidV4 from 'uuid/v4';
+import s3StreamFactory from 's3-upload-stream'
+import uuidV4 from 'uuid/v4'
 
-import config from '../../config';
+import config from '../../config'
 
 const s3Config = {
   accessKeyId: config('AWS_ACCESS_KEY_ID'),
   secretAccessKey: config('AWS_SECRET_ACCESS_KEY'),
-  region: 'us-west-2',
-};
+  region: 'us-west-2'
+}
 
-const s3Stream = s3StreamFactory(new AWS.S3(s3Config));
+const s3Stream = s3StreamFactory(new AWS.S3(s3Config))
 
 /**
  * Uploads the given file to S3
  * @param stream {Stream} stream of the file to upload
  * @returns Promise reolves to result of S3 save, rejects on/with error
  */
-function saveBlobToS3(stream) {
-  const uuid = uuidV4();
+function saveBlobToS3 (stream) {
+  const uuid = uuidV4()
 
   return new Promise((resolve, reject) => {
-    const s3ResourceName = `${uuid}.mp3`;
+    const s3ResourceName = `${uuid}.mp3`
     // Create the streams
     // var compress = zlib.createGzip();
     const upload = s3Stream.upload({
       Bucket: `samples-${config('ENV')}`,
-      Key: s3ResourceName,
-    });
+      Key: s3ResourceName
+    })
 
     // Optional configuration
-    upload.maxPartSize(20971520); // 20 MB
-    upload.concurrentParts(5);
+    upload.maxPartSize(20971520) // 20 MB
+    upload.concurrentParts(5)
 
     // Handle errors.
     upload.on('error', (error) => {
       // @todo metric and log error
-      console.log(error);
-      reject(error);
-    });
+      console.log(error)
+      reject(error)
+    })
 
     /* Handle upload completion. Example details object:
       { Location: 'https://bucketName.s3.amazonaws.com/filename.ext',
@@ -49,16 +49,16 @@ function saveBlobToS3(stream) {
     */
     upload.on('uploaded', (details) => {
       // @todo metric this event and log details
-    });
+    })
 
     upload.on('finish', () => {
-      resolve(s3ResourceName);
-    });
+      resolve(s3ResourceName)
+    })
 
     // Pipe the incoming filestream through compression, and up to S3.
     // @todo implment the compression: .pipe(compress).pipe(upload);
-    stream.pipe(upload); 
-  });
+    stream.pipe(upload)
+  })
 }
 
-export { saveBlobToS3 };
+export { saveBlobToS3 }

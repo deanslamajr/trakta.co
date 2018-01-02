@@ -1,6 +1,6 @@
-import Sequelize from 'sequelize';
+import Sequelize from 'sequelize'
 
-import config from '../../config';
+import config from '../../config'
 
 const sequelize = new Sequelize(config('PGDB_DBNAME'), config('PGDB_USERNAME'), config('PGDB_PASSWORD'), {
   host: config('PGDB_HOST'),
@@ -11,6 +11,6 @@ const sequelize = new Sequelize(config('PGDB_DBNAME'), config('PGDB_USERNAME'), 
     min: 0,
     idle: 10000
   }
-});
+})
 
 export { sequelize }
