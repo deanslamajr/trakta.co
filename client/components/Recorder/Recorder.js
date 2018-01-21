@@ -10,6 +10,7 @@ import {
   setStagedSample } from '../../../shared/actions/recorder'
 import * as selectors from '../../../shared/reducers'
 
+import InstancePlaylist from '../InstancePlaylist'
 import { getSampleCreator } from './SampleCreator'
 
 import styles from './Recorder.css'
@@ -274,6 +275,14 @@ class Recorder extends React.Component {
                 i.e. internet explorer, safari, and all iOS-based browsers will not be able to run this application
               </div>
             )
+        }
+
+        {
+          !this.state.disableRecording && (
+            <InstancePlaylist
+              addItemToNavBar={this.props.addItemToNavBar}
+              renderErrorComponent={() => {}} />
+          )
         }
 
         <canvas

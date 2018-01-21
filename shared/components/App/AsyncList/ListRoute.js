@@ -37,17 +37,6 @@ class ListRoute extends React.Component {
     )
   }
 
-  _renderNewTrakItem () {
-    return (
-      <div
-        key='new-trak-item'
-        className={classnames(styles.card, styles.new)}
-        onClick={() => this.props.history.push(`/new`)}>
-        New Trak
-      </div>
-    )
-  }
-
   componentDidMount () {
     this.props.fetchTraks()
     this.props.resetSampleLoaderState()

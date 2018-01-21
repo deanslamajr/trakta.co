@@ -76,6 +76,8 @@ class MainRoute extends React.Component {
     // clear any staged sample from store
     this.props.setStagedSample({ duration: 0 })
     this.props.setStagedObjectUrl(undefined)
+
+    this.props.addItemToNavBar(null, null)
   }
 
   render () {
