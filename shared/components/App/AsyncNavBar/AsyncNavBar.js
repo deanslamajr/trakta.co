@@ -57,12 +57,12 @@ function renderButton (type, position, cb) {
 }
 
 const buttonMappings = {
-  RECORD: renderRecordButton,
+  ADD: renderAddButton,
+  BACK: renderBackButton,
   CHECK: renderCheckButton,
   PLAY: renderPlayButton,
-  STOP: renderStopButton,
-  ADD: renderAddButton,
-  BACK: renderBackButton
+  RECORD: renderRecordButton,
+  STOP: renderStopButton
 }
 
 class NavBar extends React.Component {

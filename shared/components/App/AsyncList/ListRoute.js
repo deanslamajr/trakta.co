@@ -52,7 +52,7 @@ class ListRoute extends React.Component {
     this.props.fetchTraks()
     this.props.resetSampleLoaderState()
     this.props.resetTrakState()
-    this.props.addItemToNavBar(null, null)
+    this.props.addItemToNavBar(null, { type: 'ADD', cb: () => this.props.history.push(`/new`) })
   }
 
   render () {
@@ -63,7 +63,6 @@ class ListRoute extends React.Component {
         </Helmet>
 
         <div className={styles.label}>
-          { this._renderNewTrakItem() }
           { this.props.traks.map(this._renderListItem) }
         </div>
 
