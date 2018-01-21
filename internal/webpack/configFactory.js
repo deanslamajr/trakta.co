@@ -93,7 +93,7 @@ export default function webpackConfigFactory (buildOptions) {
         // Note: as we are using the WebpackMd5Hash plugin, the hashes will
         // only change when the file contents change. This means we can
         // set very aggressive caching strategies on our bundle output.
-        '[name]-[chunkhash].js',
+        '[name]-[hash].js',
         // For any other bundle (typically a server/node) bundle we want a
         // determinable output name to allow for easier importing/execution
         // of the bundle by our scripts.
