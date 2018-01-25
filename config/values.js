@@ -230,6 +230,7 @@ const values = {
           'react',
           'react-dom',
           'react-helmet',
+          'react-icons',
           'react-router-dom'
         ],
 
