@@ -54,6 +54,11 @@ function createSampleTrakSampleInstance (queryStrings = [], s3ResourceName) {
                 player_id: ANONYMOUS_PLAYER_ID,
                 trak_id: trak.id
               }, { transaction })
+              .then(() => {
+                return trak.update({
+                  contribution_count: trak.contribution_count + 1
+                }, { transaction })
+              })
             })
             .then(() => trakName)
         }

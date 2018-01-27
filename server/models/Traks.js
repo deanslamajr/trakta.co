@@ -13,6 +13,11 @@ const Traks = sequelize.define('traks',
     name: {
       type: Sequelize.STRING,
       allowNull: false
+    },
+    contribution_count: {
+      type: Sequelize.INTEGER,
+      defaultValue: 1,
+      allowNull: false
     }
   },
   {
