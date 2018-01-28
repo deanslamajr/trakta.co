@@ -3,7 +3,6 @@ import AssetsPlugin from 'assets-webpack-plugin'
 import nodeExternals from 'webpack-node-externals'
 import path from 'path'
 import webpack from 'webpack'
-import WebpackMd5Hash from 'webpack-md5-hash'
 
 import { happyPackPlugin } from '../utils'
 import { ifElse } from '../../shared/utils/logic'
@@ -90,9 +89,6 @@ export default function webpackConfigFactory (buildOptions) {
         // For our production client bundles we include a hash in the filename.
         // That way we won't hit any browser caching issues when our bundle
         // output changes.
-        // Note: as we are using the WebpackMd5Hash plugin, the hashes will
-        // only change when the file contents change. This means we can
-        // set very aggressive caching strategies on our bundle output.
         '[name]-[hash].js',
         // For any other bundle (typically a server/node) bundle we want a
         // determinable output name to allow for easier importing/execution
@@ -100,7 +96,7 @@ export default function webpackConfigFactory (buildOptions) {
         '[name].js'
       ),
       // The name format for any additional chunks produced for the bundle.
-      chunkFilename: '[name]-[chunkhash].js',
+      chunkFilename: '[name]-[hash].js',
       // When targetting node we will output our bundle as a commonjs2 module.
       libraryTarget: ifNode('commonjs2', 'var'),
       // This is the web path under which our webpack bundled client should
@@ -210,13 +206,6 @@ export default function webpackConfigFactory (buildOptions) {
             entryOnly: false
           })
       ),
-
-      // We use this so that our generated [chunkhash]'s are only different if
-      // the content for our respective chunks have changed.  This optimises
-      // our long term browser caching strategy for our client bundle, avoiding
-      // cases where browsers end up having to download all the client chunks
-      // even though 1 or 2 may have only changed.
-      ifClient(() => new WebpackMd5Hash()),
 
       // These are process.env flags that you can use in your code in order to
       // have advanced control over what is included/excluded in your bundles.
