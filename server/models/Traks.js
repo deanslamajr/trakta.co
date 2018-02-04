@@ -18,6 +18,25 @@ const Traks = sequelize.define('traks',
       type: Sequelize.INTEGER,
       defaultValue: 1,
       allowNull: false
+    },
+    duration: {
+      type: Sequelize.DOUBLE,
+      defaultValue: 0,
+      allowNull: false
+    },
+    start_time: {
+      type: Sequelize.DOUBLE,
+      allowNull: false,
+      defaultValue: 0.0
+    },
+    plays_count: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    last_contribution_date: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.NOW
     }
   },
   {

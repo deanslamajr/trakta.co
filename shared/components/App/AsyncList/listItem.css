@@ -1,0 +1,56 @@
+@import "../../../colors.css";
+
+.card {
+  background-color: var(--clearRed);
+  box-shadow: 0 4px 4px 0 white;
+  color: #696969;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font-size: 2.5rem;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 60rem;
+  padding: 0;
+  width: 100%;
+  border-bottom: 1px solid white;
+}
+
+.card-container {
+  padding: .25rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.update {
+  font-size: .8rem;
+  margin: .25rem 0 .1rem;
+  text-align: left;
+}
+
+.stats-container {
+  font-size: 1rem;
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  min-width: 4rem;
+}
+
+.plays-container {
+  display: flex;
+  margin: .1rem;
+}
+
+.datum {
+  margin-left: .25rem;
+}

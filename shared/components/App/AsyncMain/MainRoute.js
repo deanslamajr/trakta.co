@@ -99,7 +99,9 @@ class MainRoute extends React.Component {
             {/* Play button  */}
             <InstancePlaylist
               addItemToNavBar={this.props.addItemToNavBar}
-              renderErrorComponent={this._renderErrorComponent} />
+              renderErrorComponent={this._renderErrorComponent}
+              incrementPlaysCount
+            />
           </div>
 
           <SampleInstances />

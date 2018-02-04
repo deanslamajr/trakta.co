@@ -4,60 +4,6 @@
   position: inherit;
 }
 
-.title {
-  font-size: 1.5rem;
-  margin-bottom: .75rem;
-  text-align: left;
-}
-
-.lower-section {
-  flex-direction: row;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.update {
-  font-size: .8rem;
-  margin: .25rem 0 .1rem;
-  text-align: left;
-}
-
-.plays-container {
-  display: flex;
-}
-
-.stats-container {
-  font-size: 1rem;
-  display: flex;
-  justify-content: flex-start;
-}
-
-.card-container {
-  padding: .25rem;
-  padding-top: 0;
-}
-
-.card {
-  background-color: var(--clearRed);
-  box-shadow: 0 4px 4px 0 white;
-  color: #696969;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  font-size: 2.5rem;
-  justify-content: center;
-  margin: 0 auto;
-  max-width: 60rem;
-  padding: 0;
-  width: 100%;
-  border-bottom: 1px solid white;
-}
-
-.new {
-  width: 95%;
-}
-
 .label {
   top: 0;
   bottom: 0;
@@ -66,34 +12,4 @@
   color: var(--black);
   user-select: none;
   margin: 0 auto 5.5rem;
-}
-
-.button {
-  font-size: 3.5rem;
-  height: 100%;
-  color: var(--black);
-  opacity: .5;
-  user-select: none;
-  cursor: pointer;
-}
-
-.record-button {
-  background-color: var(--clearRed);
-}
-
-.upload-button {
-  background-color: var(--clearOrange);
-}
-
-.recycle-button {
-  background-color: var(--clearGreen);
-}
-
-.generate-button {
-  background-color: var(--clearBlue);
-}
-
-.duplicate-button {
-  background-color: var(--black);
-  color: var(--white);
 }

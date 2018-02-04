@@ -5,6 +5,8 @@ import Tone from 'tone'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import debounce from 'debounce'
 import isEqual from 'lodash.isequal'
+import axios from 'axios'
+import randToken from 'rand-token'
 
 import config from '../../../config'
 
@@ -19,6 +21,8 @@ const baseUrl = config('s3SampleBucket')
 
 const bufferCache = {}
 
+let playCode
+
 function addPluginsToPlayer (samplePlayer, volume, panning) {
   // Plugins
   //
@@ -32,12 +36,27 @@ function syncPlayerToTransport (samplePlayer, playerStartTime) {
   samplePlayer.sync().start(playerStartTime)
 }
 
+/**
+ * generate code
+ * make request with code
+ *
+ * @todo have generation salted by app-version-unique secret
+ * probably should do this salting (cpu intensive task) in a webWorker
+ */
+function postStartSignal (trakName) {
+  playCode = randToken.generate(16)
+  axios.post('/api/play-back', { code: playCode, trakName })
+}
+
+function postEndSignal (trakName) {
+  axios.post('/api/play-back', { code: playCode, trakName })
+}
+
 function playArrangement () {
-  if (Tone.Transport.state === 'started') {
-    Tone.Transport.stop()
-  } else {
-    Tone.Transport.start()
-  }
+  Tone.Transport.start()
+}
+function stopArrangement () {
+  Tone.Transport.stop()
 }
 
 function prepTransport (trackStartTime, trackLength) {
@@ -51,6 +70,9 @@ function prepTransport (trackStartTime, trackLength) {
 
   // clear the transport
   Tone.Transport.cancel()
+
+  /** schedule plays POST */
+  // Tone.Transport.schedule(function (time) {}, '0')
 }
 
 class InstancePlaylist extends React.Component {
@@ -156,13 +178,19 @@ class InstancePlaylist extends React.Component {
   }
 
   _stop () {
-    playArrangement()
+    stopArrangement()
+    if (this.props.incrementPlaysCount) {
+      postEndSignal(this.props.trakName)
+    }
     this.setState({ isPlaying: false })
     this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
   }
 
   _play () {
     playArrangement()
+    if (this.props.incrementPlaysCount) {
+      postStartSignal(this.props.trakName)
+    }
     this.setState({ isPlaying: true })
     this.props.addItemToNavBar({ type: 'STOP', cb: this._stop })
   }
@@ -181,7 +209,12 @@ class InstancePlaylist extends React.Component {
   }
 
   componentWillUnmount () {
-    Tone.Transport.stop()
+    if (Tone.Transport.state === 'started') {
+      stopArrangement()
+      if (this.props.incrementPlaysCount) {
+        postEndSignal(this.props.trakName)
+      }
+    }
   }
 
   render () {
@@ -202,7 +235,8 @@ function mapStateToProps (state, ownProps) {
     isLoading: selectors.isLoading(state),
     instances: selectors.getInstances(state),
     stagedSample: selectors.getStagedSample(state),
-    trackDimensions: selectors.getTrackDimensions(state)
+    trackDimensions: selectors.getTrackDimensions(state),
+    trakName: selectors.getTrakName(state)
   }
 }
 

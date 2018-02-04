@@ -281,7 +281,9 @@ class Recorder extends React.Component {
           !this.state.disableRecording && (
             <InstancePlaylist
               addItemToNavBar={this.props.addItemToNavBar}
-              renderErrorComponent={() => {}} />
+              renderErrorComponent={() => {}}
+              incrementPlaysCount
+            />
           )
         }
 

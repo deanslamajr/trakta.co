@@ -2,12 +2,10 @@ import React from 'react'
 import Helmet from 'react-helmet'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
-import UpdatedIcon from 'react-icons/lib/md/update'
-import Eye from 'react-icons/lib/md/remove-red-eye'
-import PaperClip from 'react-icons/lib/md/attach-file'
-import TimeAgo from 'react-timeago'
 
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
+
+import ListItem from './ListItem'
 
 import config from '../../../../config'
 
@@ -22,41 +20,11 @@ import styles from './listRoute.css'
 class ListRoute extends React.Component {
   constructor (props) {
     super(props)
-    this._renderListItem = this._renderListItem.bind(this)
+    this._navigateToTrak = this._navigateToTrak.bind(this)
   }
 
   _navigateToTrak (name) {
     this.props.history.push(`/e/${name}`)
-  }
-
-  _renderListItem (trak) {
-    return (
-      <div
-        className={styles.card}
-        key={trak.id}
-        onClick={this._navigateToTrak.bind(this, trak.name)}>
-        <div className={styles.cardContainer}>
-          <div className={styles.title}>
-            { trak.name }
-          </div>
-          <div className={styles.lowerSection}>
-            <div className={styles.statsContainer}>
-              <div className={styles.playsContainer}>
-                <Eye size={18} />
-                <span>12</span>
-              </div>
-              <div className={styles.playsContainer}>
-                <PaperClip size={18} />
-                <span>{trak.contribution_count}</span>
-              </div>
-            </div>
-            <div className={styles.update}>
-              <TimeAgo date={trak.updated_at} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
   }
 
   componentDidMount () {
@@ -68,7 +36,7 @@ class ListRoute extends React.Component {
 
   render () {
     const { traks } = this.props
-    const sortedTraks = traks.sort((a, b) => a.updated_at < b.updated_at)
+    const sortedTraks = traks.sort((a, b) => a.last_contribution_date < b.last_contribution_date)
 
     return (
       <div className={styles.container}>
@@ -77,9 +45,8 @@ class ListRoute extends React.Component {
         </Helmet>
 
         <div className={styles.label}>
-          { sortedTraks.map(this._renderListItem) }
+          {sortedTraks.map(trak => <ListItem key={trak.id} trak={trak} handleClick={this._navigateToTrak} />)}
         </div>
-
       </div>
     )
   }

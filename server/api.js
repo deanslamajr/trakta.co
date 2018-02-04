@@ -1,13 +1,22 @@
 import express from 'express'
 
 import { getByTrakName as getTraksSampleInstances } from './controllers/sample-instances'
-import { getAll as getAllTraks } from './controllers/traks'
+import {
+  getAll as getAllTraks,
+  recordPlay
+} from './controllers/traks'
 
 import { create as createSampleAndAddInstanceToTrak } from './controllers/samples'
 
 // import { getNextWindowEndTime } from './controllers/getNextWindowEndTime'
 
 const router = express.Router()
+
+/**
+ * Fetch all the sample instances
+ * @todo target a particular track's sample instances
+ */
+router.post('/play-back', recordPlay)
 
 /**
  * Fetch all the sample instances
