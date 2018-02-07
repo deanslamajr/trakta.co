@@ -26,18 +26,22 @@ function recordPlay (req, res) {
             .then(() => res.sendStatus(200))
         /** PlayCode exists: determine number of full playthroughs and update trak.playCount */
         } else {
-          return playsFromStartTime(playCode.created_at, trakName)
-            .then(numberOfPlays => {
-              return Traks.findOne({ where: { name: trakName },
-                transaction,
-                lock: transaction.LOCK.UPDATE
-              })
-                .then(trak => {
-                  const updatedPlayCount = trak.plays_count + numberOfPlays
+          const millisecondsListened = Date.now() - playCode.created_at.getTime()
 
-                  return trak.update({ plays_count: updatedPlayCount }, { transaction })
-                    .then(() => res.sendStatus(200))
-                })
+          return Traks.findOne({ where: { name: trakName },
+            transaction,
+            lock: transaction.LOCK.UPDATE
+          })
+            .then(trak => {
+              if (!trak) {
+                throw new Error(`trak:${trakName} does not exist!`)
+              }
+
+              const numberOfPlays = Math.floor(millisecondsListened / (trak.duration * 1000))
+              const updatedPlayCount = trak.plays_count + numberOfPlays
+
+              return trak.update({ plays_count: updatedPlayCount }, { transaction })
+                .then(() => res.sendStatus(200))
             })
         }
       })
