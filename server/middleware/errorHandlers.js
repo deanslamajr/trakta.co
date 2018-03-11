@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 const errorHandlersMiddleware = [
   /**
    * 404 errors middleware.
@@ -21,9 +23,13 @@ const errorHandlersMiddleware = [
    */
   function unexpectedErrorMiddleware (err, req, res, next) {
     if (err) {
-      console.log(err)
-      console.log(err.stack)
+      if (isProduction) {
+        res.error = err
+      } else {
+        console.error(err)
+      }
     }
+    // @todo flesh this out
     res.status(500).send('Sorry, an unexpected error occurred.')
   }
 ]

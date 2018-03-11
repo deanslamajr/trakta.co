@@ -4,7 +4,7 @@
   "description": "Make a sound!",
   "main": "build/server/index.js",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "scripts": {
     "analyze:client": "babel-node internal/scripts/analyze --client",
@@ -84,6 +84,7 @@
     "lamejs": "^1.2.0",
     "lodash.isequal": "^4.5.0",
     "modernizr": "3.5.0",
+    "moment": "^2.21.0",
     "nocache": "^2.0.0",
     "normalize.css": "6.0.0",
     "offline-plugin": "4.7.0",
@@ -115,7 +116,9 @@
     "tone": "^0.10.0",
     "uuid": "^3.0.1",
     "viewport-dimensions": "^0.2.0",
-    "waveform-data": "^2.0.1"
+    "waveform-data": "^2.0.1",
+    "winston": "^3.0.0-rc2",
+    "winston-daily-rotate-file": "^3.0.1"
   },
   "devDependencies": {
     "all-contributors-cli": "^4.3.0",

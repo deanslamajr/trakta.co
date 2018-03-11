@@ -14,8 +14,8 @@ function formatTime (seconds) {
 }
 
 function renderLastUpdated (time) {
-  return time ?
-  (
+  return time
+  ? (
     <div className={styles.update}>
       Last updated <TimeAgo date={time} />
     </div>

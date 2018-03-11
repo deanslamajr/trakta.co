@@ -8,7 +8,7 @@ exports[`<RecorderRoute /> renders 1`] = `
     encodeSpecialCharacters={true}
   >
     <title>
-      recorder - tracta.co
+      ::recorder - tracta.co
     </title>
   </HelmetWrapper>
   <div

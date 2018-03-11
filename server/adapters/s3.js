@@ -34,10 +34,8 @@ function saveBlobToS3 (stream) {
     upload.maxPartSize(20971520) // 20 MB
     upload.concurrentParts(5)
 
-    // Handle errors.
     upload.on('error', (error) => {
-      // @todo metric and log error
-      console.log(error)
+      // @todo metric
       reject(error)
     })
 

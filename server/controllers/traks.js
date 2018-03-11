@@ -1,62 +1,54 @@
 import { PlayCodes, Traks } from '../models'
 import { sequelize } from '../adapters/db'
 
-function playsFromStartTime (startTime, trakName) {
-  const millisecondsListened = Date.now() - startTime.getTime()
-
-  return Traks.findAll({ where: { name: trakName } })
-    .then(([ trak ]) => {
-      if (!trak) {
-        throw new Error(`trak:${trakName} does not exist!`)
-      }
-
-      return Math.floor(millisecondsListened / (trak.duration * 1000))
-    })
-}
-
-function recordPlay (req, res) {
+async function recordPlay (req, res, next) {
   const { code, trakName } = req.body
 
-  return sequelize.transaction(transaction => {
-    return PlayCodes.findOne({ where: { code, trak_name: trakName }, transaction })
-      .then((playCode) => {
-        /** PlayCode doesn't exist: create a new one i.e. user has started playback */
-        if (!playCode) {
-          return PlayCodes.create({ code, trak_name: trakName })
-            .then(() => res.sendStatus(200))
-        /** PlayCode exists: determine number of full playthroughs and update trak.playCount */
-        } else {
-          const millisecondsListened = Date.now() - playCode.created_at.getTime()
+  try {
+    return await sequelize.transaction(async transaction => {
+      const playCode = await PlayCodes.findOne({ where: { code, trak_name: trakName }, transaction })
 
-          return Traks.findOne({ where: { name: trakName },
-            transaction,
-            lock: transaction.LOCK.UPDATE
-          })
-            .then(trak => {
-              if (!trak) {
-                throw new Error(`trak:${trakName} does not exist!`)
-              }
+      /**
+       * PlayCode doesn't exist
+       * create a new one i.e. user has started playback
+       * */
+      if (!playCode) {
+        await PlayCodes.create({ code, trak_name: trakName })
+      /**
+       * PlayCode exists
+       * determine number of full playthroughs and update trak.playCount
+       * */
+      } else {
+        const millisecondsListened = Date.now() - playCode.created_at.getTime()
 
-              const numberOfPlays = Math.floor(millisecondsListened / (trak.duration * 1000))
-              const updatedPlayCount = trak.plays_count + numberOfPlays
+        const trak = await Traks.findOne({ where: { name: trakName },
+          transaction,
+          lock: transaction.LOCK.UPDATE
+        })
 
-              return trak.update({ plays_count: updatedPlayCount }, { transaction })
-                .then(() => res.sendStatus(200))
-            })
+        if (!trak) {
+          throw new Error(`trak:${trakName} does not exist!`)
         }
-      })
-  })
+
+        const numberOfPlays = Math.floor(millisecondsListened / (trak.duration * 1000))
+        const updatedPlayCount = trak.plays_count + numberOfPlays
+
+        await trak.update({ plays_count: updatedPlayCount }, { transaction })
+      }
+      res.sendStatus(200)
+    })
+  } catch (error) {
+    next(error)
+  }
 }
 
-function getAll (req, res) {
-  return Traks.findAll({})
-    .then(traks => {
-      res.json(traks)
-    })
-    .catch(error => {
-      console.error(error)
-      res.json(error)
-    })
+async function getAll (req, res, next) {
+  try {
+    const traks = await Traks.findAll({})
+    res.json(traks)
+  } catch (error) {
+    next(error)
+  }
 }
 
 export {

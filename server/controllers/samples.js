@@ -7,116 +7,110 @@ import { ANONYMOUS_PLAYER_ID } from '../models/Players'
 import { sequelize } from '../adapters/db'
 import { saveBlobToS3 } from '../adapters/s3'
 
-function createSampleTrakSampleInstance (queryStrings = [], s3ResourceName) {
-  return sequelize.transaction(transaction => {
-    let player
-    let sample
+async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName) {
+  const duration = queryStrings.duration || 0.0
+  const start_time = queryStrings.startTime || 0.0 // eslint-disable-line 
+  const volume = queryStrings.volume || -6.0
+  const panning = queryStrings.panning || 0.0
 
-    return Players.findById(ANONYMOUS_PLAYER_ID)
-      .then(thePlayer => {
-        player = thePlayer
-        return player.createSample(
-          {
-            url: s3ResourceName,
-            duration: queryStrings.duration ? queryStrings.duration : 0.0
-          },
-          { transaction }
-        )
+  return sequelize.transaction(async transaction => {
+    const player = await Players.findById(ANONYMOUS_PLAYER_ID)
+    const sample = await player.createSample(
+      {
+        url: s3ResourceName,
+        duration
+      },
+      { transaction }
+    )
+
+    let trakName = queryStrings.trakName
+
+    /**
+     * trak doesn't exist: Create a new trak
+     */
+    if (!trakName) {
+      trakName = randomWords({ exactly: 3, join: '-' })
+
+      // @todo ensure that trakName is not already in use!!!
+
+      const trak = await player.createTrak({
+        name: trakName,
+        start_time: 0,
+        duration
+      }, { transaction })
+
+      await sample.createSample_instance({
+        start_time,
+        volume,
+        panning,
+        player_id: ANONYMOUS_PLAYER_ID,
+        trak_id: trak.id
+      }, { transaction })
+
+      return trakName
+    /**
+     * trak exists: Do we need to update start_time AND/OR duration?
+     */
+    } else {
+      const trak = await Traks.findOne({
+        where: { name: trakName },
+        transaction,
+        lock: transaction.LOCK.UPDATE
       })
-      .then(newSample => {
-        sample = newSample
 
-        let trakName = queryStrings.trakName
+      let updates = {
+        contribution_count: trak.contribution_count + 1,
+        last_contribution_date: sequelize.fn('NOW')
+      }
 
-        /**
-         * trak doesn't exist: Create a new trak
-         */
-        if (!trakName) {
-          trakName = randomWords({ exactly: 3, join: '-' })
+      const currentDuration = Number.parseFloat(trak.duration)
+      const sampleStartTime = Number.parseFloat(start_time)
+      const sampleDuration = Number.parseFloat(duration)
 
-          // @todo ensure that trakName is not already in use!!!
+      /**
+       * update trak.start_time ??
+       */
+      if (sampleStartTime < trak.start_time) {
+        updates = Object.assign({}, updates, {
+          start_time: sampleStartTime,
+          duration: currentDuration + (trak.start_time - sampleStartTime)
+        })
+      }
 
-          return player.createTrak({
-            name: trakName,
-            start_time: 0,
-            duration: queryStrings.duration
-          }, { transaction })
-            .then(trak => {
-              return sample.createSample_instance({
-                start_time: queryStrings.startTime ? queryStrings.startTime : 0.0,
-                volume: queryStrings.volume ? queryStrings.volume : -6.0,
-                panning: queryStrings.panning ? queryStrings.panning : 0.0,
-                player_id: ANONYMOUS_PLAYER_ID,
-                trak_id: trak.id
-              }, { transaction })
-            })
-            .then(() => trakName)
-        /**
-         * trak exists: Do we need to update start_time AND/OR duration?
-         */
-        } else {
-          return Traks.findOne({
-            where: { name: trakName },
-            transaction,
-            lock: transaction.LOCK.UPDATE
-          })
-            .then(trak => {
-              let updates = {
-                contribution_count: trak.contribution_count + 1,
-                last_contribution_date: sequelize.fn('NOW')
-              }
+      /**
+       * update trak.duration ??
+       */
+      if ((sampleStartTime + sampleDuration) > trak.start_time + currentDuration) {
+        const currentDurationUpdate = updates.duration || currentDuration
+        const endPointDiff = (sampleStartTime + sampleDuration) - (trak.start_time + currentDuration)
+        const newDuration = currentDurationUpdate + endPointDiff
+        updates = Object.assign({}, updates, { duration: newDuration })
+      }
 
-              const currentDuration = Number.parseFloat(trak.duration)
-              const sampleStartTime = Number.parseFloat(queryStrings.startTime)
-              const sampleDuration = Number.parseFloat(queryStrings.duration)
+      await trak.update(updates, { transaction })
+      await sample.createSample_instance({
+        start_time,
+        volume,
+        panning,
+        player_id: ANONYMOUS_PLAYER_ID,
+        trak_id: trak.id
+      }, { transaction })
 
-              /**
-               * update trak.start_time ??
-               */
-              if (sampleStartTime < trak.start_time) {
-                updates = Object.assign({}, updates, {
-                  start_time: sampleStartTime,
-                  duration: currentDuration + (trak.start_time - sampleStartTime)
-                })
-              }
-              /**
-               * update trak.duration ??
-               */
-              if ((sampleStartTime + sampleDuration) > trak.start_time + currentDuration) {
-                const currentDurationUpdate = updates.duration || currentDuration
-                const endPointDiff = (sampleStartTime + sampleDuration) - (trak.start_time + currentDuration)
-                const newDuration = currentDurationUpdate + endPointDiff
-                updates = Object.assign({}, updates, { duration: newDuration })
-              }
-
-              return trak.update(updates, { transaction })
-                .then(() => {
-                  return sample.createSample_instance({
-                    start_time: queryStrings.startTime ? queryStrings.startTime : 0.0,
-                    volume: queryStrings.volume ? queryStrings.volume : -6.0,
-                    panning: queryStrings.panning ? queryStrings.panning : 0.0,
-                    player_id: ANONYMOUS_PLAYER_ID,
-                    trak_id: trak.id
-                  }, { transaction })
-                })
-            })
-            .then(() => trakName)
-        }
-      })
+      return trakName
+    }
   })
 }
 
-function create (req, res) {
-  saveBlobToS3(req)
-    .then(createSampleTrakSampleInstance.bind(this, req.query))
-    .then(trakName => {
-      res.json({ trakName })
-    })
-    .catch((err) => {
-      // @todo log error
-      console.error(err)
-      res.sendStatus(500)
-    })
+async function create (req, res, next) {
+  try {
+    const s3ResourceName = await saveBlobToS3(req)
+
+    const trakName = await createSampleTrakSampleInstance(req.query, s3ResourceName)
+
+    res.json({ trakName })
+  } catch (error) {
+    next(error)
+  }
 }
 
 export {
