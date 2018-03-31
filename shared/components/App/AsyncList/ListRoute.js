@@ -2,6 +2,7 @@ import React from 'react'
 import Helmet from 'react-helmet'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
+import moment from 'moment'
 
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
@@ -36,7 +37,11 @@ class ListRoute extends React.Component {
 
   render () {
     const { traks } = this.props
-    const sortedTraks = traks.sort((a, b) => a.last_contribution_date < b.last_contribution_date)
+
+    const sortedTraks = traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
+      ? 1
+      : -1
+    )
 
     return (
       <div className={styles.container}>
