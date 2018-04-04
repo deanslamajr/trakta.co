@@ -198,7 +198,9 @@ class Recorder extends React.Component {
       startTime: 0,
       volume: 0,
       panning: 0,
-      duration: 0
+      duration: 0,
+      loopCount: 0,
+      loopPadding: 0
     })
     this.props.setStagedObjectUrl(objectUrl)
 

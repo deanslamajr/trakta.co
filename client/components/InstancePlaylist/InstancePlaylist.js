@@ -102,12 +102,18 @@ class InstancePlaylist extends React.Component {
   _onInstanceLoadSuccess (instance, resolve) {
     const buffer = bufferCache[instance.sample.id]
 
-    const samplePlayer = new Tone.Player(buffer)
+    /**
+     * do stagedSample loop work
+     */
+    let i = 0
+    do {
+      const samplePlayer = new Tone.Player(buffer)
+      const playerStartTime = (instance.start_time + (i * instance.loop_padding)) - this.props.trackDimensions.startTime
 
-    let playerStartTime = instance.start_time - this.props.trackDimensions.startTime
-
-    addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
-    syncPlayerToTransport(samplePlayer, playerStartTime)
+      addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
+      syncPlayerToTransport(samplePlayer, playerStartTime)
+      i++
+    } while (i <= instance.loop_count)
 
     this.props.finishLoadTask()
     resolve()
@@ -130,12 +136,18 @@ class InstancePlaylist extends React.Component {
       stagedSample,
       trackDimensions } = this.props
 
-    const samplePlayer = new Tone.Player(buffer)
+    /**
+     * do stagedSample loop work
+     */
+    let i = 0
+    do {
+      const samplePlayer = new Tone.Player(buffer)
+      const playerStartTime = (stagedSample.startTime + (i * stagedSample.loopPadding)) - trackDimensions.startTime
 
-    const playerStartTime = stagedSample.startTime - trackDimensions.startTime
-
-    addPluginsToPlayer(samplePlayer, stagedSample.volume, stagedSample.panning)
-    syncPlayerToTransport(samplePlayer, playerStartTime)
+      addPluginsToPlayer(samplePlayer, stagedSample.volume, stagedSample.panning)
+      syncPlayerToTransport(samplePlayer, playerStartTime)
+      i++
+    } while (i <= stagedSample.loopCount)
   }
 
   _downloadAndArrangeSampleInstances (instances) {
@@ -144,21 +156,25 @@ class InstancePlaylist extends React.Component {
       length: trackLength
     } = this.props.trackDimensions
 
-    if (instances) {
-      // remove 'play' button
-      if (!this.state.isPlaying) {
-        this.props.addItemToNavBar(null)
+    // remove 'play' button
+    if (!this.state.isPlaying) {
+      this.props.addItemToNavBar(null)
+    }
+
+    prepTransport(trackStartTime, trackLength)
+
+    // if buffer exists, add the staged sample to the track
+    if (this.props.buffer) {
+      this._loadBuffer()
+
+      if (!instances || (instances && !instances.length)) {
+        this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
       }
+    }
 
-      prepTransport(trackStartTime, trackLength)
-
+    if (instances && instances.length) {
       // Load the samples
       const tasks = instances.map(this._loadSample.bind(this))
-
-      // if buffer exists, add the staged sample to the track
-      if (this.props.buffer) {
-        this._loadBuffer()
-      }
 
       return Promise.all(tasks)
         .then(() => {

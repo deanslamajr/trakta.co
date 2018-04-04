@@ -4,13 +4,12 @@ import viewportDimensions from 'viewport-dimensions'
 
 import * as selectors from '../../../shared/reducers'
 
-import {
-  calculateInstanceRectangles,
-  generateRectangle } from './calculateInstanceRectangles'
+import { calculateInstanceRectangles } from './calculateInstanceRectangles'
 
 const padding = 5
+const STAGED_SAMPLE = 'staged-sample'
 
-function drawRectangles (rowsOfRectangles, stagedSampleRectangle, viewportWidth, viewportHeight) {
+function drawRectangles (rowsOfRectangles, viewportWidth, viewportHeight) {
   const rowsCount = rowsOfRectangles.length
   const rowHeight = viewportHeight / rowsCount
 
@@ -22,7 +21,7 @@ function drawRectangles (rowsOfRectangles, stagedSampleRectangle, viewportWidth,
         y={(index * rowHeight) + padding}
         width={(scaledDuration * viewportWidth)}
         height={rowHeight - padding}
-        fill='#cfcfcf'
+        fill={id === STAGED_SAMPLE ? 'rgb(226,132,19)' : '#cfcfcf'}
         stroke='black'
         strokeWidth='.15'
         strokeLinecap='round'
@@ -31,24 +30,6 @@ function drawRectangles (rowsOfRectangles, stagedSampleRectangle, viewportWidth,
 
     return [...rectangles, ...newRectangles]
   }, [])
-
-  // staged rectangle
-  if (stagedSampleRectangle) {
-    svgRectangles.push((
-      <rect
-        key={stagedSampleRectangle.id}
-        x={(stagedSampleRectangle.scaledStartPos * viewportWidth)}
-        y={padding}
-        width={(stagedSampleRectangle.scaledDuration * viewportWidth)}
-        height={viewportHeight - padding}
-        fill='rgb(226,132,19)'
-        stroke='black'
-        strokeWidth='.15'
-        strokeLinecap='round'
-        fillOpacity='.25'
-      />
-    ))
-  }
 
   return (
     <svg style={{ display: 'block' }} width={viewportWidth} height={viewportHeight}>
@@ -74,29 +55,34 @@ const SampleInstances = ({ instances, trackDimensions, stagedSample }) => {
     ? viewportDimensions.height() && viewportDimensions.height()
     : 300
 
-  const samples = instances.map(
-    instance => {
-      return {
-        start_time: instance.start_time,
-        duration: instance.sample.duration,
-        id: instance.id
-      }
-    }
-  )
+  const samples = instances.map(instance => {
+    const duration = instance.loop_count === 0
+      ? instance.sample.duration
+      : (instance.loop_count * instance.loop_padding) + instance.sample.duration
 
-  let stagedSampleRectangle
+    return {
+      start_time: instance.start_time,
+      duration,
+      id: instance.id
+    }
+  })
+
   if (stagedSample && stagedSample.duration) {
+    const duration = stagedSample.loopCount === 0
+      ? stagedSample.duration
+      : (stagedSample.loopCount * stagedSample.loopPadding) + stagedSample.duration
+
     const stagedSampleRectangleIngredients = {
       start_time: stagedSample.startTime,
-      duration: stagedSample.duration,
-      id: 'staged-sample'
+      duration,
+      id: STAGED_SAMPLE
     }
-    stagedSampleRectangle = generateRectangle(startTime, length, stagedSampleRectangleIngredients)
+    samples.push(stagedSampleRectangleIngredients)
   }
 
   const rowsOfRectangles = calculateInstanceRectangles(startTime, length, samples)
 
-  return drawRectangles(rowsOfRectangles, stagedSampleRectangle, width, height)
+  return drawRectangles(rowsOfRectangles, width, height)
 }
 
 function mapStateToProps (state) {

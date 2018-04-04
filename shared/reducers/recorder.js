@@ -9,7 +9,9 @@ const defaultState = {
     startTime: 0,
     volume: 0,
     panning: 0,
-    duration: 0
+    duration: 0,
+    loopPadding: 0,
+    loopCount: 0
   },
   cleanup: {
     leftSliderValue: 0,

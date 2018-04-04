@@ -17,7 +17,11 @@ export function calculateTrackDimensions (instances) {
       earliest = instance.start_time
     }
 
-    const instanceEndTime = instance.start_time + instance.sample.duration
+    const duration = instance.loop_count === 0
+      ? instance.sample.duration
+      : (instance.loop_count * instance.loop_padding) + instance.sample.duration
+
+    const instanceEndTime = instance.start_time + duration
     if (isNotANumber(latest)) {
       latest = instanceEndTime
     } else if (latest < instanceEndTime) {

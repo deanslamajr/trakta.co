@@ -4,12 +4,11 @@
 .container {
   display: flex;
   flex-direction: column;
-  margin-top: 5.5rem;
   position: absolute;
   background: var(--clearBlue);
   left: 35%;
   right: 35%;
-  top: 20%;
+  top: 5%;
   z-index: 999;
 }
 

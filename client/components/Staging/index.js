@@ -24,8 +24,14 @@ function isNotANumber (unknown) {
   return isNaN(parseFloat(unknown))
 }
 
-function validateData (absoluteStartTime, duration, volume, panning) {
-  if (isNotANumber(absoluteStartTime) || isNotANumber(duration) || isNotANumber(volume) || isNotANumber(panning)) {
+function validateData (absoluteStartTime, duration, volume, panning, loopCount, loopPadding) {
+  if (isNotANumber(absoluteStartTime) ||
+    isNotANumber(duration) ||
+    isNotANumber(volume) ||
+    isNotANumber(panning) ||
+    isNotANumber(loopCount) ||
+    isNotANumber(loopPadding)
+  ) {
     throw new Error('Malformed submit data')
   }
 }
@@ -47,9 +53,16 @@ class Staging extends React.Component {
   _updateTrack (stagedSample) {
     const latestStagedSample = stagedSample || this.props.stagedSample
 
+    /**
+     * make it so that an array can be passed to this action creator
+     *
+     * generate array from two values: loopCount, loop separation
+     */
     this.props.updateTrackDimensionsWithAdditionalSample({
       // weird shape that mocks the shape returned from DB query for sampleInstances
       start_time: latestStagedSample.startTime,
+      loop_count: latestStagedSample.loopCount,
+      loop_padding: latestStagedSample.loopPadding,
       sample: { duration: latestStagedSample.duration }
     })
   }
@@ -60,7 +73,7 @@ class Staging extends React.Component {
       return
     }
 
-    if (type === 'startTime') {
+    if (type === 'startTime' || type === 'loopPadding' || type === 'loopCount') {
       this.setState({
         updateTrack: true
       }, () => {
@@ -76,7 +89,9 @@ class Staging extends React.Component {
       startTime: stagedSampleStartTime,
       volume,
       panning,
-      duration
+      duration,
+      loopCount,
+      loopPadding
     } = this.props.stagedSample
 
     // prevent page refresh
@@ -95,13 +110,13 @@ class Staging extends React.Component {
 
     // validate that data is properly formatted
     // @todo handle invalid data state gracefully
-    validateData(stagedSampleStartTime, duration, volume, panning)
+    validateData(stagedSampleStartTime, duration, volume, panning, loopCount, loopPadding)
 
     const trakName = this.props.trakName || ''
 
     // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
     // e.g. user is actually looking at the page and is not a robot
-    const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}`
+    const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}&loopCount=${loopCount}&loopPadding=${loopPadding}`
 
     this._getBlobFromObjectUrl()
       .then((data) => axios.post(`/api/sample${queryString}`, data, config))
@@ -110,7 +125,9 @@ class Staging extends React.Component {
           startTime: 0,
           volume: 0,
           panning: 0,
-          duration: 0
+          duration: 0,
+          loopCount: 0,
+          loopPadding: 0
         })
 
         this.props.resetSampleLoaderState()
@@ -187,7 +204,7 @@ class Staging extends React.Component {
       // success
       buffer => {
         const duration = buffer.get().duration
-        this.props.setStagedSample({ duration })
+        this.props.setStagedSample({ duration, loopPadding: duration })
 
         this._updateTrack()
 
@@ -208,7 +225,8 @@ class Staging extends React.Component {
     const {
       startTime,
       volume,
-      panning
+      loopPadding,
+      loopCount
     } = this.props.stagedSample
 
     return (
@@ -241,13 +259,22 @@ class Staging extends React.Component {
             placeholder='volume'
             className={styles.formInput} />
 
-          <label htmlFor='panning'>panning (-1 to 1)</label>
-          <input id='panning'
+          <label htmlFor='loopCount'># of loops</label>
+          <input id='loopCount'
             type='number'
-            step='0.01'
-            value={panning}
-            onChange={this._handleChange.bind(this, 'panning')}
-            placeholder='panning'
+            step='1'
+            value={loopCount}
+            onChange={this._handleChange.bind(this, 'loopCount')}
+            placeholder='# of loops'
+            className={styles.formInput} />
+
+          <label htmlFor='loopPadding'>Space between loops</label>
+          <input id='loopPadding'
+            type='number'
+            step='1'
+            value={loopPadding}
+            onChange={this._handleChange.bind(this, 'loopPadding')}
+            placeholder='padding'
             className={styles.formInput} />
 
           <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} />

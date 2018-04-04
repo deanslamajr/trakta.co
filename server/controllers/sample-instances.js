@@ -4,10 +4,6 @@ async function getByTrakName (req, res, next) {
   try {
     const trakName = req.params.trakName
 
-    if (!trakName) {
-      return res.sendStatus(404)
-    }
-
     const sampleInstances = await SampleInstances.findAll({
       include: [
         Samples,

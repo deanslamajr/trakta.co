@@ -39,7 +39,7 @@ const winstonLogger = winston.createLogger({
   format
 })
 
-function log (level = 'error', message = '', data) {
+function log (level = 'error', message = '', data = {}) {
   if (typeof data !== 'object' || data === null) {
     data = {}
   }

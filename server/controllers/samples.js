@@ -12,6 +12,8 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
   const start_time = queryStrings.startTime || 0.0 // eslint-disable-line 
   const volume = queryStrings.volume || -6.0
   const panning = queryStrings.panning || 0.0
+  const loop_count = queryStrings.loopCount || 0 // eslint-disable-line 
+  const loop_padding = queryStrings.loopPadding || 0.0 // eslint-disable-line 
 
   return sequelize.transaction(async transaction => {
     const player = await Players.findById(ANONYMOUS_PLAYER_ID)
@@ -24,6 +26,7 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
     )
 
     let trakName = queryStrings.trakName
+    let trak
 
     /**
      * trak doesn't exist: Create a new trak
@@ -33,26 +36,16 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
 
       // @todo ensure that trakName is not already in use!!!
 
-      const trak = await player.createTrak({
+      trak = await player.createTrak({
         name: trakName,
         start_time: 0,
         duration
       }, { transaction })
-
-      await sample.createSample_instance({
-        start_time,
-        volume,
-        panning,
-        player_id: ANONYMOUS_PLAYER_ID,
-        trak_id: trak.id
-      }, { transaction })
-
-      return trakName
     /**
      * trak exists: Do we need to update start_time AND/OR duration?
      */
     } else {
-      const trak = await Traks.findOne({
+      trak = await Traks.findOne({
         where: { name: trakName },
         transaction,
         lock: transaction.LOCK.UPDATE
@@ -88,16 +81,19 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
       }
 
       await trak.update(updates, { transaction })
-      await sample.createSample_instance({
-        start_time,
-        volume,
-        panning,
-        player_id: ANONYMOUS_PLAYER_ID,
-        trak_id: trak.id
-      }, { transaction })
-
-      return trakName
     }
+
+    await sample.createSample_instance({
+      start_time,
+      volume,
+      panning,
+      player_id: ANONYMOUS_PLAYER_ID,
+      trak_id: trak.id,
+      loop_count,
+      loop_padding
+    }, { transaction })
+
+    return trakName
   })
 }
 

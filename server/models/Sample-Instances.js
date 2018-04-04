@@ -24,6 +24,16 @@ const SampleInstances = sequelize.define('sample_instances',
       type: Sequelize.DOUBLE,
       allowNull: false,
       defaultValue: 0.0
+    },
+    loop_count: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    loop_padding: {
+      type: Sequelize.DOUBLE,
+      allowNull: false,
+      defaultValue: 0.0
     }
   },
   {
