@@ -6,20 +6,26 @@
   flex-direction: column;
   position: absolute;
   background: var(--clearBlue);
-  left: 35%;
-  right: 35%;
-  top: 5%;
+  left: 0;
+  right: 0;
   z-index: 999;
 }
 
 .form-input {
   width: 20%;
-  margin: 0.75rem auto;
+  margin: .75rem 0 .75rem 1rem;
 }
 
 .form-saving {
   opacity: 0.25; 
   cursor: not-allowed;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0 3rem 0 1rem;
 }
 
 @keyframes spin {

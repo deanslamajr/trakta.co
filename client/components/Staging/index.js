@@ -41,7 +41,11 @@ class Staging extends React.Component {
     super(props)
 
     this.state = {
-      isSaving: false
+      isSaving: false,
+      startTime: props.stagedSample.startTime,
+      volume: props.stagedSample.volume,
+      loopPadding: props.stagedSample.loopPadding,
+      loopCount: props.stagedSample.loopCount
     }
 
     this._saveRecording = this._saveRecording.bind(this)
@@ -53,11 +57,6 @@ class Staging extends React.Component {
   _updateTrack (stagedSample) {
     const latestStagedSample = stagedSample || this.props.stagedSample
 
-    /**
-     * make it so that an array can be passed to this action creator
-     *
-     * generate array from two values: loopCount, loop separation
-     */
     this.props.updateTrackDimensionsWithAdditionalSample({
       // weird shape that mocks the shape returned from DB query for sampleInstances
       start_time: latestStagedSample.startTime,
@@ -69,19 +68,18 @@ class Staging extends React.Component {
 
   _handleChange (type, event) {
     let parsedValue = parseFloat(event.target.value)
+
     if (Number.isNaN(parsedValue)) {
-      return
+      parsedValue = 0
     }
 
+    let stateUpdate = { [type]: parsedValue }
+
     if (type === 'startTime' || type === 'loopPadding' || type === 'loopCount') {
-      this.setState({
-        updateTrack: true
-      }, () => {
-        this.props.setStagedSample({ [type]: parsedValue })
-      })
-    } else {
-      this.props.setStagedSample({ [type]: parsedValue })
+      stateUpdate.updateTrack = true
     }
+
+    this.setState(stateUpdate, () => this.props.setStagedSample({ [type]: parsedValue }))
   }
 
   _saveRecording (event) {
@@ -208,7 +206,10 @@ class Staging extends React.Component {
 
         this._updateTrack()
 
-        this.setState({ buffer })
+        this.setState({
+          loopPadding: duration,
+          buffer
+        })
         this.props.addItemToNavBar(undefined, (
           { type: 'CHECK', cb: this._saveRecording }
         ))
@@ -222,60 +223,59 @@ class Staging extends React.Component {
   }
 
   render () {
-    const {
-      startTime,
-      volume,
-      loopPadding,
-      loopCount
-    } = this.props.stagedSample
-
     return (
       <div>
         <form className={styles.container} onSubmit={this._saveRecording}>
           {
             this.props.instances && this.props.instances.length
               ? (
-                <div>
+                <span className={styles.inputContainer}>
                   <label htmlFor='startTime'>startTime</label>
                   <input
                     id='startTime'
                     type='number'
                     step='0.01'
-                    value={startTime}
+                    value={this.state.startTime}
                     onChange={this._handleChange.bind(this, 'startTime')}
                     placeholder='startTime'
                     className={styles.formInput} />
-                </div>
+                </span>
                 )
               : null
           }
 
-          <label htmlFor='volume'>volume (-infinity to +infinity)</label>
-          <input id='volume'
-            type='number'
-            step='0.01'
-            value={volume}
-            onChange={this._handleChange.bind(this, 'volume')}
-            placeholder='volume'
-            className={styles.formInput} />
+          <span className={styles.inputContainer}>
+            <label htmlFor='volume'>volume (-infinity to +infinity)</label>
+            <input id='volume'
+              type='number'
+              step='1'
+              value={this.state.volume}
+              onChange={this._handleChange.bind(this, 'volume')}
+              placeholder='volume'
+              className={styles.formInput} />
+          </span>
 
-          <label htmlFor='loopCount'># of loops</label>
-          <input id='loopCount'
-            type='number'
-            step='1'
-            value={loopCount}
-            onChange={this._handleChange.bind(this, 'loopCount')}
-            placeholder='# of loops'
-            className={styles.formInput} />
+          <span className={styles.inputContainer}>
+            <label htmlFor='loopCount'># of loops</label>
+            <input id='loopCount'
+              type='number'
+              step='1'
+              value={this.state.loopCount}
+              onChange={this._handleChange.bind(this, 'loopCount')}
+              placeholder='# of loops'
+              className={styles.formInput} />
+          </span>
 
-          <label htmlFor='loopPadding'>Space between loops</label>
-          <input id='loopPadding'
-            type='number'
-            step='1'
-            value={loopPadding}
-            onChange={this._handleChange.bind(this, 'loopPadding')}
-            placeholder='padding'
-            className={styles.formInput} />
+          <span className={styles.inputContainer}>
+            <label htmlFor='loopPadding'>Space between loops</label>
+            <input id='loopPadding'
+              type='number'
+              step='1'
+              value={this.state.loopPadding}
+              onChange={this._handleChange.bind(this, 'loopPadding')}
+              placeholder='padding'
+              className={styles.formInput} />
+          </span>
 
           <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} />
         </form>

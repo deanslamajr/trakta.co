@@ -75,6 +75,18 @@ function prepTransport (trackStartTime, trackLength) {
   // Tone.Transport.schedule(function (time) {}, '0')
 }
 
+function addBufferToTrak (buffer, instance, trakStartTime) {
+  let i = 0
+  do {
+    const samplePlayer = new Tone.Player(buffer)
+    const playerStartTime = (instance.startTime + (i * instance.loopPadding)) - trakStartTime
+
+    addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
+    syncPlayerToTransport(samplePlayer, playerStartTime)
+    i++
+  } while (i <= (instance.loopCount || 0))
+}
+
 class InstancePlaylist extends React.Component {
   constructor (props) {
     super(props)
@@ -83,7 +95,6 @@ class InstancePlaylist extends React.Component {
       error: null
     }
 
-    this._loadBuffer = this._loadBuffer.bind(this)
     this._play = this._play.bind(this)
     this._stop = this._stop.bind(this)
 
@@ -102,18 +113,13 @@ class InstancePlaylist extends React.Component {
   _onInstanceLoadSuccess (instance, resolve) {
     const buffer = bufferCache[instance.sample.id]
 
-    /**
-     * do stagedSample loop work
-     */
-    let i = 0
-    do {
-      const samplePlayer = new Tone.Player(buffer)
-      const playerStartTime = (instance.start_time + (i * instance.loop_padding)) - this.props.trackDimensions.startTime
-
-      addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
-      syncPlayerToTransport(samplePlayer, playerStartTime)
-      i++
-    } while (i <= instance.loop_count)
+    addBufferToTrak(buffer, {
+      ...instance,
+      loopCount: instance.loop_count,
+      loopPadding: instance.loop_padding,
+      startTime: instance.start_time
+    },
+    this.props.trackDimensions.startTime)
 
     this.props.finishLoadTask()
     resolve()
@@ -130,44 +136,28 @@ class InstancePlaylist extends React.Component {
     })
   }
 
-  _loadBuffer () {
+  _downloadAndArrangeSampleInstances (instances) {
     const {
       buffer,
       stagedSample,
       trackDimensions } = this.props
 
-    /**
-     * do stagedSample loop work
-     */
-    let i = 0
-    do {
-      const samplePlayer = new Tone.Player(buffer)
-      const playerStartTime = (stagedSample.startTime + (i * stagedSample.loopPadding)) - trackDimensions.startTime
-
-      addPluginsToPlayer(samplePlayer, stagedSample.volume, stagedSample.panning)
-      syncPlayerToTransport(samplePlayer, playerStartTime)
-      i++
-    } while (i <= stagedSample.loopCount)
-  }
-
-  _downloadAndArrangeSampleInstances (instances) {
     const {
       startTime: trackStartTime,
       length: trackLength
-    } = this.props.trackDimensions
-
-    // remove 'play' button
-    if (!this.state.isPlaying) {
-      this.props.addItemToNavBar(null)
-    }
+    } = trackDimensions
 
     prepTransport(trackStartTime, trackLength)
 
     // if buffer exists, add the staged sample to the track
-    if (this.props.buffer) {
-      this._loadBuffer()
+    if (buffer) {
+      addBufferToTrak(buffer, stagedSample, trackDimensions.startTime)
 
       if (!instances || (instances && !instances.length)) {
+        // if playback had been engaged:
+        // 1. start playback
+        // 2. set stop button in navbar
+        // else, show playbutton:
         this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
       }
     }
@@ -179,9 +169,11 @@ class InstancePlaylist extends React.Component {
       return Promise.all(tasks)
         .then(() => {
           this.props.endFetchSample()
-          if (!this.state.isPlaying) {
-            this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
-          }
+          // if playback had been engaged:
+          // 1. start playback
+          // 2. set stop button in navbar
+          // else, show playbutton:
+          this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
         })
         .catch(error => {
           // @todo log error
@@ -193,11 +185,15 @@ class InstancePlaylist extends React.Component {
     }
   }
 
-  _stop () {
+  _stopPlaybackAndSendSignal () {
     stopArrangement()
     if (this.props.incrementPlaysCount) {
       postEndSignal(this.props.trakName)
     }
+  }
+
+  _stop () {
+    this._stopPlaybackAndSendSignal()
     this.setState({ isPlaying: false })
     this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
   }
@@ -220,16 +216,15 @@ class InstancePlaylist extends React.Component {
     const stagedSamplePropsHaveChanged = !isEqual(this.props.stagedSample, nextProps.stagedSample)
 
     if (instancesHaveChanged || stagedSamplePropsHaveChanged) {
+      this.props.addItemToNavBar(null)
+      this._stopPlaybackAndSendSignal()
       this._debouncedDownloadAndArrangeSampleInstances(nextProps.instances)
     }
   }
 
   componentWillUnmount () {
     if (Tone.Transport.state === 'started') {
-      stopArrangement()
-      if (this.props.incrementPlaysCount) {
-        postEndSignal(this.props.trakName)
-      }
+      this._stopPlaybackAndSendSignal()
     }
   }
 
