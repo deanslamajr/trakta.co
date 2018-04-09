@@ -24,18 +24,6 @@
   bottom: 35%
 }
 
-.start-time {
-  position: absolute;
-  left: 0;
-  margin: 1rem;
-}
-
-.end-time {
-  position: absolute;
-  right: 0;
-  margin: 1rem;
-}
-
 .contribute {
   background-color: var(--clearBlue);
 }

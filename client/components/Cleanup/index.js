@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import ReactSlider from 'react-slider'
 import classnames from 'classnames'
-import { keyframes } from 'styled-components'
 
 import * as selectors from '../../../shared/reducers'
 import {
@@ -16,6 +15,9 @@ import { getSampleCreator } from '../Recorder/SampleCreator'
 import styles from './cleanup.css'
 
 let audioElement
+let intervalAnimationId
+let position
+let onEndPlaybackLoop
 
 function getRootPath (fullPath) {
   const pathTokens = fullPath.split('/')
@@ -52,8 +54,8 @@ class Cleanup extends React.Component {
     this._startPlayback = this._startPlayback.bind(this)
     this._stopPlayback = this._stopPlayback.bind(this)
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
-    this._generateKeyFrames = this._generateKeyFrames.bind(this)
     this._renderSample = this._renderSample.bind(this)
+    this._onEndPlaybackLoop = this._onEndPlaybackLoop.bind(this)
   }
 
   _clickUseThisSelection () {
@@ -68,7 +70,6 @@ class Cleanup extends React.Component {
     const objectUrl = this.sampleCreator.createBlobObjectUrl()
 
     audioElement = new Audio([objectUrl]) // eslint-disable-line
-    audioElement.loop = true
 
     this.props.setStagedObjectUrl(objectUrl)
   }
@@ -102,19 +103,75 @@ class Cleanup extends React.Component {
 
   _stopPlayback () {
     stopPlayback()
+    audioElement.removeEventListener('ended', onEndPlaybackLoop)
+    audioElement._isPlaying = false
+    clearInterval(intervalAnimationId)
+    this.playIndicatorEl.style.backgroundColor = 'transparent'
 
-    this.props.addItemToNavBar({ type: 'PLAY', cb: this._startPlayback })
-    this.setState({ isPlaying: false })
+    this.setState({ isPlaying: false }, () => {
+      this.props.addItemToNavBar({ type: 'PLAY', cb: this._startPlayback })
+    })
+  }
+
+  _redrawPosition (bottom, displacementPerFrame, top) {
+    position = position <= bottom
+      ? position + displacementPerFrame
+      : bottom
+
+    if (this.playIndicatorEl) {
+      this.playIndicatorEl.style.top = `${position}px`
+    }
+  }
+
+  _onEndPlaybackLoop (top, bottom, displacementPerFrame, animationInterval) {
+    clearInterval(intervalAnimationId)
+    this.playIndicatorEl.style.backgroundColor = 'transparent'
+    if (audioElement._isPlaying) {
+      this._startPlaybackAudioAndAnimation(top, bottom, displacementPerFrame, animationInterval)
+    }
+  }
+
+  _startPlaybackAudioAndAnimation (top, bottom, displacementPerFrame, animationInterval) {
+    position = top
+
+    audioElement.addEventListener('play', () => {
+      if (this.playIndicatorEl) {
+        this.playIndicatorEl.style.backgroundColor = 'black'
+      }
+  
+      const redrawPosition = this._redrawPosition.bind(this)
+      onEndPlaybackLoop = this._onEndPlaybackLoop.bind(this, top, bottom, displacementPerFrame, animationInterval)
+  
+      redrawPosition(bottom, displacementPerFrame, top)
+  
+      intervalAnimationId = setInterval(() => redrawPosition(bottom, displacementPerFrame, top), animationInterval)
+
+      audioElement.addEventListener('ended', onEndPlaybackLoop, { once: true })
+    },
+    { once: true })
+
+    audioElement.play()
+    audioElement._isPlaying = true
   }
 
   _startPlayback () {
-    audioElement.play()
     this.props.addItemToNavBar({ type: 'STOP', cb: this._stopPlayback })
+
+    const maxClipValue = this.sampleCreator.getDataBufferLength()
+    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
+    const bottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue)
+    const animationDistance = bottom - top
+
+    const animationInterval = 20
+    const sampleDuration = audioElement.duration * 1000
+    const numberOfFrames = (sampleDuration / animationInterval) + 1
+
+    const displacementPerFrame = animationDistance / numberOfFrames
 
     this.setState({
       isPlaying: true,
-      duration: audioElement.duration
-    })
+      duration: audioElement.duration,
+    }, () => this._startPlaybackAudioAndAnimation(top, bottom, displacementPerFrame, animationInterval))
   }
 
   _onLeftSliderChange (value) {
@@ -139,26 +196,12 @@ class Cleanup extends React.Component {
     })
   }
 
-  _generateKeyFrames () {
-    const maxClipValue = this.sampleCreator.getDataBufferLength()
-    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
-    const keyframeBottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue)
-
-    const playAnimationKeyframeName = keyframes`
-        0%   { top: ${Math.ceil(top)}px; }
-        100% { top: ${Math.ceil(keyframeBottom)}px; }
-      `
-
-    this.setState({ playAnimationKeyframeName })
-  }
-
   componentWillReceiveProps (nextProps) {
     if (this.props.cleanup.clipStart !== nextProps.cleanup.clipStart || this.props.cleanup.clipEnd !== nextProps.cleanup.clipEnd) {
       if (this.state.isPlaying) {
         this._stopPlayback()
       }
       this._renderSample(nextProps.cleanup.clipStart, nextProps.cleanup.clipEnd)
-      this._generateKeyFrames()
     }
   }
 
@@ -189,8 +232,6 @@ class Cleanup extends React.Component {
           this._drawWaveForm()
           this._renderSample(this.props.cleanup.clipStart, this.props.cleanup.clipEnd)
 
-          this._generateKeyFrames()
-
           this.props.addItemToNavBar(
             { type: 'PLAY', cb: this._startPlayback },
             { type: 'CHECK', cb: this._clickUseThisSelection }
@@ -201,7 +242,9 @@ class Cleanup extends React.Component {
   }
 
   componentWillUnmount () {
-    stopPlayback()
+    if (this.state.isPlaying) {
+      this._stopPlayback()
+    }
   }
 
   render () {
@@ -210,13 +253,6 @@ class Cleanup extends React.Component {
 
     const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
     const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue))
-
-    const playIndicatorStyles = this.state.isPlaying
-      ? {
-        animation: `${this.state.playAnimationKeyframeName} ${this.state.duration}s linear infinite`,
-        backgroundColor: 'black'
-      }
-      : {}
 
     return (
       <div ref={(container) => { this.container = container }}>
@@ -255,7 +291,7 @@ class Cleanup extends React.Component {
                   ref={(canvas) => { this.canvas = canvas }}
                 />
                 <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
-                <div style={playIndicatorStyles} className={styles.playIndicator} />
+                <div ref={ref => this.playIndicatorEl = ref} className={styles.playIndicator} />
               </div>
             )
           }

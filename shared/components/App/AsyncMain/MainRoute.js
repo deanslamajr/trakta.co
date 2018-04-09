@@ -81,6 +81,7 @@ class MainRoute extends React.Component {
   }
 
   render () {
+    const { instances } = this.props
     const currentTrakName = this.props.trakName || ''
 
     return (
@@ -89,23 +90,25 @@ class MainRoute extends React.Component {
           <title>{`${currentTrakName} - ${config('appTitle')}`}</title>
         </Helmet>
 
-        <div className={styles.canvasContainer}>
-          <div className={styles.meter}>
-            <span className={styles.startTime}>{this.props.trackDimensions.startTime}</span>
-            <span className={styles.endTime}>{this.props.trackDimensions.length}</span>
-          </div>
+        {
+          // don't begin rendering InstancePlaylist and SampleInstances until instances exist
+          // Those components won't function properly if they mount before instances exist
+          instances && instances.length
+            ? (
+              <div className={styles.canvasContainer}>
+                <div className={styles.label}>
+                  <InstancePlaylist
+                    addItemToNavBar={this.props.addItemToNavBar}
+                    renderErrorComponent={this._renderErrorComponent}
+                    incrementPlaysCount
+                  />
+                </div>
 
-          <div className={styles.label}>
-            {/* Play button  */}
-            <InstancePlaylist
-              addItemToNavBar={this.props.addItemToNavBar}
-              renderErrorComponent={this._renderErrorComponent}
-              incrementPlaysCount
-            />
-          </div>
-
-          <SampleInstances />
-        </div>
+                <SampleInstances />
+              </div>
+            )
+            : null
+        }
         { this.props.isLoading && this._renderLoadingComponent() }
       </div>
     )

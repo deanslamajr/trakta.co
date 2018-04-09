@@ -34,6 +34,7 @@ async function recordPlay (req, res, next) {
         const updatedPlayCount = trak.plays_count + numberOfPlays
 
         await trak.update({ plays_count: updatedPlayCount }, { transaction })
+        // @todo playCode.update({ is_used: true })
       }
       res.sendStatus(200)
     })

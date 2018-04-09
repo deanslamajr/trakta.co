@@ -7,11 +7,13 @@ import debounce from 'debounce'
 import isEqual from 'lodash.isequal'
 import axios from 'axios'
 import randToken from 'rand-token'
+import viewportDimensions from 'viewport-dimensions'
 
 import config from '../../../config'
 
 import * as selectors from '../../../shared/reducers'
 import {
+  beginInitialFetch,
   endFetchSample,
   finishLoadTask } from '../../../shared/actions/samples'
 
@@ -21,7 +23,11 @@ const baseUrl = config('s3SampleBucket')
 
 const bufferCache = {}
 
+let player
 let playCode
+let intervalAnimationId
+let position = 0
+
 
 function addPluginsToPlayer (samplePlayer, volume, panning) {
   // Plugins
@@ -32,8 +38,10 @@ function addPluginsToPlayer (samplePlayer, volume, panning) {
   samplePlayer.chain(panVol, /* limiter, */ Tone.Master)
 }
 
-function syncPlayerToTransport (samplePlayer, playerStartTime) {
-  samplePlayer.sync().start(playerStartTime)
+function syncPlayerToTransport (samplePlayer, playerStartTime, transport = Tone.Transport) {
+  transport.schedule(() => {
+    samplePlayer.start()
+  }, playerStartTime)
 }
 
 /**
@@ -59,30 +67,14 @@ function stopArrangement () {
   Tone.Transport.stop()
 }
 
-function prepTransport (trackStartTime, trackLength) {
-  Tone.Transport.loop = true
-  Tone.Transport.position = Tone.Transport.loopStart = trackStartTime >= 0
-    ? trackStartTime
-    : 0
-  Tone.Transport.loopEnd = trackStartTime >= 0
-    ? trackLength + trackStartTime
-    : trackLength
-
-  // clear the transport
-  Tone.Transport.cancel()
-
-  /** schedule plays POST */
-  // Tone.Transport.schedule(function (time) {}, '0')
-}
-
-function addBufferToTrak (buffer, instance, trakStartTime) {
+function addBufferToTrak (buffer, instance, trakStartTime, transport) {
   let i = 0
   do {
     const samplePlayer = new Tone.Player(buffer)
     const playerStartTime = (instance.startTime + (i * instance.loopPadding)) - trakStartTime
 
     addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
-    syncPlayerToTransport(samplePlayer, playerStartTime)
+    syncPlayerToTransport(samplePlayer, playerStartTime, transport)
     i++
   } while (i <= (instance.loopCount || 0))
 }
@@ -99,8 +91,8 @@ class InstancePlaylist extends React.Component {
     this._stop = this._stop.bind(this)
 
     // this debounce slows down invocation just enough so that redux store can be updated properly from form
-    this._downloadAndArrangeSampleInstances = this._downloadAndArrangeSampleInstances.bind(this)
-    this._debouncedDownloadAndArrangeSampleInstances = debounce(this._downloadAndArrangeSampleInstances, 1000)
+    this._renderTrak = this._renderTrak.bind(this)
+    this._debouncedRenderTrak = debounce(this._renderTrak, 1000)
   }
 
   _onInstanceLoadError (instance, reject, error) {
@@ -110,33 +102,64 @@ class InstancePlaylist extends React.Component {
     reject()
   }
 
-  _onInstanceLoadSuccess (instance, resolve) {
-    const buffer = bufferCache[instance.sample.id]
-
-    addBufferToTrak(buffer, {
-      ...instance,
-      loopCount: instance.loop_count,
-      loopPadding: instance.loop_padding,
-      startTime: instance.start_time
-    },
-    this.props.trackDimensions.startTime)
-
-    this.props.finishLoadTask()
-    resolve()
-  }
-
   _loadSample (instance) {
     return new Promise((resolve, reject) => {
       const url = `${baseUrl}/${instance.sample.url}`
       bufferCache[instance.sample.id] = new Tone.Buffer(
         url,
-        this._onInstanceLoadSuccess.bind(this, instance, resolve),
+        () => {
+          this.props.finishLoadTask()
+          resolve()
+        },
         this._onInstanceLoadError.bind(this, instance, reject)
       )
     })
   }
 
-  _downloadAndArrangeSampleInstances (instances) {
+  _drawPosition (displacementPerFrame, endPosition) {
+    position = position <= endPosition
+      ? position + displacementPerFrame
+      : endPosition
+
+    if (this.playIndicatorEl) {
+      this.playIndicatorEl.style.left = `${position}px`
+    }
+  }
+
+  _prepTransport () {
+    const { length: trakDuration } = this.props.trackDimensions
+    const width = viewportDimensions
+      ? viewportDimensions.width() && viewportDimensions.width()
+      : 300
+
+    const animationInterval = 20
+    const sampleDuration = trakDuration * 1000
+    const numberOfFrames = (sampleDuration / animationInterval) + 1
+
+    const displacementPerFrame = width / numberOfFrames
+
+    // clear the transport
+    Tone.Transport.cancel()
+
+    Tone.Transport.loop = true
+    Tone.Transport.position = 0
+    Tone.Transport.loopEnd = trakDuration
+  
+    Tone.Transport.schedule((time) => {
+      Tone.Draw.schedule(() => {
+        position = 0
+        this.playIndicatorEl.style.backgroundColor = 'black'
+        clearInterval(intervalAnimationId)
+        // draw first frame of animation
+        this._drawPosition(displacementPerFrame, width)
+        // setup interval for the other frames
+        intervalAnimationId = setInterval(() => this._drawPosition(displacementPerFrame, width), animationInterval)
+  
+      }, time)
+    }, 0)
+  }
+
+  _renderTrak (instances) {
     const {
       buffer,
       stagedSample,
@@ -147,32 +170,45 @@ class InstancePlaylist extends React.Component {
       length: trackLength
     } = trackDimensions
 
-    prepTransport(trackStartTime, trackLength)
-
-    // if buffer exists, add the staged sample to the track
-    if (buffer) {
-      addBufferToTrak(buffer, stagedSample, trackDimensions.startTime)
-
-      if (!instances || (instances && !instances.length)) {
-        // if playback had been engaged:
-        // 1. start playback
-        // 2. set stop button in navbar
-        // else, show playbutton:
-        this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
-      }
-    }
-
-    if (instances && instances.length) {
+    if (trackLength && instances && instances.length || buffer) {
       // Load the samples
-      const tasks = instances.map(this._loadSample.bind(this))
-
-      return Promise.all(tasks)
+      Promise.all(instances.map(instance => this._loadSample(instance)))
         .then(() => {
+          return Tone.Offline(OfflineTransport => {
+            // add task to load animation
+            this.props.beginInitialFetch()
+
+            OfflineTransport.position = trackStartTime >= 0
+              ? trackStartTime
+              : 0
+      
+            // if buffer exists, add the staged sample to the track
+            if (buffer) {
+              addBufferToTrak(buffer, stagedSample, trackStartTime, OfflineTransport)
+            }
+      
+            instances.forEach(instance => {
+              addBufferToTrak(bufferCache[instance.sample.id], {
+                ...instance,
+                loopCount: instance.loop_count,
+                loopPadding: instance.loop_padding,
+                startTime: instance.start_time
+              },
+              this.props.trackDimensions.startTime,
+              OfflineTransport)
+            })
+    
+            OfflineTransport.start()
+          }, trackLength || buffer.get().duration)
+        })
+        .then(buffer => {
+          this.props.finishLoadTask()
+          return new Tone.Player(buffer).toMaster()
+        })
+        .then(latestPlayer => {
+          this._prepTransport()
+          player = latestPlayer.sync().start()
           this.props.endFetchSample()
-          // if playback had been engaged:
-          // 1. start playback
-          // 2. set stop button in navbar
-          // else, show playbutton:
           this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
         })
         .catch(error => {
@@ -180,13 +216,15 @@ class InstancePlaylist extends React.Component {
           console.error(error)
           this.setState({ error })
         })
-    } else {
-      return Promise.resolve()
     }
   }
 
   _stopPlaybackAndSendSignal () {
+    clearInterval(intervalAnimationId)
+    this.playIndicatorEl.style.backgroundColor = 'transparent'
+    position = 0
     stopArrangement()
+    this.setState({ isPlaying: false })
     if (this.props.incrementPlaysCount) {
       postEndSignal(this.props.trakName)
     }
@@ -194,21 +232,21 @@ class InstancePlaylist extends React.Component {
 
   _stop () {
     this._stopPlaybackAndSendSignal()
-    this.setState({ isPlaying: false })
     this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
   }
 
   _play () {
     playArrangement()
+    
+    this.setState({ isPlaying: true })
+    this.props.addItemToNavBar({ type: 'STOP', cb: this._stop })
     if (this.props.incrementPlaysCount) {
       postStartSignal(this.props.trakName)
     }
-    this.setState({ isPlaying: true })
-    this.props.addItemToNavBar({ type: 'STOP', cb: this._stop })
   }
 
   componentDidMount () {
-    this._downloadAndArrangeSampleInstances(this.props.instances)
+    this._renderTrak(this.props.instances)
   }
 
   componentWillReceiveProps (nextProps) {
@@ -218,7 +256,7 @@ class InstancePlaylist extends React.Component {
     if (instancesHaveChanged || stagedSamplePropsHaveChanged) {
       this.props.addItemToNavBar(null)
       this._stopPlaybackAndSendSignal()
-      this._debouncedDownloadAndArrangeSampleInstances(nextProps.instances)
+      this._debouncedRenderTrak(nextProps.instances)
     }
   }
 
@@ -229,15 +267,18 @@ class InstancePlaylist extends React.Component {
   }
 
   render () {
-    if (this.state.error) {
-      return this.props.renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances))
-    }
-    return null
+    return (
+      <div>
+        {/* {this.state.error && this.props.renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances))} */}
+        <div ref={ref => this.playIndicatorEl = ref} className={styles.playIndicator} />
+      </div>
+    )
   }
 }
 
 const mapActionsToProps = {
   endFetchSample,
+  beginInitialFetch,
   finishLoadTask
 }
 
