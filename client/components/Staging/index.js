@@ -8,6 +8,7 @@ import Tone from 'tone'
 
 import InstancePlaylist from '../InstancePlaylist'
 import SampleInstances from '../SampleInstances'
+import { getTrakRenderer } from '../../lib/TrakRenderer'
 
 import * as selectors from '../../../shared/reducers'
 
@@ -39,6 +40,8 @@ function validateData (absoluteStartTime, duration, volume, panning, loopCount, 
 class Staging extends React.Component {
   constructor (props) {
     super(props)
+
+    this.trakRenderer = getTrakRenderer()
 
     this.state = {
       isSaving: false,
@@ -110,7 +113,7 @@ class Staging extends React.Component {
     // @todo handle invalid data state gracefully
     validateData(stagedSampleStartTime, duration, volume, panning, loopCount, loopPadding)
 
-    const trakName = this.props.trakName || ''
+    let trakName = this.props.trakName || ''
 
     // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
     // e.g. user is actually looking at the page and is not a robot
@@ -134,9 +137,17 @@ class Staging extends React.Component {
 
         const isANewTrak = response.data.trakName !== this.props.trakName
         if (response.data.trakName && isANewTrak) {
+          trakName = response.data.trakName
           this.props.setTrakName(response.data.trakName)
         }
-
+      })
+      .then(() => {
+        // get new trak blob
+        const blob = this.trakRenderer.getBlobFromBuffer()
+        // POST to backend
+        return axios.post(`/api/trak/${trakName}`, blob, config)
+      })
+      .then(() => {
         // jump back to /e/:name
         // doing it like this 'clears' the recording steps from the browser history
         this.props.history.go(-3)

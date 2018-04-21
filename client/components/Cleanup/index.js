@@ -10,7 +10,7 @@ import {
   setStagedObjectUrl,
   setCleanup } from '../../../shared/actions/recorder'
 
-import { getSampleCreator } from '../Recorder/SampleCreator'
+import { getSampleCreator } from '../../lib/SampleCreator'
 
 import styles from './cleanup.css'
 
@@ -65,9 +65,7 @@ class Cleanup extends React.Component {
   }
 
   _renderSample (start, stop) {
-    this.sampleCreator.createBlob(start, stop)
-
-    const objectUrl = this.sampleCreator.createBlobObjectUrl()
+    const objectUrl = this.sampleCreator.clipBlobAndReturnObjectUrl(start, stop)
 
     audioElement = new Audio([objectUrl]) // eslint-disable-line
 
@@ -138,12 +136,12 @@ class Cleanup extends React.Component {
       if (this.playIndicatorEl) {
         this.playIndicatorEl.style.backgroundColor = 'black'
       }
-  
+
       const redrawPosition = this._redrawPosition.bind(this)
       onEndPlaybackLoop = this._onEndPlaybackLoop.bind(this, top, bottom, displacementPerFrame, animationInterval)
-  
+
       redrawPosition(bottom, displacementPerFrame, top)
-  
+
       intervalAnimationId = setInterval(() => redrawPosition(bottom, displacementPerFrame, top), animationInterval)
 
       audioElement.addEventListener('ended', onEndPlaybackLoop, { once: true })
@@ -170,7 +168,7 @@ class Cleanup extends React.Component {
 
     this.setState({
       isPlaying: true,
-      duration: audioElement.duration,
+      duration: audioElement.duration
     }, () => this._startPlaybackAudioAndAnimation(top, bottom, displacementPerFrame, animationInterval))
   }
 
@@ -291,7 +289,7 @@ class Cleanup extends React.Component {
                   ref={(canvas) => { this.canvas = canvas }}
                 />
                 <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
-                <div ref={ref => this.playIndicatorEl = ref} className={styles.playIndicator} />
+                <div ref={(ref) => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
               </div>
             )
           }

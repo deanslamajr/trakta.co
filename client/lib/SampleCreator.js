@@ -1,5 +1,5 @@
 import Tone from 'tone'
-import lamejs from 'lamejs'
+import Encoder from './encoder'
 
 /**
  * Private
@@ -11,15 +11,8 @@ let mp3Encoder
 let dataBuffer
 let audioBuffers
 let processor
-let summedBuffer
-let blob
 let reducedSet
 let drawSet
-
-function inititializeEncoder (sampleRate) {
-  mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128)
-  clearBuffers()
-}
 
 function clearBuffers () {
   dataBuffer = []
@@ -61,61 +54,6 @@ function appendBuffer (buffer1, buffer2) {
   tmp.set(new Uint8Array(buffer2), buffer1.byteLength)
   return tmp.buffer
 };
-
-function encode (arrayBuffer) {
-  const samplesMono = convertBuffer(arrayBuffer)
-
-  let remaining = samplesMono.length
-
-  for (let i = 0; remaining >= 0; i++) {
-    const left = samplesMono.subarray(i, i + 1)
-    const mp3buf = mp3Encoder.encodeBuffer(left)
-
-    appendToDataBuffer(mp3buf)
-    remaining--
-  }
-
-  appendToDataBuffer(mp3Encoder.flush())
-}
-
-function convertBuffer (arrayBuffer) {
-  // need to clone the incoming buffer otherwise we end up with
-  // samples reflecting the sound coming from the microphone at the instant we stopped recording
-  const data = new Float32Array(arrayBuffer)
-  const output = new Int16Array(data.length)
-
-  floatTo16BitPCM(data, output)
-  return output
-}
-
-function floatTo16BitPCM (input, output) {
-  for (let i = 0; i < input.length; i++) {
-    const s = Math.max(-1, Math.min(1, input[i]))
-    // magic bit shuffling
-    output[i] = s < 0 ? s * 0x8000 : s * 0x7fff
-  }
-}
-
-function appendToDataBuffer (mp3Buf) {
-  dataBuffer.push(new Int8Array(mp3Buf))
-}
-
-function generateMp3Blob (startOfSplice, endOfSplice) {
-  let start = Number(startOfSplice)
-  let end = Number(endOfSplice)
-
-  if (!start || start < 0 || start > dataBuffer.length) {
-    start = 0
-  }
-  if (!end || end < 0 || end > dataBuffer.length || end < start) {
-    end = dataBuffer.length
-  }
-
-  let bufferToBlob = Array.from(dataBuffer)
-  bufferToBlob = bufferToBlob.slice(start, end + 1)
-
-  return new Blob(bufferToBlob, { type: 'audio/mp3' }) // eslint-disable-line 
-}
 
 function generateRandomIndex (min, max) {
   min = Math.ceil(min)
@@ -160,6 +98,11 @@ export default class SampleCreator {
     }
   }
 
+  clipBlobAndReturnObjectUrl (start, stop) {
+    const blob = mp3Encoder.createBlob(dataBuffer, start, stop)
+    return mp3Encoder.createBlobObjectUrl(blob)
+  }
+
   getReducedSet (canvasHeight) {
     const samplingPeriod = drawSet.length / canvasHeight
     generateWaveForm(samplingPeriod)
@@ -176,7 +119,8 @@ export default class SampleCreator {
         // save a reference to the AudioContext
         const context = userMedia.context._context
 
-        inititializeEncoder(context.sampleRate)
+        mp3Encoder = new Encoder(context.sampleRate)
+        clearBuffers()
 
         // a bufferSize of 0 instructs the browser to choose the best bufferSize
         processor = context.createScriptProcessor(0, 1, 1)
@@ -210,17 +154,14 @@ export default class SampleCreator {
     processor.disconnect()
 
     // combine audioBuffers
-    summedBuffer = combineBuffers()
+    const summedBuffer = combineBuffers()
 
     // encode mp3
-    encode(summedBuffer)
+    dataBuffer = mp3Encoder.encode(summedBuffer)
 
-    // create blob and return the size of the recording
-    this.createBlob()
-  }
-
-  createBlobObjectUrl () {
-    return window.URL.createObjectURL(blob)
+    // create blob and return the associated object URL
+    const blob = mp3Encoder.createBlob(dataBuffer)
+    return mp3Encoder.createBlobObjectUrl(blob)
   }
 
   createBuffer (objectUrl) {
@@ -236,10 +177,6 @@ export default class SampleCreator {
         }
       )
     })
-  }
-
-  createBlob (start, stop) {
-    blob = generateMp3Blob(start, stop)
   }
 
   getValues () {

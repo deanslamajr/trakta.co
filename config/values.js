@@ -31,6 +31,8 @@ const values = {
   },
 
   s3SampleBucket: EnvVars.string('S3_SAMPLE_BUCKET_URL'),
+  s3TrakBucket: EnvVars.string('S3_TRAK_BUCKET_URL'),
+  s3Url: EnvVars.string('S3_URL'),
 
   // The host on which the server should run.
   host: EnvVars.string('HOST', '0.0.0.0'),

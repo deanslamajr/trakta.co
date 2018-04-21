@@ -10,6 +10,7 @@ import randToken from 'rand-token'
 import viewportDimensions from 'viewport-dimensions'
 
 import config from '../../../config'
+import { getTrakRenderer } from '../../lib/TrakRenderer'
 
 import * as selectors from '../../../shared/reducers'
 import {
@@ -23,11 +24,10 @@ const baseUrl = config('s3SampleBucket')
 
 const bufferCache = {}
 
-let player
 let playCode
+let player // eslint-disable-line
 let intervalAnimationId
 let position = 0
-
 
 function addPluginsToPlayer (samplePlayer, volume, panning) {
   // Plugins
@@ -82,6 +82,8 @@ function addBufferToTrak (buffer, instance, trakStartTime, transport) {
 class InstancePlaylist extends React.Component {
   constructor (props) {
     super(props)
+
+    this.trakRenderer = getTrakRenderer()
 
     this.state = {
       error: null
@@ -144,7 +146,7 @@ class InstancePlaylist extends React.Component {
     Tone.Transport.loop = true
     Tone.Transport.position = 0
     Tone.Transport.loopEnd = trakDuration
-  
+
     Tone.Transport.schedule((time) => {
       Tone.Draw.schedule(() => {
         position = 0
@@ -154,7 +156,6 @@ class InstancePlaylist extends React.Component {
         this._drawPosition(displacementPerFrame, width)
         // setup interval for the other frames
         intervalAnimationId = setInterval(() => this._drawPosition(displacementPerFrame, width), animationInterval)
-  
       }, time)
     }, 0)
   }
@@ -170,10 +171,11 @@ class InstancePlaylist extends React.Component {
       length: trackLength
     } = trackDimensions
 
-    if (trackLength && instances && instances.length || buffer) {
+    if ((trackLength && instances && instances.length) || buffer) {
       // Load the samples
       Promise.all(instances.map(instance => this._loadSample(instance)))
         .then(() => {
+          // render audio
           return Tone.Offline(OfflineTransport => {
             // add task to load animation
             this.props.beginInitialFetch()
@@ -181,12 +183,12 @@ class InstancePlaylist extends React.Component {
             OfflineTransport.position = trackStartTime >= 0
               ? trackStartTime
               : 0
-      
+
             // if buffer exists, add the staged sample to the track
             if (buffer) {
               addBufferToTrak(buffer, stagedSample, trackStartTime, OfflineTransport)
             }
-      
+
             instances.forEach(instance => {
               addBufferToTrak(bufferCache[instance.sample.id], {
                 ...instance,
@@ -197,12 +199,16 @@ class InstancePlaylist extends React.Component {
               this.props.trackDimensions.startTime,
               OfflineTransport)
             })
-    
+
             OfflineTransport.start()
           }, trackLength || buffer.get().duration)
         })
         .then(buffer => {
           this.props.finishLoadTask()
+
+          // this buffer will be saved to s3 on /staging save action
+          this.trakRenderer.setBuffer(buffer.get())
+
           return new Tone.Player(buffer).toMaster()
         })
         .then(latestPlayer => {
@@ -237,7 +243,7 @@ class InstancePlaylist extends React.Component {
 
   _play () {
     playArrangement()
-    
+
     this.setState({ isPlaying: true })
     this.props.addItemToNavBar({ type: 'STOP', cb: this._stop })
     if (this.props.incrementPlaysCount) {
@@ -270,7 +276,7 @@ class InstancePlaylist extends React.Component {
     return (
       <div>
         {/* {this.state.error && this.props.renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances))} */}
-        <div ref={ref => this.playIndicatorEl = ref} className={styles.playIndicator} />
+        <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
       </div>
     )
   }

@@ -11,7 +11,7 @@ import {
 import * as selectors from '../../../shared/reducers'
 
 import InstancePlaylist from '../InstancePlaylist'
-import { getSampleCreator } from './SampleCreator'
+import { getSampleCreator } from '../../lib/SampleCreator'
 
 import styles from './Recorder.css'
 
@@ -191,8 +191,7 @@ class Recorder extends React.Component {
 
     clearCanvas(this.canvasContext)
 
-    this.sampleCreator.stopAndFinishRecording()
-    const objectUrl = this.sampleCreator.createBlobObjectUrl()
+    const objectUrl = this.sampleCreator.stopAndFinishRecording()
 
     this.props.setStagedSample({
       startTime: 0,

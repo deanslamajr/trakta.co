@@ -1,5 +1,21 @@
 import { PlayCodes, Traks } from '../models'
 import { sequelize } from '../adapters/db'
+import { saveBlobToS3 } from '../adapters/s3'
+
+async function saveTrak (req, res, next) {
+  try {
+    // @todo properly version this by getting a lock on the DB, discovering the latest version, bumping, and then after saving to s3, adding a new row to the trak_versions table
+    const versionedTrakName = req.params.trakName
+    const s3Config = {
+      bucketName: 'traks',
+      resourceName: versionedTrakName
+    }
+    const s3ResourceName = await saveBlobToS3(s3Config, req) // eslint-disable-line
+    res.sendStatus(200)
+  } catch (error) {
+    next(error)
+  }
+}
 
 async function recordPlay (req, res, next) {
   const { code, trakName } = req.body
@@ -54,5 +70,6 @@ async function getAll (req, res, next) {
 
 export {
   getAll,
-  recordPlay
+  recordPlay,
+  saveTrak
 }

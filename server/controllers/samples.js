@@ -1,4 +1,5 @@
 import randomWords from 'random-words'
+import uuidV4 from 'uuid/v4'
 
 import { Players, Traks } from '../models'
 
@@ -99,7 +100,12 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
 
 async function create (req, res, next) {
   try {
-    const s3ResourceName = await saveBlobToS3(req)
+    const uuid = uuidV4()
+    const s3Config = {
+      bucketName: 'samples',
+      resourceName: uuid
+    }
+    const s3ResourceName = await saveBlobToS3(s3Config, req)
 
     const trakName = await createSampleTrakSampleInstance(req.query, s3ResourceName)
 

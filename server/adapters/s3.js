@@ -1,7 +1,6 @@
 import AWS from 'aws-sdk'
 // import zlib from 'zlib'
 import s3StreamFactory from 's3-upload-stream'
-import uuidV4 from 'uuid/v4'
 
 import config from '../../config'
 
@@ -18,16 +17,14 @@ const s3Stream = s3StreamFactory(new AWS.S3(s3Config))
  * @param stream {Stream} stream of the file to upload
  * @returns Promise reolves to result of S3 save, rejects on/with error
  */
-function saveBlobToS3 (stream) {
-  const uuid = uuidV4()
-
+function saveBlobToS3 ({ bucketName, resourceName }, stream) {
   return new Promise((resolve, reject) => {
-    const s3ResourceName = `${uuid}.mp3`
+    const Key = `${resourceName}.mp3`
     // Create the streams
     // var compress = zlib.createGzip();
     const upload = s3Stream.upload({
-      Bucket: `samples-${config('ENV')}`,
-      Key: s3ResourceName
+      Bucket: `${bucketName}-${config('ENV')}`,
+      Key
     })
 
     // Optional configuration
@@ -50,7 +47,7 @@ function saveBlobToS3 (stream) {
     })
 
     upload.on('finish', () => {
-      resolve(s3ResourceName)
+      resolve(Key)
     })
 
     // Pipe the incoming filestream through compression, and up to S3.

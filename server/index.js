@@ -14,6 +14,7 @@ import serviceWorker from './middleware/serviceWorker'
 import offlinePage from './middleware/offlinePage'
 import errorHandlers from './middleware/errorHandlers'
 import logger from './middleware/logger'
+import player from './middleware/player'
 
 import api from './api'
 
@@ -24,6 +25,8 @@ const app = express()
 
 // Don't expose any software information to potential hackers.
 app.disable('x-powered-by')
+
+app.set('view engine', 'ejs')
 
 // Security middlewares.
 app.use(...security)
@@ -56,6 +59,8 @@ app.use(config('bundles.client.webPath'), clientBundle)
 app.use(express.static(pathResolve(appRootDir.get(), config('publicAssetsPath'))))
 
 app.use('/api', api)
+
+app.use('/p/:trakName', player)
 
 // The React application middleware.
 app.get('*', nocache(), reactApplication)

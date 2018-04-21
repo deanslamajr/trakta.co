@@ -28,7 +28,7 @@ const cspConfig = {
     objectSrc: ["'self'"],
     mediaSrc: [
       "'self'",
-      // @todo This is needed for displaying recordings from blobs, can remove after prototype is finished
+      config('s3Url'),
       'blob:'
     ],
     manifestSrc: ["'self'"],

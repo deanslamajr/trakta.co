@@ -1,0 +1,16 @@
+<html>
+<head>
+  
+</head>
+<body>
+  <div id='trak' />
+  <script nonce="<%= nonce %>">
+    var trakName = window.location.pathname.split('/')[2]
+    var assetsUrl = '<%= s3TrakBucket %>/' + trakName + '.mp3'
+    var trak = document.createElement('audio');
+    trak.controls = 'controls';
+    trak.src = assetsUrl;
+    document.getElementById('trak').appendChild(trak);
+  </script>
+</body>
+</html>
