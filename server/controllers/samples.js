@@ -1,7 +1,7 @@
 import randomWords from 'random-words'
 import uuidV4 from 'uuid/v4'
 
-import { Players, Traks } from '../models'
+import { Players, Traks, Versions } from '../models'
 
 import { ANONYMOUS_PLAYER_ID } from '../models/Players'
 
@@ -15,6 +15,9 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
   const panning = queryStrings.panning || 0.0
   const loop_count = queryStrings.loopCount || 0 // eslint-disable-line 
   const loop_padding = queryStrings.loopPadding || 0.0 // eslint-disable-line 
+  let trakName = queryStrings.trakName
+  let trak
+  let version
 
   return sequelize.transaction(async transaction => {
     const player = await Players.findById(ANONYMOUS_PLAYER_ID)
@@ -25,9 +28,6 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
       },
       { transaction }
     )
-
-    let trakName = queryStrings.trakName
-    let trak
 
     /**
      * trak doesn't exist: Create a new trak
@@ -42,15 +42,32 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
         start_time: 0,
         duration
       }, { transaction })
+
+      version = await trak.createVersion({ active: false }, { transaction })
     /**
      * trak exists: Do we need to update start_time AND/OR duration?
      */
     } else {
       trak = await Traks.findOne({
         where: { name: trakName },
-        transaction,
-        lock: transaction.LOCK.UPDATE
+        lock: transaction.LOCK.UPDATE,
+        transaction
       })
+
+      // get latest version of trak
+      const [ latestVersion ] = await Versions.findAll({
+        where: { trak_id: trak.id },
+        group: [ 'versions.id' ],
+        limit: 1,
+        order: sequelize.literal('max(version) DESC'),
+        transaction
+      })    
+
+      // bump version number
+      version = await trak.createVersion({
+        version: latestVersion.version + 1,
+        active: false
+      }, { transaction })
 
       let updates = {
         contribution_count: trak.contribution_count + 1,
@@ -91,10 +108,14 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
       player_id: ANONYMOUS_PLAYER_ID,
       trak_id: trak.id,
       loop_count,
-      loop_padding
+      loop_padding,
+      version_id: version.id
     }, { transaction })
 
-    return trakName
+    return {
+      trakName,
+      versionId: version.id
+    }
   })
 }
 
@@ -107,9 +128,9 @@ async function create (req, res, next) {
     }
     const s3ResourceName = await saveBlobToS3(s3Config, req)
 
-    const trakName = await createSampleTrakSampleInstance(req.query, s3ResourceName)
+    const trakNameAndVersionId = await createSampleTrakSampleInstance(req.query, s3ResourceName)
 
-    res.json({ trakName })
+    res.json(trakNameAndVersionId)
   } catch (error) {
     next(error)
   }

@@ -1,20 +1,29 @@
-PostgreSQL:
-  image: sameersbn/postgresql:9.6-2
-  ports:
-    - "5432:5432"
-  environment:
-    - DEBUG=false
+version: "3"
+services:
+  db:
+    image: sameersbn/postgresql:9.6-2
+    ports:
+      - "5432:5432"
+    environment:
+      - DEBUG=false
 
-    - DB_USER=username
-    - DB_PASS=password
-    - DB_NAME=database_development
-    - DB_TEMPLATE=
+      - DB_USER=username
+      - DB_PASS=password
+      - DB_NAME=database_development
+      - DB_TEMPLATE=
 
-    - DB_EXTENSION=
+      - DB_EXTENSION=
 
-    - REPLICATION_MODE=
-    - REPLICATION_USER=
-    - REPLICATION_PASS=
-    - REPLICATION_SSLMODE=
-  volumes:
-    - /var/lib/postgresql:/var/lib/postgresql
+      - REPLICATION_MODE=
+      - REPLICATION_USER=
+      - REPLICATION_PASS=
+      - REPLICATION_SSLMODE=
+    volumes:
+      - /var/lib/postgresql:/var/lib/postgresql
+  cli:
+    image: dpage/pgadmin4
+    ports:
+      - "80:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@domain.com
+      - PGADMIN_DEFAULT_PASSWORD=SuperSecret

@@ -113,7 +113,7 @@ class Staging extends React.Component {
     // @todo handle invalid data state gracefully
     validateData(stagedSampleStartTime, duration, volume, panning, loopCount, loopPadding)
 
-    let trakName = this.props.trakName || ''
+    const trakName = this.props.trakName || ''
 
     // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
     // e.g. user is actually looking at the page and is not a robot
@@ -121,7 +121,12 @@ class Staging extends React.Component {
 
     this._getBlobFromObjectUrl()
       .then((data) => axios.post(`/api/sample${queryString}`, data, config))
-      .then(response => {
+      .then(({ data }) => {
+        const {
+          trakName,
+          versionId
+        } = data
+
         this.props.setStagedSample({
           startTime: 0,
           volume: 0,
@@ -135,17 +140,15 @@ class Staging extends React.Component {
         // reset staged ObjectUrl
         this.props.setStagedObjectUrl(undefined)
 
-        const isANewTrak = response.data.trakName !== this.props.trakName
-        if (response.data.trakName && isANewTrak) {
-          trakName = response.data.trakName
-          this.props.setTrakName(response.data.trakName)
+        const isANewTrak = trakName !== this.props.trakName
+        if (trakName && isANewTrak) {
+          this.props.setTrakName(trakName)
         }
-      })
-      .then(() => {
+
         // get new trak blob
         const blob = this.trakRenderer.getBlobFromBuffer()
         // POST to backend
-        return axios.post(`/api/trak/${trakName}`, blob, config)
+        return axios.post(`/api/version/${versionId}`, blob, config)
       })
       .then(() => {
         // jump back to /e/:name

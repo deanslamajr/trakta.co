@@ -3,9 +3,9 @@ import express from 'express'
 import { getByTrakName as getTraksSampleInstances } from './controllers/sample-instances'
 import {
   getAll as getAllTraks,
-  recordPlay,
-  saveTrak
+  recordPlay
 } from './controllers/traks'
+import { saveVersion } from './controllers/versions'
 
 import { create as createSampleAndAddInstanceToTrak } from './controllers/samples'
 
@@ -26,21 +26,21 @@ router.post('/play-back', recordPlay)
 router.get('/sample-instances/:trakName', getTraksSampleInstances)
 
 /**
- * Add sample to existing track
- * @todo add trak update logic
- */
-router.post('/sample', createSampleAndAddInstanceToTrak)
-
-/**
  * Fetch all the traks
  * @todo do a top 100 fetch/ filtered fetch
  */
 router.get('/traks', getAllTraks)
 
 /**
+ * Add sample to existing track
+ * @todo add trak update logic
+ */
+router.post('/sample', createSampleAndAddInstanceToTrak)
+
+/**
  * Save a new version of a trak
  */
-router.post('/trak/:trakName', saveTrak)
+router.post('/version/:versionId', saveVersion)
 
 /**
  * Generate the user's next window-end-time
