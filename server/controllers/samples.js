@@ -65,7 +65,7 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
 
       // bump version number
       version = await trak.createVersion({
-        version: latestVersion.version + 1,
+        version: latestVersion ? latestVersion.version + 1 : 1, // if trak was created before versions were implemented
         active: false
       }, { transaction })
 
