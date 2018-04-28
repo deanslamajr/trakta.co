@@ -55,6 +55,8 @@ class MainRoute extends React.Component {
 
   componentDidMount () {
     if (this.props.match.params.trakName) {
+      this.props.resetSampleLoaderState()
+      this.props.setStagedObjectUrl(undefined)
       // @todo handle the case where a non existant trakName is passed
 
       // verify that we have updated the store to the correct trakName

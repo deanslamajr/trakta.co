@@ -136,10 +136,6 @@ class Staging extends React.Component {
           loopPadding: 0
         })
 
-        this.props.resetSampleLoaderState()
-        // reset staged ObjectUrl
-        this.props.setStagedObjectUrl(undefined)
-
         const isANewTrak = trakName !== this.props.trakName
         if (trakName && isANewTrak) {
           this.props.setTrakName(trakName)
@@ -151,6 +147,7 @@ class Staging extends React.Component {
         return axios.post(`/api/version/${versionId}`, blob, config)
       })
       .then(() => {
+        this.props.resetTrak()
         // jump back to /e/:name
         // doing it like this 'clears' the recording steps from the browser history
         this.props.history.go(-3)

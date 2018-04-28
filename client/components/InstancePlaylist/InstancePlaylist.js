@@ -91,30 +91,44 @@ class InstancePlaylist extends React.Component {
 
     this._play = this._play.bind(this)
     this._stop = this._stop.bind(this)
+    this._loadSample = this._loadSample.bind(this)
 
     // this debounce slows down invocation just enough so that redux store can be updated properly from form
     this._renderTrak = this._renderTrak.bind(this)
     this._debouncedRenderTrak = debounce(this._renderTrak, 1000)
   }
 
-  _onInstanceLoadError (instance, reject, error) {
-    // @todo log error
-    bufferCache[instance.sample.id] = undefined
-    this.props.finishLoadTask()
-    reject()
-  }
-
   _loadSample (instance) {
     return new Promise((resolve, reject) => {
       const url = `${baseUrl}/${instance.sample.url}`
-      bufferCache[instance.sample.id] = new Tone.Buffer(
-        url,
-        () => {
-          this.props.finishLoadTask()
-          resolve()
-        },
-        this._onInstanceLoadError.bind(this, instance, reject)
-      )
+      const finishLoadTask = this.props.finishLoadTask.bind(this)
+      
+      let downloadAttempts = 0
+
+      function attemptToLoadBuffer() {
+        downloadAttempts++
+
+        // try to download this three times
+        // bc sometimes after making a contribution the cloud takes a moment to enable the new asset
+        if (downloadAttempts <= 3) {
+          bufferCache[instance.sample.id] = new Tone.Buffer(
+            url,
+            () => {
+              finishLoadTask()
+              resolve()
+            },
+            () => setTimeout(attemptToLoadBuffer.bind(this), 1000 * downloadAttempts)
+          )
+        }
+        else {
+          // @todo log error
+          bufferCache[instance.sample.id] = undefined
+          finishLoadTask()
+          reject()
+        }
+      }
+
+      attemptToLoadBuffer()
     })
   }
 
@@ -218,7 +232,7 @@ class InstancePlaylist extends React.Component {
           this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
         })
         .catch(error => {
-          // @todo log error
+          // @todo show an error view with a retry action
           console.error(error)
           this.setState({ error })
         })
@@ -261,8 +275,12 @@ class InstancePlaylist extends React.Component {
 
     if (instancesHaveChanged || stagedSamplePropsHaveChanged) {
       this.props.addItemToNavBar(null)
-      this._stopPlaybackAndSendSignal()
-      this._debouncedRenderTrak(nextProps.instances)
+
+      if (Tone.Transport.state === 'started') {
+        this._stopPlaybackAndSendSignal()
+      }
+
+      this._renderTrak(nextProps.instances)
     }
   }
 
