@@ -76,8 +76,11 @@ class Staging extends React.Component {
       parsedValue = 0
     }
 
-    let stateUpdate = { [type]: parsedValue }
+    let stateUpdate = {
+      [type]: parsedValue,
+    }
 
+    // changes that effect the drawing
     if (type === 'startTime' || type === 'loopPadding' || type === 'loopCount') {
       stateUpdate.updateTrack = true
     }
@@ -98,66 +101,93 @@ class Staging extends React.Component {
     // prevent page refresh
     event.preventDefault()
 
-    // show save animation
-    this.setState({ isSaving: true })
+    this.props.addItemToNavBar(undefined, null)
 
-    const config = {
-      onUploadProgress: (progressEvent) => {
-        console.log(
-          `upload progress: ${Math.round(progressEvent.loaded * 100 / progressEvent.total)}`
-        )
-      }
-    }
-
-    // validate that data is properly formatted
-    // @todo handle invalid data state gracefully
-    validateData(stagedSampleStartTime, duration, volume, panning, loopCount, loopPadding)
-
-    const trakName = this.props.trakName || ''
-
-    // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
-    // e.g. user is actually looking at the page and is not a robot
-    const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}&loopCount=${loopCount}&loopPadding=${loopPadding}`
-
-    this._getBlobFromObjectUrl()
-      .then((data) => axios.post(`/api/sample${queryString}`, data, config))
-      .then(({ data }) => {
-        const {
-          trakName,
-          versionId
-        } = data
-
-        this.props.setStagedSample({
-          startTime: 0,
-          volume: 0,
-          panning: 0,
-          duration: 0,
-          loopCount: 0,
-          loopPadding: 0
-        })
-
-        const isANewTrak = trakName !== this.props.trakName
-        if (trakName && isANewTrak) {
-          this.props.setTrakName(trakName)
+    this.setState({
+      isSaving: true, // show save animation
+      buffer: undefined    // side effect: removes player
+    },
+    () => {
+      const config = {
+        onUploadProgress: (progressEvent) => {
+          console.log(
+            `upload progress: ${Math.round(progressEvent.loaded * 100 / progressEvent.total)}`
+          )
         }
+      }
+  
+      // validate that data is properly formatted
+      // @todo handle invalid data state gracefully
+      validateData(stagedSampleStartTime, duration, volume, panning, loopCount, loopPadding)
+  
+      const trakName = this.props.trakName || ''
+  
+      // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
+      // e.g. user is actually looking at the page and is not a robot
+      const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}&loopCount=${loopCount}&loopPadding=${loopPadding}`
 
-        // get new trak blob
-        const blob = this.trakRenderer.getBlobFromBuffer()
-        // POST to backend
-        return axios.post(`/api/version/${versionId}`, blob, config)
-      })
-      .then(() => {
-        this.props.resetTrak()
-        // jump back to /e/:name
-        // doing it like this 'clears' the recording steps from the browser history
-        this.props.history.go(-3)
-      })
-      .catch((err) => {
-        // @todo log error
-        // @todo handle this gracefully
-        console.error(err)
-        // this.props.failureCB
-      })
+      this._getBlobFromObjectUrl()
+        .then((data) => axios.post(`/api/sample${queryString}`, data, config))
+        .then(({ data }) => {
+          const {
+            trakName,
+            versionId
+          } = data
+
+          this.props.setStagedSample({
+            startTime: 0,
+            volume: 0,
+            panning: 0,
+            duration: 0,
+            loopCount: 0,
+            loopPadding: 0
+          })
+
+          this.props.resetTrak()
+
+          const isANewTrak = trakName !== this.props.trakName
+          if (trakName && isANewTrak) {
+            this.props.setTrakName(trakName)
+          }
+
+          // get new trak blob
+          const blob = this.trakRenderer.getBlobFromBuffer()
+          // POST to backend
+          return axios.post(`/api/version/${versionId}`, blob, config)
+        })
+        /**
+         * Mp3 Encoding results in Tone.Transport being unresponsive for an amount of time
+         * proportional to the length of Mp3 encoding
+         * 
+         * Consequently, don't proceed until Tone.Transport is responsive once again
+         */
+        .then(() => {
+          return new Promise(resolve => {
+            Tone.Transport.cancel()
+            Tone.Transport.loop = true
+            Tone.Transport.setLoopPoints(0, 0.5)
+
+            Tone.Transport.schedule((time) => {
+              Tone.Transport.stop()
+              Tone.Transport.cancel()
+              resolve()
+            }, 0)
+
+            Tone.Transport.start()
+          })
+        })
+        .then(() => {
+          // jump back to /e/:name
+          // doing it like this 'clears' the recording steps from the browser history
+          this.props.history.go(-3)
+        })
+        .catch((err) => {
+          // @todo log error
+          // @todo handle this gracefully
+          console.error(err)
+          // this.props.failureCB
+        })
+    })
   }
 
   /**
