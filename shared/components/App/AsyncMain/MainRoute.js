@@ -57,6 +57,14 @@ class MainRoute extends React.Component {
     if (this.props.match.params.trakName) {
       this.props.resetSampleLoaderState()
       this.props.setStagedObjectUrl(undefined)
+      this.props.setStagedSample({
+        startTime: 0,
+        volume: 0,
+        panning: 0,
+        duration: 0,
+        loopCount: 0,
+        loopPadding: 0
+      })
       // @todo handle the case where a non existant trakName is passed
 
       // verify that we have updated the store to the correct trakName
@@ -75,10 +83,7 @@ class MainRoute extends React.Component {
   }
 
   componentWillUnmount () {
-    // clear any staged sample from store
-    this.props.setStagedSample({ duration: 0 })
     this.props.setStagedObjectUrl(undefined)
-
     this.props.addItemToNavBar(null, null)
   }
 

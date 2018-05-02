@@ -6,7 +6,7 @@ import { getTrakRenderer } from './TrakRenderer'
 
 const trakRenderer = getTrakRenderer()
 const baseUrl = config('s3SampleBucket')
-const bufferCache = {}
+let bufferCache = {}
 let playlistRenderer
 let player = null
 let cachedStagedBuffer
@@ -101,10 +101,9 @@ function hasStagedSampleChanged (stagedSample) {
   return !isEqual(cachedStagedSample, stagedSample)
 }
 
-function areBuffersCacheMiss (instances, buffer, stagedSample) {
-  const isBufferCacheMiss = !isBufferCached(buffer)
-
-  return didInstancesCacheMiss(instances) || isBufferCacheMiss || hasStagedSampleChanged(stagedSample)
+function isBufferCacheMiss (buffer, stagedSample) {
+  const isCacheMiss = !isBufferCached(buffer)
+  return isCacheMiss || hasStagedSampleChanged(stagedSample)
 }
 
 /**
@@ -112,6 +111,12 @@ function areBuffersCacheMiss (instances, buffer, stagedSample) {
  */
 
 class PlaylistRenderer {
+  clearCache () {
+    bufferCache = {}
+    cachedStagedBuffer = undefined
+    cachedStagedSample = undefined
+  }
+
   getPlayer ({ trackDimensions, instances, buffer, stagedSample, loadTaskCb }) {
     const {
       startTime: trackStartTime,
@@ -120,45 +125,55 @@ class PlaylistRenderer {
 
     const trakAndOrBufferExist = (trackLength && instances && instances.length) || buffer
 
-    if (trakAndOrBufferExist && areBuffersCacheMiss(instances, buffer, stagedSample)) {
-      // Load the samples
-      return Promise.all(instances.map(instance => loadSample(instance, loadTaskCb)))
-        .then(() => {
-          // render audio
-          return Tone.Offline(OfflineTransport => {
-            OfflineTransport.position = trackStartTime >= 0
-              ? trackStartTime
-              : 0
+    let areInstancesCacheMiss
+    // check isBufferCacheMiss first bc its quicker than checking the instances cache miss
+    const cacheMiss = isBufferCacheMiss(buffer, stagedSample) || (areInstancesCacheMiss = didInstancesCacheMiss(instances))
 
-            // if buffer exists, add the staged sample to the track
-            if (buffer) {
-              cachedStagedBuffer = buffer
-              addBufferToTrak(buffer, stagedSample, trackStartTime, OfflineTransport)
-            }
+    // skip all this if the buffers are all cached
+    if (trakAndOrBufferExist && cacheMiss) {
+      // only fetch instances if the instances aren't cached
+      // i.e. a change in `stagedSample` shouldn't require refetching of the instances
+      const loadSamplesTask = areInstancesCacheMiss || didInstancesCacheMiss(instances)
+        ? Promise.all(instances.map(instance => loadSample(instance, loadTaskCb)))
+        : Promise.resolve()
 
-            instances.forEach(instance => {
-              addBufferToTrak(bufferCache[instance.sample.id], {
-                ...instance,
-                loopCount: instance.loop_count,
-                loopPadding: instance.loop_padding,
-                startTime: instance.start_time
-              },
-              trackStartTime,
-              OfflineTransport)
-            })
+      return loadSamplesTask.then(() => {
 
-            OfflineTransport.start()
-          }, trackLength || buffer.get().duration)
-        })
-        .then(buffer => {
-          loadTaskCb()
+        // render audio
+        return Tone.Offline(OfflineTransport => {
+          OfflineTransport.position = trackStartTime >= 0
+            ? trackStartTime
+            : 0
 
-          // this buffer will be saved to s3 on /staging save action
-          trakRenderer.setBuffer(buffer.get())
+          // if buffer exists, add the staged sample to the track
+          if (buffer) {
+            cachedStagedBuffer = buffer
+            addBufferToTrak(buffer, stagedSample, trackStartTime, OfflineTransport)
+          }
 
-          player = new Tone.Player(buffer).toMaster()
-          return player
-        })
+          instances.forEach(instance => {
+            addBufferToTrak(bufferCache[instance.sample.id], {
+              ...instance,
+              loopCount: instance.loop_count,
+              loopPadding: instance.loop_padding,
+              startTime: instance.start_time
+            },
+            trackStartTime,
+            OfflineTransport)
+          })
+
+          OfflineTransport.start()
+        }, trackLength || buffer.get().duration)
+      })
+      .then(buffer => {
+        loadTaskCb()
+
+        // this buffer will be saved to s3 on /staging save action
+        trakRenderer.setBuffer(buffer.get())
+
+        player = new Tone.Player(buffer).toMaster()
+        return player
+      })
     }
 
     return Promise.resolve(player)
