@@ -60,7 +60,7 @@ app.use(express.static(pathResolve(appRootDir.get(), config('publicAssetsPath'))
 
 app.use('/api', api)
 
-app.use('/p/:trakName', player)
+//app.use('/p/:trakName', player)
 
 // The React application middleware.
 app.get('*', nocache(), reactApplication)

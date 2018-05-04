@@ -56,7 +56,10 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
 
       // get latest version of trak
       const [ latestVersion ] = await Versions.findAll({
-        where: { trak_id: trak.id },
+        where: {
+          trak_id: trak.id,
+          active: true // don't create a version based off of an unfinished (orphaned) version
+        },
         group: [ 'versions.id' ],
         limit: 1,
         order: sequelize.literal('max(version) DESC'),

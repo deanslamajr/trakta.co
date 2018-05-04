@@ -27,7 +27,8 @@ const values = {
     // We need to expose all the htmlPage settings.
     htmlPage: true,
 
-    s3SampleBucket: true
+    s3SampleBucket: true,
+    s3TrakBucket: true
   },
 
   s3SampleBucket: EnvVars.string('S3_SAMPLE_BUCKET_URL'),

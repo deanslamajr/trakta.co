@@ -13,6 +13,7 @@ import './globals.css'
 import AsyncNavBar from './AsyncNavBar'
 import AsyncList from './AsyncList'
 import AsyncMain from './AsyncMain'
+import AsyncPlayer from './AsyncPlayer'
 import AsyncRecorder from './AsyncRecorder'
 import AsyncContribute from './AsyncContribute'
 import Error404 from './Error404'
@@ -114,6 +115,9 @@ class App extends React.Component {
               )} />
               <Route path='/e/:trakName' render={props => (
                 <AsyncMain {...props} addItemToNavBar={addItemToNavBar} />
+              )} />
+              <Route path='/p/:trakName' render={props => (
+                <AsyncPlayer {...props} addItemToNavBar={addItemToNavBar} />
               )} />
               <Route path='/recorder' render={props => (
                 <AsyncRecorder {...props} addItemToNavBar={addItemToNavBar} />
