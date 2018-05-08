@@ -77,7 +77,7 @@ class Staging extends React.Component {
     }
 
     let stateUpdate = {
-      [type]: parsedValue,
+      [type]: parsedValue
     }
 
     // changes that effect the drawing
@@ -115,13 +115,13 @@ class Staging extends React.Component {
           )
         }
       }
-  
+
       // validate that data is properly formatted
       // @todo handle invalid data state gracefully
       validateData(stagedSampleStartTime, duration, volume, panning, loopCount, loopPadding)
-  
+
       const trakName = this.props.trakName || ''
-  
+
       // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
       // e.g. user is actually looking at the page and is not a robot
       const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}&loopCount=${loopCount}&loopPadding=${loopPadding}`
@@ -158,7 +158,7 @@ class Staging extends React.Component {
         /**
          * Mp3 Encoding results in Tone.Transport being unresponsive for an amount of time
          * proportional to the length of Mp3 encoding
-         * 
+         *
          * Consequently, don't proceed until Tone.Transport is responsive once again
          */
         .then(() => {

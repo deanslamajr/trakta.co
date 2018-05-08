@@ -10,8 +10,6 @@ import styles from './styles.css'
 
 class PlayerRoute extends React.Component {
   render () {
-    console.log('this.props.match')
-    console.dir(this.props.match.params.trakName)
     const url = `${config('s3TrakBucket')}/${this.props.match.params.trakName}.mp3`
 
     return (
@@ -20,7 +18,7 @@ class PlayerRoute extends React.Component {
           <title>{`Player`}</title>
         </Helmet>
 
-        <audio src={url} controls loop></audio>
+        <audio src={url} controls loop />
       </div>
     )
   }

@@ -15,10 +15,10 @@ let cachedStagedSample
 function loadSample (instance, loadTaskCb) {
   return new Promise((resolve, reject) => {
     const url = `${baseUrl}/${instance.sample.url}`
-    
+
     let downloadAttempts = 0
 
-    function attemptToLoadBuffer() {
+    function attemptToLoadBuffer () {
       downloadAttempts++
 
       // try to download this three times
@@ -34,12 +34,11 @@ function loadSample (instance, loadTaskCb) {
             console.error(error)
             setTimeout(attemptToLoadBuffer.bind(this), 1000 * downloadAttempts)
           })
-      }
-      else {
+      } else {
         // @todo log error
         bufferCache[instance.sample.id] = undefined
         loadTaskCb()
-        reject()
+        reject(new Error(`Gave up trying to download ${url} after 3 failed attempts.`))
       }
     }
 
@@ -138,7 +137,6 @@ class PlaylistRenderer {
         : Promise.resolve()
 
       return loadSamplesTask.then(() => {
-
         // render audio
         return Tone.Offline(OfflineTransport => {
           OfflineTransport.position = trackStartTime >= 0

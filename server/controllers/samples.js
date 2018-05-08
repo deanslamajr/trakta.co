@@ -64,7 +64,7 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
         limit: 1,
         order: sequelize.literal('max(version) DESC'),
         transaction
-      })    
+      })
 
       // bump version number
       version = await trak.createVersion({

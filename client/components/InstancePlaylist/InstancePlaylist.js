@@ -3,7 +3,6 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import Tone from 'tone'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
-import debounce from 'debounce'
 import isEqual from 'lodash.isequal'
 import axios from 'axios'
 import randToken from 'rand-token'
@@ -23,7 +22,6 @@ let playCode
 let player // eslint-disable-line
 let intervalAnimationId
 let position = 0
-let cachedStagedBuffer
 
 /**
  * generate code
@@ -166,7 +164,7 @@ class InstancePlaylist extends React.Component {
     const instancesHaveChanged = !isEqual(this.props.instances, nextProps.instances)
     const stagedSamplePropsHaveChanged = !isEqual(this.props.stagedSample, nextProps.stagedSample)
 
-    if (instancesHaveChanged || stagedSamplePropsHaveChanged) {     
+    if (instancesHaveChanged || stagedSamplePropsHaveChanged) {
       if (Tone.Transport.state === 'started') {
         this._stopPlaybackAndSendSignal()
       }
