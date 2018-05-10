@@ -1,0 +1,20 @@
+# Git
+.git
+.gitignore
+
+# build assets
+build
+.happypack
+
+# Docker
+Dockerfile
+Makefile
+docker-compose.yml
+
+# Node
+node_modules
+
+# Other
+.editorconfig
+.ebextensions
+logging.conf

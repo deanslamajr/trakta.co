@@ -1,6 +1,20 @@
 version: "3"
 services:
-  db:
+  traktaco:
+    image: traktaco
+    ports:
+      - "4444:80"
+      - "3000:3000"
+      - "7331:7331"
+    volumes:
+      - .:/opt/app
+      - reserved:/opt/app/node_modules/
+    entrypoint:
+      - npm
+      - run
+      - develop
+
+  postgres:
     image: sameersbn/postgresql:9.6-2
     ports:
       - "5432:5432"
@@ -20,10 +34,12 @@ services:
       - REPLICATION_SSLMODE=
     volumes:
       - /var/lib/postgresql:/var/lib/postgresql
-  cli:
+  db_cli:
     image: dpage/pgadmin4
     ports:
       - "80:80"
     environment:
       - PGADMIN_DEFAULT_EMAIL=user@domain.com
       - PGADMIN_DEFAULT_PASSWORD=SuperSecret
+volumes:
+  reserved:
