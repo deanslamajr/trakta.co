@@ -55,20 +55,11 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
       })
 
       // get latest version of trak
-      const [ latestVersion ] = await Versions.findAll({
-        where: {
-          trak_id: trak.id,
-          active: true // don't create a version based off of an unfinished (orphaned) version
-        },
-        group: [ 'versions.id' ],
-        limit: 1,
-        order: sequelize.literal('max(version) DESC'),
-        transaction
-      })
+      const latestVersion = await Versions.getHighestVersionByTrakId(trak.id)
 
       // bump version number
       version = await trak.createVersion({
-        version: latestVersion ? latestVersion.version + 1 : 1, // if trak was created before versions were implemented
+        version_number: latestVersion ? latestVersion.version_number + 1 : 1, // if trak was created before versions were implemented
         active: false
       }, { transaction })
 

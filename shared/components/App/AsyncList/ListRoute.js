@@ -29,7 +29,10 @@ class ListRoute extends React.Component {
   }
 
   componentDidMount () {
-    this.props.fetchTraks()
+    if (!this.props.hasFetched) {
+      this.props.fetchTraks()
+    }
+    
     this.props.resetSampleLoaderState()
     this.props.resetTrakState()
     this.props.addItemToNavBar(null, { type: 'ADD', cb: () => this.props.history.push(`/new`) })
@@ -72,7 +75,10 @@ const mapActionsToProps = {
 }
 
 function mapStateToProps (state) {
-  return { traks: selectors.getTraks(state) }
+  return {
+    traks: selectors.getTraks(state),
+    hasFetched: selectors.hasFetched(state)
+  }
 }
 
 export default compose(

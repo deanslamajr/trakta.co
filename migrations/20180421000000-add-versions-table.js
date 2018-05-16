@@ -35,7 +35,8 @@ module.exports = {
             onUpdate: 'cascade',
             onDelete: 'cascade'
           }
-        }
+        },
+        { transaction: t }
       )
       .then(() => {
         return queryInterface.addColumn('sample_instances', 'version_id',

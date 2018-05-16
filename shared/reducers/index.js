@@ -3,6 +3,7 @@ import samples, * as FromSamples from './samples'
 import trak, * as FromTrak from './trak'
 import recorder, * as FromRecorder from './recorder'
 import traklist, * as FromTraklist from './traklist'
+import player, * as FromPlayer from './player'
 
 // -----------------------------------------------------------------------------
 // REDUCER
@@ -11,11 +12,17 @@ const rootReducer = combineReducers({
   samples,
   trak,
   recorder,
-  traklist
+  traklist,
+  player
 })
 
 // -----------------------------------------------------------------------------
 // EXPORTED SELECTORS
+
+// PLAYER
+export function getTrakFilename (state) {
+  return FromPlayer.getTrakFilename(state.player)
+}
 
 // SAMPLES
 export function isLoading (state) {
@@ -33,6 +40,10 @@ export function getFinishedTasks (state) {
 // TRAKLIST
 export function getTraks (state) {
   return FromTraklist.getTraks(state.traklist)
+}
+
+export function hasFetched (state) {
+  return FromTraklist.hasFetched(state.traklist)
 }
 
 // TRAK

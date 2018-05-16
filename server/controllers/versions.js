@@ -20,11 +20,9 @@ export async function saveVersion (req, res, next) {
         throw new Error(`versionId:${versionId} does not exist`)
       }
 
-      const versionedTrakName = `${version.trak.name}${version.version}`
-
       const s3Config = {
         bucketName: 'traks',
-        resourceName: versionedTrakName
+        resourceName: versionId
       }
       const s3ResourceName = await saveBlobToS3(s3Config, req) // eslint-disable-line
 

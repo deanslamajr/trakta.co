@@ -10,7 +10,7 @@ const Versions = sequelize.define('versions',
       primaryKey: true,
       allowNull: false
     },
-    version: {
+    version_number: {
       type: Sequelize.INTEGER,
       allowNull: false,
       defaultValue: 1
@@ -30,5 +30,20 @@ const Versions = sequelize.define('versions',
     underscored: true
   }
 )
+
+Versions.getHighestVersionByTrakId = async function (trakId) {
+  // get latest version of trak
+  const [ latestVersion ] = await Versions.findAll({
+    where: {
+      trak_id: trakId,
+      active: true // don't get an invalid/orphaned version
+    },
+    group: [ 'versions.id' ],
+    limit: 1,
+    order: sequelize.literal('max(version_number) DESC')
+  })
+
+  return latestVersion
+}
 
 export default Versions

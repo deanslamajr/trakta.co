@@ -4,13 +4,15 @@ import { connect } from 'react-redux'
 import Helmet from 'react-helmet'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
+import { getTrakFilename } from '../../../reducers'
+
 import config from '../../../../config'
 
 import styles from './styles.css'
 
 class PlayerRoute extends React.Component {
   render () {
-    const url = `${config('s3TrakBucket')}/${this.props.match.params.trakName}.mp3`
+    const url = `${config('s3TrakBucket')}/${this.props.trakFilename}`
 
     return (
       <div className={styles.container}>
@@ -25,7 +27,9 @@ class PlayerRoute extends React.Component {
 }
 
 function mapStateToProps (state, ownProps) {
-  return {}
+  return {
+    trakFilename: getTrakFilename(state)
+  }
 };
 
 const mapActionsToProps = {}

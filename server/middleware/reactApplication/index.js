@@ -10,20 +10,17 @@ import config from '../../../config'
 
 import configureStore from '../../../shared/redux/configureStore'
 
+import initializeReduxState from './initializeReduxState'
 import ServerHTML from './ServerHTML'
 import App from '../../../shared/components/App'
 
-function initializeReactApplication (req, res) {
+async function initializeReactApplication (req, res) {
   const nonce = res.locals.nonce
-
-  /**
-   * @todo use req.url to initialize the store
-   * via appropriate data fetches
-   */
-  // const initialState = initializeReduxState(req.url)
 
   // Create the redux store.
   const store = configureStore()
+
+  await initializeReduxState(store, req, res)
 
   // We're using this outer context to store all server-rendered css for injection in server rendered header style tag
   // necessary configuration to support isomorphic-style-loader

@@ -6,7 +6,8 @@ import {
 
 const defaultState = {
   traks: [],
-  isFetching: false
+  isFetching: false,
+  hasFetched: false
 }
 
 // -----------------------------------------------------------------------------
@@ -22,6 +23,7 @@ function traklist (state = defaultState, action) {
 
     return Object.assign({}, state,
       {
+        hasFetched: true,
         isFetching: false,
         traks,
         error: null
@@ -45,6 +47,10 @@ function traklist (state = defaultState, action) {
 
 export function getTraks (state) {
   return state.traks
+}
+
+export function hasFetched (state) {
+  return state.hasFetched
 }
 
 // -----------------------------------------------------------------------------

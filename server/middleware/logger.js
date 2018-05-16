@@ -55,19 +55,19 @@ function log (level = 'error', message = '', data = {}) {
   return winstonLogger.log(datums)
 }
 
-function scrapeRequestData (req, res) {
+function scrapeRequestData (req, res, err) {
   const canUseHeaders = req.headers && typeof (req.headers) === 'object'
   // @todo add user and session details to returned object
 
   return {
-    error: res.error ? res.error.message : undefined,
+    error: res.error ? res.error.message : err ? err.message : undefined,
     method: req.method,
     path: req.path,
     query: req.query,
     body: req.body,
     host: canUseHeaders ? req.header('host') : undefined,
     referer: canUseHeaders ? req.header('referer') : undefined,
-    stack: res.error ? res.error.stack : undefined,
+    stack: res.error ? res.error.stack : err ? err.message : undefined,
     statusCode: res.statusCode
   }
 }
@@ -92,6 +92,15 @@ function middleware (req, res, next) {
   return next()
 }
 
+function logError (err, req, res) {
+  err = isProduction
+    ? err
+    : console.error(err)
+
+  const data = scrapeRequestData(req, res, err)
+  error(err, data)
+}
+
 /**
  * @param {Error|string} errorMessage - the error or message to log
  * @param {Object} data - a plain object to log along with the data
@@ -107,6 +116,7 @@ function info (message, data) {
 }
 
 const logger = {
+  logError,
   middleware,
   error,
   info,

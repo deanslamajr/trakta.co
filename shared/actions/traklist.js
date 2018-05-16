@@ -14,8 +14,8 @@ function fetching () {
   return { type: TRAKLIST_FETCH_PENDING }
 }
 
-function fetched (data) {
-  return { type: TRAKLIST_FETCH_FULFILLED, payload: data }
+export function fetched (traks) {
+  return { type: TRAKLIST_FETCH_FULFILLED, payload: traks }
 }
 
 function failed (error) {
