@@ -6,39 +6,73 @@
 }
 
 .button {
+  border: 2px solid #696969;
   background-color: white;
   cursor: pointer;
   z-index: 1;
-  height: 5rem;
-  width: 5rem;
-  margin: .75rem;
-  box-shadow: 0 2px 1px #333;
+  height: 4rem;
+  width: 4rem;
+  margin: 0;
   user-select: none;
 }
 
-.left {
+.top-left {
+  position: fixed;
+  top: 0;
+}
+
+.top-center {
+  margin: 0 auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.top-right {
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+.bottom-left {
   position: fixed;
   bottom: 0;
 }
 
-.center {
-  margin: .75rem auto;
+.bottom-center {
+  margin: 0 auto;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
 }
 
-.right {
+.bottom-right {
   position: fixed;
   bottom: 0;
   right: 0;
 }
 
 .icon {
-  margin: .95rem;
+  margin: .5rem;
+}
+
+.add-icon {
+  margin: .5rem;
+  margin-left: .45rem;
+  margin-top: .4rem;
+}
+
+.stop-icon {
+  margin: .05rem;
+}
+
+.back-icon {
+  margin: .4rem;
 }
 
 .play-icon {
-  margin: .5rem;
+  margin: .05rem;
+  margin-left: -.05rem;
 }

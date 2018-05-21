@@ -105,7 +105,9 @@ class InstancePlaylist extends React.Component {
 
   _renderTrak (instances, stagedSample, trackDimensions) {
     // remove play button
-    this.props.addItemToNavBar(null)
+    this.props.addItemToNavBar({
+      BOTTOM_RIGHT: null
+    }, true)
 
     // add task to load animation
     this.props.beginInitialFetch()
@@ -121,7 +123,9 @@ class InstancePlaylist extends React.Component {
         this._prepTransport()
         player = latestPlayer.sync().start()
         this.props.endFetchSample()
-        this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
+        this.props.addItemToNavBar({
+          BOTTOM_RIGHT: { type: 'PLAY', cb: this._play }
+        }, true)
       })
       .catch(error => {
         // @todo show an error view with a retry action
@@ -143,14 +147,18 @@ class InstancePlaylist extends React.Component {
 
   _stop () {
     this._stopPlaybackAndSendSignal()
-    this.props.addItemToNavBar({ type: 'PLAY', cb: this._play })
+    this.props.addItemToNavBar({
+      BOTTOM_RIGHT: { type: 'PLAY', cb: this._play }
+    }, true)
   }
 
   _play () {
     playArrangement()
 
     this.setState({ isPlaying: true })
-    this.props.addItemToNavBar({ type: 'STOP', cb: this._stop })
+    this.props.addItemToNavBar({
+      BOTTOM_RIGHT: { type: 'STOP', cb: this._stop }
+    }, true)
     if (this.props.incrementPlaysCount) {
       postStartSignal(this.props.trakName)
     }
@@ -177,8 +185,10 @@ class InstancePlaylist extends React.Component {
     if (Tone.Transport.state === 'started') {
       this._stopPlaybackAndSendSignal()
     }
-    // remove play button
-    this.props.addItemToNavBar(null)
+
+    this.props.addItemToNavBar({
+      BOTTOM_RIGHT: null
+    }, true)
   }
 
   render () {

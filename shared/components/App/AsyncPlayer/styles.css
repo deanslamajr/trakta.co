@@ -1,3 +1,10 @@
 @import "../../../colors.css";
 @import "../../../common.css";
 
+.container {
+  display: flex;
+}
+
+.player {
+  margin: 10rem auto;
+}

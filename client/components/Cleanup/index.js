@@ -19,14 +19,13 @@ let intervalAnimationId
 let position
 let onEndPlaybackLoop
 
-function getRootPath (fullPath) {
-  const pathTokens = fullPath.split('/')
-  return pathTokens[1] || ''
-}
-
 function stopPlayback () {
   audioElement.pause()
   audioElement.currentTime = 0.0
+}
+
+function getMainEditUrl (url) {
+  return url.replace('/cleanup', '')
 }
 
 class Cleanup extends React.Component {
@@ -59,9 +58,9 @@ class Cleanup extends React.Component {
   }
 
   _clickUseThisSelection () {
-    const rootPath = getRootPath(this.props.match.path)
+    const mainEditUrl = getMainEditUrl(this.props.match.path)
 
-    this.props.history.push(`/${rootPath}/staging`)
+    this.props.history.push(`${mainEditUrl}/staging`)
   }
 
   _renderSample (start, stop) {
@@ -107,7 +106,9 @@ class Cleanup extends React.Component {
     this.playIndicatorEl.style.backgroundColor = 'transparent'
 
     this.setState({ isPlaying: false }, () => {
-      this.props.addItemToNavBar({ type: 'PLAY', cb: this._startPlayback })
+      this.props.addItemToNavBar({
+        BOTTOM_RIGHT: { type: 'PLAY', cb: this._startPlayback }
+      }, true)
     })
   }
 
@@ -153,7 +154,9 @@ class Cleanup extends React.Component {
   }
 
   _startPlayback () {
-    this.props.addItemToNavBar({ type: 'STOP', cb: this._stopPlayback })
+    this.props.addItemToNavBar({
+      BOTTOM_RIGHT: { type: 'STOP', cb: this._stopPlayback }
+    }, true)
 
     const maxClipValue = this.sampleCreator.getDataBufferLength()
     const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
@@ -230,10 +233,13 @@ class Cleanup extends React.Component {
           this._drawWaveForm()
           this._renderSample(this.props.cleanup.clipStart, this.props.cleanup.clipEnd)
 
-          this.props.addItemToNavBar(
-            { type: 'PLAY', cb: this._startPlayback },
-            { type: 'CHECK', cb: this._clickUseThisSelection }
-          )
+          const mainEditUrl = getMainEditUrl(this.props.match.url)
+          
+          this.props.addItemToNavBar({
+            TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(`${mainEditUrl}/recorder`) },
+            TOP_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
+            BOTTOM_RIGHT: { type: 'PLAY', cb: this._startPlayback }
+          })
         }
       })
     }

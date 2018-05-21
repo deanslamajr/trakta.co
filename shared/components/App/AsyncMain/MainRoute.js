@@ -32,7 +32,13 @@ class MainRoute extends React.Component {
   _showContribute () {
     // @todo have this show a menu of contribution options, which would include <Recorder> among others
     this.props.resetSampleLoaderState()
-    this.props.history.push('/recorder')
+
+    let urlWithoutTrailingSlash = this.props.match.url
+    if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length-1) === '/') {
+      urlWithoutTrailingSlash = urlWithoutTrailingSlash.slice(0, -1)
+    }
+
+    this.props.history.push(`${urlWithoutTrailingSlash}/recorder`)
   }
 
   _renderLoadingComponent () {
@@ -54,7 +60,9 @@ class MainRoute extends React.Component {
   }
 
   componentDidMount () {
-    if (this.props.match.params.trakName) {
+    const trakNameFromUrl = this.props.match.path.split('/')[2]
+
+    if (trakNameFromUrl) {
       this.props.resetSampleLoaderState()
       this.props.setStagedObjectUrl(undefined)
       this.props.setStagedSample({
@@ -68,8 +76,8 @@ class MainRoute extends React.Component {
       // @todo handle the case where a non existant trakName is passed
 
       // verify that we have updated the store to the correct trakName
-      if (this.props.trakName !== this.props.match.params.trakName) {
-        this.props.setTrakName(this.props.match.params.trakName)
+      if (this.props.trakName !== trakNameFromUrl) {
+        this.props.setTrakName(trakNameFromUrl)
       }
       this.props.fetchInstances()
     } else {
@@ -79,12 +87,14 @@ class MainRoute extends React.Component {
       return this.props.history.push('/new')
     }
 
-    this.props.addItemToNavBar(undefined, { type: 'ADD', cb: this._showContribute })
+    this.props.addItemToNavBar({
+      TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push('/') },
+      TOP_RIGHT: { type: 'ADD', cb: this._showContribute }
+    })
   }
 
   componentWillUnmount () {
     this.props.setStagedObjectUrl(undefined)
-    this.props.addItemToNavBar(null, null)
   }
 
   render () {

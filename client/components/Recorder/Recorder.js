@@ -26,6 +26,15 @@ function clearCanvas (ctx) {
   })
 }
 
+function getMainEditUrl (url) {
+  let urlWithoutTrailingSlash = url
+  if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length-1) === '/') {
+    urlWithoutTrailingSlash = urlWithoutTrailingSlash.slice(0, -1)
+  }
+
+  return urlWithoutTrailingSlash.replace('/recorder', '')
+}
+
 class Recorder extends React.Component {
   constructor (props) {
     super(props)
@@ -166,7 +175,12 @@ class Recorder extends React.Component {
   _startRecording () {
     this.sampleCreator.startRecording()
 
-    this.props.addItemToNavBar(null, { type: 'CHECK', cb: this._stopRecording })
+    this.props.addItemToNavBar({
+      TOP_RIGHT: {
+        type: 'CHECK',
+        cb: this._stopRecording
+      }
+    }, true)
 
     this.setState({
       recordingStartTime: Date.now(),
@@ -180,7 +194,8 @@ class Recorder extends React.Component {
   }
 
   _navigateToCleanup () {
-    this.props.history.push(`${this.props.match.url}/cleanup`)
+    const mainEditUrl = getMainEditUrl(this.props.match.url)
+    this.props.history.push(`${mainEditUrl}/cleanup`)
   }
 
   _stopRecording () {
@@ -241,7 +256,12 @@ class Recorder extends React.Component {
             // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
             // don't do this stuff
             if (this.canvas) {
-              this.props.addItemToNavBar(null, { type: 'RECORD', cb: this._startRecording })
+              const mainEditUrl = getMainEditUrl(this.props.match.url)
+              // @todo if trakName = new, set back action to '/'
+              this.props.addItemToNavBar({
+                TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(mainEditUrl) },
+                TOP_RIGHT: { type: 'RECORD', cb: this._startRecording }
+              })
               // overlay 'start recording' mask
               this.setState({ disableRecording: false })
               this._beginDrawingWaves()

@@ -11,6 +11,12 @@ import config from '../../../../config'
 import styles from './styles.css'
 
 class PlayerRoute extends React.Component {
+  componentDidMount () {
+    this.props.addItemToNavBar({
+      TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push('/') }
+    })
+  }
+
   render () {
     const url = `${config('s3TrakBucket')}/${this.props.trakFilename}`
 
@@ -20,7 +26,7 @@ class PlayerRoute extends React.Component {
           <title>{`Player`}</title>
         </Helmet>
 
-        <audio src={url} controls loop />
+        <audio className={styles.player} src={url} controls loop />
       </div>
     )
   }

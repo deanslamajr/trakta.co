@@ -37,6 +37,10 @@ function validateData (absoluteStartTime, duration, volume, panning, loopCount, 
   }
 }
 
+function getMainEditUrl (url) {
+  return url.replace('/staging', '')
+}
+
 class Staging extends React.Component {
   constructor (props) {
     super(props)
@@ -101,7 +105,7 @@ class Staging extends React.Component {
     // prevent page refresh
     event.preventDefault()
 
-    this.props.addItemToNavBar(undefined, null)
+    this.props.addItemToNavBar(null)
 
     this.setState({
       isSaving: true, // show save animation
@@ -178,8 +182,8 @@ class Staging extends React.Component {
         })
         .then(() => {
           // jump back to /e/:name
-          // doing it like this 'clears' the recording steps from the browser history
-          this.props.history.go(-3)
+          const mainEditUrl = getMainEditUrl(this.props.match.url)
+          this.props.history.push(mainEditUrl)
         })
         .catch((err) => {
           // @todo log error
@@ -239,6 +243,8 @@ class Staging extends React.Component {
 
   // initialize the buffer everytime the user navigates to this page
   componentDidMount () {
+    this.props.addItemToNavBar(null)
+
     new Tone.Buffer(this.props.objectUrl, // eslint-disable-line 
       // success
       buffer => {
@@ -251,9 +257,12 @@ class Staging extends React.Component {
           loopPadding: duration,
           buffer
         })
-        this.props.addItemToNavBar(undefined, (
-          { type: 'CHECK', cb: this._saveRecording }
-        ))
+        const mainEditUrl = getMainEditUrl(this.props.match.url)
+          
+        this.props.addItemToNavBar({
+          TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(`${mainEditUrl}/cleanup`) },
+          TOP_RIGHT: { type: 'CHECK', cb: this._saveRecording }
+        })
       },
       // error
       // @todo log, set error view state (w/ try again functionality)
