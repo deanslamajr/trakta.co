@@ -16,11 +16,11 @@ import * as selectors from '../../../reducers'
 import styles from './styles.css'
 
 class EditRoute extends React.Component {
-
   render () {
     return (
       <div className={styles.container}>
         <Switch>
+          <Redirect exact from='/e/new' to='/e/new/recorder' />
           <Route exact path={this.props.match.url} render={props => (
             <MainRoute {...props} addItemToNavBar={this.props.addItemToNavBar} />
               )}
@@ -29,24 +29,19 @@ class EditRoute extends React.Component {
             <Recorder {...props} addItemToNavBar={this.props.addItemToNavBar} />
               )}
           />
-
           {
-            this.props.objectUrl
-              ? ([
-                <Route key={2} path={`${this.props.match.url}/staging`} render={props => (
-                  <Staging {...props} addItemToNavBar={this.props.addItemToNavBar} />
-                    )}
-                />,
-                <Route key={3} path={`${this.props.match.url}/cleanup`} render={props => (
-                  <Cleanup {...props} addItemToNavBar={this.props.addItemToNavBar} />
-                    )}
-                />
-              ])
-              : <Redirect to={{ pathname: this.props.match.url }} />
+            this.props.objectUrl && ([
+              <Route key={2} path={`${this.props.match.url}/staging`} render={props => (
+                <Staging {...props} addItemToNavBar={this.props.addItemToNavBar} />
+                  )}
+              />,
+              <Route key={3} path={`${this.props.match.url}/cleanup`} render={props => (
+                <Cleanup {...props} addItemToNavBar={this.props.addItemToNavBar} />
+                  )}
+              />
+            ])
           }
-
           <Redirect to={{ pathname: this.props.match.url }} />
-          
         </Switch>
       </div>
     )

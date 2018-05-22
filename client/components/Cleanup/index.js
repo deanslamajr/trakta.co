@@ -234,7 +234,7 @@ class Cleanup extends React.Component {
           this._renderSample(this.props.cleanup.clipStart, this.props.cleanup.clipEnd)
 
           const mainEditUrl = getMainEditUrl(this.props.match.url)
-          
+
           this.props.addItemToNavBar({
             TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(`${mainEditUrl}/recorder`) },
             TOP_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },

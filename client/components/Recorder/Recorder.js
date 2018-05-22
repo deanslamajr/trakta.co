@@ -26,9 +26,14 @@ function clearCanvas (ctx) {
   })
 }
 
-function getMainEditUrl (url) {
+function getMainEditUrl (url, isGoingBack) {
+  // if this is new trak creation, go back to main list
+  if (isGoingBack && url.split('/')[2] === 'new') {
+    return '/'
+  }
+
   let urlWithoutTrailingSlash = url
-  if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length-1) === '/') {
+  if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length - 1) === '/') {
     urlWithoutTrailingSlash = urlWithoutTrailingSlash.slice(0, -1)
   }
 
@@ -244,6 +249,8 @@ class Recorder extends React.Component {
         ? this.container.parentNode.clientWidth
         : 0
 
+    this.props.setStagedObjectUrl()
+
     this.setState({
       canvasWidth: width,
       canvasHeight: height
@@ -256,7 +263,7 @@ class Recorder extends React.Component {
             // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
             // don't do this stuff
             if (this.canvas) {
-              const mainEditUrl = getMainEditUrl(this.props.match.url)
+              const mainEditUrl = getMainEditUrl(this.props.match.url, true)
               // @todo if trakName = new, set back action to '/'
               this.props.addItemToNavBar({
                 TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(mainEditUrl) },

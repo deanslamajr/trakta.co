@@ -89,8 +89,7 @@ class NavBar extends React.Component {
   addItemToNavBar (updatedPositionConfigs, retainAllOtherItems) {
     if (updatedPositionConfigs === null) {
       this.setState({ positions: {} })
-    }
-    else {
+    } else {
       const validPositionsToChange = Object.keys(updatedPositionConfigs).filter(position => positionMappings[position])
 
       const basePositions = retainAllOtherItems
@@ -100,8 +99,7 @@ class NavBar extends React.Component {
       validPositionsToChange.forEach(position => {
         if (updatedPositionConfigs[position] === null) {
           delete basePositions[position]
-        }
-        else {
+        } else {
           basePositions[position] = updatedPositionConfigs[position]
         }
       })
@@ -113,7 +111,7 @@ class NavBar extends React.Component {
   render () {
     const { positions } = this.state
     const occupiedPositions = Object.keys(positions)
-    
+
     return (
       <div>
         {
@@ -121,7 +119,7 @@ class NavBar extends React.Component {
         }
 
         <div className={styles.container} >
-          { 
+          {
             occupiedPositions.map(position => {
               if (position === null) {
                 return

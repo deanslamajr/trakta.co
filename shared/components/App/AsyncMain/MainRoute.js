@@ -34,7 +34,7 @@ class MainRoute extends React.Component {
     this.props.resetSampleLoaderState()
 
     let urlWithoutTrailingSlash = this.props.match.url
-    if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length-1) === '/') {
+    if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length - 1) === '/') {
       urlWithoutTrailingSlash = urlWithoutTrailingSlash.slice(0, -1)
     }
 

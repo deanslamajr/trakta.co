@@ -32,20 +32,20 @@ class ListRoute extends React.Component {
     if (!this.props.hasFetched) {
       this.props.fetchTraks()
     }
-    
+
     this.props.resetSampleLoaderState()
     this.props.resetTrakState()
     this.props.addItemToNavBar({
       TOP_RIGHT: {
         type: 'ADD',
-        cb: () => this.props.history.push(`/new`)
+        cb: () => this.props.history.push(`/e/new/recorder`)
       }
     })
   }
 
   componentWillUnmount () {
     this.props.addItemToNavBar(null)
-    
+
     if (window) {
       const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
       const playlistRenderer = getPlaylistRenderer()

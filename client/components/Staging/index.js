@@ -12,7 +12,7 @@ import { getTrakRenderer } from '../../lib/TrakRenderer'
 
 import * as selectors from '../../../shared/reducers'
 
-import { setStagedSample, setStagedObjectUrl } from '../../../shared/actions/recorder'
+import { setStagedSample } from '../../../shared/actions/recorder'
 import {
   setName as setTrakName,
   reset as resetTrak,
@@ -124,7 +124,7 @@ class Staging extends React.Component {
       // @todo handle invalid data state gracefully
       validateData(stagedSampleStartTime, duration, volume, panning, loopCount, loopPadding)
 
-      const trakName = this.props.trakName || ''
+      const trakName = this.props.trakName || this.props.match.url.split('/')[2]
 
       // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
       // e.g. user is actually looking at the page and is not a robot
@@ -182,8 +182,7 @@ class Staging extends React.Component {
         })
         .then(() => {
           // jump back to /e/:name
-          const mainEditUrl = getMainEditUrl(this.props.match.url)
-          this.props.history.push(mainEditUrl)
+          this.props.history.push(`/e/${this.props.trakName}`)
         })
         .catch((err) => {
           // @todo log error
@@ -258,7 +257,7 @@ class Staging extends React.Component {
           buffer
         })
         const mainEditUrl = getMainEditUrl(this.props.match.url)
-          
+
         this.props.addItemToNavBar({
           TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(`${mainEditUrl}/cleanup`) },
           TOP_RIGHT: { type: 'CHECK', cb: this._saveRecording }
@@ -346,8 +345,7 @@ const mapActionsToProps = {
   updateTrackDimensionsWithAdditionalSample,
   resetSampleLoaderState,
   resetTrak,
-  setTrakName,
-  setStagedObjectUrl
+  setTrakName
 }
 
 function mapStateToProps (state) {

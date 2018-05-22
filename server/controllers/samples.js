@@ -29,10 +29,16 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
       { transaction }
     )
 
+    trak = await Traks.findOne({
+      where: { name: trakName },
+      lock: transaction.LOCK.UPDATE,
+      transaction
+    })
+
     /**
      * trak doesn't exist: Create a new trak
      */
-    if (!trakName) {
+    if (!trak) {
       trakName = randomWords({ exactly: 3, join: '-' })
 
       // @todo ensure that trakName is not already in use!!!
@@ -48,12 +54,6 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
      * trak exists: Do we need to update start_time AND/OR duration?
      */
     } else {
-      trak = await Traks.findOne({
-        where: { name: trakName },
-        lock: transaction.LOCK.UPDATE,
-        transaction
-      })
-
       // get latest version of trak
       const latestVersion = await Versions.getHighestVersionByTrakId(trak.id)
 

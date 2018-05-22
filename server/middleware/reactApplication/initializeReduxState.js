@@ -1,7 +1,6 @@
 import { setTrakFilename } from '../../../shared/actions/player'
 import { fetched } from '../../../shared/actions/traklist'
 import { Traks, Versions } from '../../models'
-import { sequelize } from '../../adapters/db'
 import logger from '../logger'
 
 //
@@ -17,10 +16,6 @@ function isPlayer (urlTokens) {
 function isMainList (urlTokens) {
   return urlTokens[1].toLowerCase() === ''
 }
-
-////
-///
-//
 
 async function initializeMainList (store) {
   const traks = await Traks.findAll({})
@@ -48,14 +43,11 @@ async function initializePlayer (store, url) {
 
     if (version) {
       trakFilename = version.filename
-    }
-    // if version doesn't exist, get the filename associated with the highest version number
-    else {
+    } else { // if version doesn't exist, get the filename associated with the highest version number
       const latestVersion = await Versions.getHighestVersionByTrakId(trak.id)
       trakFilename = latestVersion.filename
     }
-  }
-  else {
+  } else {
     const latestVersion = await Versions.getHighestVersionByTrakId(trak.id)
     trakFilename = latestVersion.filename
   }
@@ -64,10 +56,10 @@ async function initializePlayer (store, url) {
 }
 
 /**
- * 
+ *
  * @public
  */
-export default async function initializeReduxState(store, req, res) {
+export default async function initializeReduxState (store, req, res) {
   const { url } = req
 
   try {
@@ -75,12 +67,10 @@ export default async function initializeReduxState(store, req, res) {
 
     if (isPlayer(tokens)) {
       await initializePlayer(store, url)
-    }
-    else if (isMainList(tokens)) {
+    } else if (isMainList(tokens)) {
       await initializeMainList(store)
     }
-  }
-  catch (error) {
+  } catch (error) {
     logger.logError(error, req, res)
   }
 }
