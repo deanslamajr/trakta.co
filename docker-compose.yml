@@ -1,6 +1,8 @@
 version: "3"
 services:
   traktaco:
+    build:
+      context: .
     image: traktaco
     ports:
       - "4444:80"
