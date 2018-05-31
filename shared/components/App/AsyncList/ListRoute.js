@@ -22,20 +22,29 @@ class ListRoute extends React.Component {
   constructor (props) {
     super(props)
     this._navigateToTrak = this._navigateToTrak.bind(this)
+    this._fetchTraks = this._fetchTraks.bind(this)
   }
 
   _navigateToTrak (name) {
     this.props.history.push(`/e/${name}`)
   }
 
+  _fetchTraks () {
+    this.props.fetchTraks()
+  }
+
   componentDidMount () {
     if (!this.props.hasFetched) {
-      this.props.fetchTraks()
+      this._fetchTraks()
     }
 
     this.props.resetSampleLoaderState()
     this.props.resetTrakState()
     this.props.addItemToNavBar({
+      TOP_LEFT: {
+        type: 'REFRESH',
+        cb: this._fetchTraks
+      },
       TOP_RIGHT: {
         type: 'ADD',
         cb: () => this.props.history.push(`/e/new/recorder`)

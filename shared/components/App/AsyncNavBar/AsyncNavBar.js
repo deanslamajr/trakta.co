@@ -1,14 +1,14 @@
 import React from 'react'
 import classnames from 'classnames'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
-import {
-  MdArrowBack,
-  MdMic,
-  MdCheck,
-  MdPlayArrow,
-  MdStop,
-  MdAdd
-} from 'react-icons/lib/md'
+
+import MdArrowBack from 'react-icons/lib/md/arrow-back'
+import MdMic from 'react-icons/lib/md/mic'
+import MdCheck from 'react-icons/lib/md/check'
+import MdPlayArrow from 'react-icons/lib/md/play-arrow'
+import MdStop from 'react-icons/lib/md/stop'
+import MdAdd from 'react-icons/lib/md/add'
+import MdRefresh from 'react-icons/lib/md/refresh'
 
 import styles from './styles.css'
 
@@ -40,6 +40,10 @@ function renderAddButton () {
   return (<MdAdd className={styles.addIcon} size={50} color={green} />)
 }
 
+function renderRefreshButton () {
+  return (<MdRefresh className={styles.addIcon} size={50} color={blue} />)
+}
+
 /**
  * render a button
  * @param {oneOf[buttonMappings]} type the content definition enum
@@ -63,6 +67,7 @@ const buttonMappings = {
   CHECK: renderCheckButton,
   PLAY: renderPlayButton,
   RECORD: renderRecordButton,
+  REFRESH: renderRefreshButton,
   STOP: renderStopButton
 }
 
