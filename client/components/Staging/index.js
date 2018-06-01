@@ -260,7 +260,7 @@ class Staging extends React.Component {
 
         this.props.addItemToNavBar({
           TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(`${mainEditUrl}/cleanup`) },
-          TOP_RIGHT: { type: 'CHECK', cb: this._saveRecording }
+          BOTTOM_RIGHT: { type: 'CHECK', cb: this._saveRecording }
         })
       },
       // error

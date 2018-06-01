@@ -89,7 +89,7 @@ class MainRoute extends React.Component {
 
     this.props.addItemToNavBar({
       TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push('/') },
-      TOP_RIGHT: { type: 'ADD', cb: this._showContribute }
+      BOTTOM_RIGHT: { type: 'ADD', cb: this._showContribute }
     })
   }
 

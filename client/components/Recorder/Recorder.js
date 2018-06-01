@@ -181,7 +181,7 @@ class Recorder extends React.Component {
     this.sampleCreator.startRecording()
 
     this.props.addItemToNavBar({
-      TOP_RIGHT: {
+      BOTTOM_RIGHT: {
         type: 'CHECK',
         cb: this._stopRecording
       }
@@ -267,7 +267,7 @@ class Recorder extends React.Component {
               // @todo if trakName = new, set back action to '/'
               this.props.addItemToNavBar({
                 TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(mainEditUrl) },
-                TOP_RIGHT: { type: 'RECORD', cb: this._startRecording }
+                BOTTOM_RIGHT: { type: 'RECORD', cb: this._startRecording }
               })
               // overlay 'start recording' mask
               this.setState({ disableRecording: false })

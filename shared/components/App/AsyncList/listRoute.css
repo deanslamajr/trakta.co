@@ -11,5 +11,5 @@
   font-size: 3.5rem;
   color: var(--black);
   user-select: none;
-  margin: 4.3rem auto;
+  margin: 0 auto 4.3rem;
 }

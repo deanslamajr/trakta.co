@@ -107,7 +107,7 @@ class Cleanup extends React.Component {
 
     this.setState({ isPlaying: false }, () => {
       this.props.addItemToNavBar({
-        BOTTOM_RIGHT: { type: 'PLAY', cb: this._startPlayback }
+        TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
       }, true)
     })
   }
@@ -155,7 +155,7 @@ class Cleanup extends React.Component {
 
   _startPlayback () {
     this.props.addItemToNavBar({
-      BOTTOM_RIGHT: { type: 'STOP', cb: this._stopPlayback }
+      TOP_RIGHT: { type: 'STOP', cb: this._stopPlayback }
     }, true)
 
     const maxClipValue = this.sampleCreator.getDataBufferLength()
@@ -237,8 +237,8 @@ class Cleanup extends React.Component {
 
           this.props.addItemToNavBar({
             TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(`${mainEditUrl}/recorder`) },
-            TOP_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
-            BOTTOM_RIGHT: { type: 'PLAY', cb: this._startPlayback }
+            BOTTOM_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
+            TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
           })
         }
       })

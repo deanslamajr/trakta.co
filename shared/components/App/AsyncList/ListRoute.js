@@ -41,11 +41,11 @@ class ListRoute extends React.Component {
     this.props.resetSampleLoaderState()
     this.props.resetTrakState()
     this.props.addItemToNavBar({
-      TOP_LEFT: {
+      BOTTOM_LEFT: {
         type: 'REFRESH',
         cb: this._fetchTraks
       },
-      TOP_RIGHT: {
+      BOTTOM_RIGHT: {
         type: 'ADD',
         cb: () => this.props.history.push(`/e/new/recorder`)
       }
