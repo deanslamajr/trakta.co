@@ -1,18 +1,6 @@
-@import "../../../shared/colors.css";
-@import "../../../shared/common.css";
-
-.play {
-  background-color: var(--clearGreen);
-}
-
 .play-indicator {
   top: 0;
   bottom: 0;
   position: fixed;
   width: 1px;
-}
-
-.top-button {
-  top: 5%;
-  bottom: 75%;
 }

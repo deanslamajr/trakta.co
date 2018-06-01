@@ -5,18 +5,18 @@ import Helmet from 'react-helmet'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import classnames from 'classnames'
 
-import config from '../../../../config'
+import config from '../../../../../config'
 
-import * as selectors from '../../../reducers'
+import * as selectors from '../../../../reducers'
 
-import { fetchInstances, setName as setTrakName } from '../../../actions/trak'
-import { reset as resetSampleLoaderState } from '../../../actions/samples'
-import { setStagedSample, setStagedObjectUrl } from '../../../actions/recorder'
+import { fetchInstances, setName as setTrakName } from '../../../../actions/trak'
+import { reset as resetSampleLoaderState } from '../../../../actions/samples'
+import { setStagedSample, setStagedObjectUrl } from '../../../../actions/recorder'
 
-import SampleInstances from '../../../../client/components/SampleInstances'
-import InstancePlaylist from '../../../../client/components/InstancePlaylist'
+import SampleInstances from '../../../../../client/components/SampleInstances'
+import InstancePlaylist from '../../../../../client/components/InstancePlaylist'
 
-import ProgressRing from '../AsyncProgressRing'
+import ProgressRing from '../../AsyncProgressRing'
 
 import styles from './styles.css'
 
@@ -26,7 +26,6 @@ class MainRoute extends React.Component {
 
     this._showContribute = this._showContribute.bind(this)
     this._renderLoadingComponent = this._renderLoadingComponent.bind(this)
-    this._renderErrorComponent = this._renderErrorComponent.bind(this)
   }
 
   _showContribute () {
@@ -47,14 +46,6 @@ class MainRoute extends React.Component {
     return (
       <div className={styles.spinner}>
         <ProgressRing radius={50} stroke={2} progress={progress} />
-      </div>
-    )
-  }
-
-  _renderErrorComponent (clickHandler) {
-    return (
-      <div onClick={clickHandler} className={classnames(styles.error, styles.button, styles.centerButton)}>
-        <div className={classnames(styles.icon)}>&#9888;</div>
       </div>
     )
   }
@@ -116,7 +107,6 @@ class MainRoute extends React.Component {
                 <div className={styles.label}>
                   <InstancePlaylist
                     addItemToNavBar={this.props.addItemToNavBar}
-                    renderErrorComponent={this._renderErrorComponent}
                     incrementPlaysCount
                   />
                 </div>

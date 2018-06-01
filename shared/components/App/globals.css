@@ -3,6 +3,16 @@ html {
   font-family: Arial, sans-serif;
 }
 
+body {
+  background-color: '#FDFFFC';
+  margin: 0;
+  overscroll-behavior-y: 'none';
+}
+
+.container {
+  margin: 0;
+}
+
 *,
 *:before,
 *:after {

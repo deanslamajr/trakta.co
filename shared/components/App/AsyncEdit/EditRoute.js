@@ -9,7 +9,7 @@ import { connect } from 'react-redux'
 import Staging from './AsyncStaging'
 import Cleanup from './AsyncCleanup'
 import Recorder from './AsyncRecorder'
-import MainRoute from '../AsyncMain'
+import EditMain from './AsyncEditMain'
 
 import * as selectors from '../../../reducers'
 
@@ -22,7 +22,7 @@ class EditRoute extends React.Component {
         <Switch>
           <Redirect exact from='/e/new' to='/e/new/recorder' />
           <Route exact path={this.props.match.url} render={props => (
-            <MainRoute {...props} addItemToNavBar={this.props.addItemToNavBar} />
+            <EditMain {...props} addItemToNavBar={this.props.addItemToNavBar} />
               )}
           />
           <Route path={`${this.props.match.url}/recorder`} render={props => (

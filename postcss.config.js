@@ -1,5 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // PostCSS-Loader config options
-module.exports = {
-  plugins: [require('postcss-simple-vars'), require('postcss-cssnext'), require('postcss-import')]
+module.exports = (ctx) => {
+  return {
+    plugins: [require('postcss-import')({ addDependencyTo: ctx.webpack }), require('postcss-simple-vars'), require('postcss-cssnext')]
+  }
 }

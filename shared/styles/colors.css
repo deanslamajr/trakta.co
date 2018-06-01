@@ -1,0 +1,25 @@
+:root {
+  --black: #252323;
+  --white: #FDFFFC;
+
+  --red: #FF1000;
+  --blue: #00A1E4;
+  --green: #6AFF00;
+  --orange: #FF6A00;
+  --yellow: #FAFF00;
+  --purple: #C200FB;
+  --pink: #FF206E;
+  --teal: #02C39A;
+}
+
+@value black: #252323;
+@value white: #FDFFFC;
+
+@value red: #FF1000;
+@value blue: #00A1E4;
+@value green: #6AFF00;
+@value orange: #FF6A00;
+@value yellow: #FAFF00;
+@value purple: #C200FB;
+@value pink: #FF206E;
+@value teal: #02C39A;

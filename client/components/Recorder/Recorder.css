@@ -1,4 +1,4 @@
-@import "../../../shared/colors.css";
+@import "../../../shared/styles/colors.css";
 
 .container {
   text-align: center;
@@ -15,20 +15,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: var(--clearBlue);
-  opacity: .5;
+  background-color: color(var(--blue) alpha(25%));
   animation: maskFadein .2s;
-  cursor: pointer;
-}
-
-.label {
-  position: absolute;
-  top: 20%;
-  width: 100%;
-  text-align: center;
-  font-size: 3.5rem;
-  color: var(--black);
-  user-select: none;
 }
 
 .red-mask {
@@ -37,28 +25,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: var(--clearRed);
-  opacity: .5;
+  background-color: color(var(--red) alpha(25%));
   animation: maskFadein .2s;
-  cursor: pointer;
-}
-
-.retry-button {
-  font-size: 3.5rem;
-  color: var(--black);
-  opacity: .5;
-  background-color: var(--clearBlue);
-  user-select: none;
-  cursor: pointer;
-}
-
-.save-button {
-  font-size: 3.5rem;
-  color: var(--black);
-  opacity: .5;
-  background-color: var(--clearGreen);
-  user-select: none;
-  cursor: pointer;
 }
 
 @keyframes maskFadein {

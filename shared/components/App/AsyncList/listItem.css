@@ -1,57 +1,79 @@
-@import "../../../colors.css";
+@import "../../../styles/colors.css";
+@import "../../../styles/breakpoints.css";
 
 .card {
-  background-color: var(--clearRed);
-  box-shadow: 0 4px 4px 0 white;
-  color: #696969;
+  color: var(--black);
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  font-size: 2.5rem;
-  justify-content: center;
   margin: 0 auto;
   max-width: 60rem;
   padding: 0;
   width: 100%;
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid var(--white);
+  
+  margin-bottom: 1px;
+  overflow: hidden;
 }
 
 .card-container {
-  border: 2px solid #696969;
-  padding: .25rem;
+  height: 4rem;
 }
 
-.title {
-  font-size: 1.5rem;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
+.name {
+  font-size: 50%;
+  text-align: end;
+  background: none;
+  position: relative;
+  right: 0;
+  top: -1.7rem;
+  height: 0;
 }
 
-.left-area {
-  display: flex;
-  flex-direction: column;
+.red-base {
+  background-color: color(var(--red) alpha(25%));
+}
+.blue-base {
+  background-color: color(var(--blue) alpha(25%));
+}
+.green-base {
+  background-color: color(var(--green) alpha(25%));
+}
+.orange-base {
+  background-color: color(var(--orange) alpha(25%));
+}
+.yellow-base {
+  background-color: color(var(--yellow) alpha(25%));
+}
+.purple-base {
+  background-color: color(var(--purple) alpha(25%));
+}
+.pink-base {
+  background-color: color(var(--pink) alpha(25%));
+}
+.teal-base {
+  background-color: color(var(--teal) alpha(25%));
 }
 
-.update {
-  font-size: .8rem;
-  margin: .25rem 0 .1rem;
-  text-align: left;
+.red {
+  background-color: var(--red);
 }
-
-.stats-container {
-  font-size: 1rem;
-  display: flex;
-  justify-content: flex-start;
-  flex-direction: column;
-  min-width: 4rem;
+.blue {
+  background-color: var(--blue);
 }
-
-.plays-container {
-  display: flex;
-  margin: .1rem;
+.green {
+  background-color: var(--green);
 }
-
-.datum {
-  margin-left: .25rem;
+.orange {
+  background-color: var(--orange);
+}
+.yellow {
+  background-color: var(--yellow);
+}
+.purple {
+  background-color: var(--purple);
+}
+.pink {
+  background-color: var(--pink);
+}
+.teal {
+  background-color: var(--teal);
 }

@@ -3,7 +3,7 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 
-import { MainRoute } from '../MainRoute'
+import { MainRoute } from '../EditMainRoute'
 
 describe('<MainRoute />', () => {
   test('renders', () => {

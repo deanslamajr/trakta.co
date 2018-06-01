@@ -4,43 +4,58 @@ import ClockIcon from 'react-icons/lib/md/access-time'
 import MusicNote from 'react-icons/lib/md/music-note'
 import formatDuration from 'format-duration'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
+import classnames from 'classnames'
 
 import styles from './listItem.css'
 
-function formatTime (seconds) {
-  const milliseconds = seconds * 1000
-  return formatDuration(milliseconds)
+function getWidth (seconds) {
+  return seconds > 5
+    ? '100%'
+    : `${(seconds / 5) * 100}%`
+}
+
+const colorClasses = [
+  'red',
+  'blue',
+  'green',
+  'yellow',
+  'purple',
+  'pink',
+  'orange',
+  'teal'
+]
+
+function getColorClass (text) {
+  const chars = text.split('')
+  const charCodesSum = chars.reduce((sum, char) => char.charCodeAt() + sum, 0)
+  const restrictedValue = charCodesSum % colorClasses.length
+  return colorClasses[restrictedValue]
+}
+
+function getOpacity (plays) {
+  return plays >= 50
+    ? 1
+    : plays / 50
 }
 
 function ListItem ({ trak, handleClick }) {
-  const formattedTime = formatTime(trak.duration)
+  const width = getWidth(trak.duration)
+  const colorClass = getColorClass(trak.name)
+  const opacity = getOpacity(trak.plays_count)
+  const style = {
+    opacity,
+    width
+  }
 
   return (
     <div
-      className={styles.card}
+    className={classnames(styles.card, styles[`${colorClass}Base`])}
       onClick={() => handleClick(trak.name)}
     >
-      <div className={styles.cardContainer}>
-        <div className={styles.title}>
-          <div className={styles.leftArea}>
-            { trak.name }
-          </div>
-
-          <div className={styles.statsContainer}>
-            <div className={styles.playsContainer}>
-              <PlayIcon size={18} />
-              <span className={styles.datum}>{trak.plays_count}</span>
-            </div>
-            <div className={styles.playsContainer}>
-              <MusicNote size={18} />
-              <span className={styles.datum}>{trak.contribution_count}</span>
-            </div>
-            <div className={styles.playsContainer}>
-              <ClockIcon size={18} />
-              <span className={styles.datum}>{formattedTime}</span>
-            </div>
-          </div>
-        </div>
+      <div style={style} className={classnames(styles.cardContainer, styles[colorClass])}>
+      </div>
+      <div className={styles.name}>
+      { trak.name }
       </div>
     </div>
   )

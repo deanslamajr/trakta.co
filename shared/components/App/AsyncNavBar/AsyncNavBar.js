@@ -12,36 +12,32 @@ import MdRefresh from 'react-icons/lib/md/refresh'
 
 import styles from './styles.css'
 
-const red = 'rgb(246, 81, 29)'
-const green = 'rgb(151, 204, 4)'
-const blue = 'rgb(0, 138, 206)'
-
 function renderBackButton () {
-  return (<MdArrowBack className={styles.backIcon} size={50} color={red} />)
+  return (<MdArrowBack className={styles.backIcon} size={50} color={styles.red} />)
 }
 
 function renderRecordButton () {
-  return (<MdMic className={styles.icon} size={50} color={green} />)
+  return (<MdMic className={styles.icon} size={50} color={styles.green} />)
 }
 
 function renderCheckButton () {
-  return (<MdCheck className={styles.icon} size={50} color={green} />)
+  return (<MdCheck className={styles.icon} size={50} color={styles.green} />)
 }
 
 function renderPlayButton () {
-  return (<MdPlayArrow className={styles.playIcon} size={60} color={blue} />)
+  return (<MdPlayArrow className={styles.playIcon} size={60} color={styles.blue} />)
 }
 
 function renderStopButton () {
-  return (<MdStop className={styles.stopIcon} size={60} color={red} />)
+  return (<MdStop className={styles.stopIcon} size={60} color={styles.red} />)
 }
 
 function renderAddButton () {
-  return (<MdAdd className={styles.addIcon} size={50} color={green} />)
+  return (<MdAdd className={styles.addIcon} size={50} color={styles.green} />)
 }
 
 function renderRefreshButton () {
-  return (<MdRefresh className={styles.addIcon} size={50} color={blue} />)
+  return (<MdRefresh className={styles.addIcon} size={50} color={styles.blue} />)
 }
 
 /**

@@ -397,15 +397,7 @@ export default function webpackConfigFactory (buildOptions) {
               }
             },
             {
-              path: 'postcss-loader',
-              query: {
-                plugins: (loader) => [
-                  require('postcss-import')({ root: loader.resourcePath }),
-                  // require('postcss-cssnext')(),
-                  require('autoprefixer')()
-                  // require('cssnano')()
-                ]
-              }
+              loader: 'postcss-loader' /** /postcss.config.js for plugins */
             }
           ]
         })
@@ -460,15 +452,7 @@ export default function webpackConfigFactory (buildOptions) {
                   }
                 },
                 {
-                  loader: 'postcss-loader',
-                  query: {
-                    plugins: (loader) => [
-                      require('postcss-import')({ root: loader.resourcePath }),
-                      // require('postcss-cssnext')(),
-                      require('autoprefixer')()
-                      // require('cssnano')()
-                    ]
-                  }
+                  loader: 'postcss-loader' /** /postcss.config.js for plugins */
                 }
               ]
             })),
@@ -486,15 +470,7 @@ export default function webpackConfigFactory (buildOptions) {
                   }
                 },
                 {
-                  loader: 'postcss-loader',
-                  query: {
-                    plugins: (loader) => [
-                      require('postcss-import')({ root: loader.resourcePath }),
-                      // require('postcss-cssnext')(),
-                      require('autoprefixer')()
-                      // require('cssnano')()
-                    ]
-                  }
+                  loader: 'postcss-loader' /** /postcss.config.js for plugins */
                 }
               ]
             })

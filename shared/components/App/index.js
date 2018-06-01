@@ -1,4 +1,5 @@
 import 'normalize.css/normalize.css'
+import './globals.css'
 
 import React from 'react'
 import PropTypes from 'prop-types'
@@ -7,8 +8,6 @@ import Route from 'react-router-dom/Route'
 import Helmet from 'react-helmet'
 
 import config from '../../../config'
-
-import './globals.css'
 
 import AsyncNavBar from './AsyncNavBar'
 import AsyncList from './AsyncList'

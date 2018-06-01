@@ -1,11 +1,11 @@
-@import "../../../shared/colors.css";
-@import "../../../shared/common.css";
+@import "../../../shared/styles/colors.css";
+@import "../../../shared/styles/common.css";
 
 .container {
   display: flex;
   flex-direction: column;
   position: absolute;
-  background: var(--clearBlue);
+  background: var(--blue);
   margin: 20vh 15vw;
   left: 0;
   right: 0;
@@ -43,7 +43,7 @@
   width: 24px;
   height: 24px;
   border: .25rem solid var(--black);
-  border-top-color: white;
+  border-top-color: var(--white);
   animation: spin 1s infinite linear;
   margin: 0 auto;
 }
