@@ -1,8 +1,4 @@
 import React from 'react'
-import PlayIcon from 'react-icons/lib/md/play-arrow'
-import ClockIcon from 'react-icons/lib/md/access-time'
-import MusicNote from 'react-icons/lib/md/music-note'
-import formatDuration from 'format-duration'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import classnames from 'classnames'
 
@@ -49,13 +45,12 @@ function ListItem ({ trak, handleClick }) {
 
   return (
     <div
-    className={classnames(styles.card, styles[`${colorClass}Base`])}
+      className={classnames(styles.card, styles[`${colorClass}Base`])}
       onClick={() => handleClick(trak.name)}
     >
-      <div style={style} className={classnames(styles.cardContainer, styles[colorClass])}>
-      </div>
+      <div style={style} className={classnames(styles.cardContainer, styles[colorClass])} />
       <div className={styles.name}>
-      { trak.name }
+        { trak.name }
       </div>
     </div>
   )

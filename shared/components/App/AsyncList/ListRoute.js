@@ -12,7 +12,6 @@ import config from '../../../../config'
 
 import { fetchAll as fetchTraks } from '../../../actions/traklist'
 import { reset as resetSampleLoaderState } from '../../../actions/samples'
-import { reset as resetTrakState } from '../../../actions/trak'
 
 import * as selectors from '../../../reducers'
 
@@ -39,7 +38,6 @@ class ListRoute extends React.Component {
     }
 
     this.props.resetSampleLoaderState()
-    this.props.resetTrakState()
     this.props.addItemToNavBar({
       BOTTOM_LEFT: {
         type: 'REFRESH',
@@ -86,8 +84,7 @@ class ListRoute extends React.Component {
 
 const mapActionsToProps = {
   fetchTraks,
-  resetSampleLoaderState,
-  resetTrakState
+  resetSampleLoaderState
 }
 
 function mapStateToProps (state) {

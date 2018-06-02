@@ -14,8 +14,8 @@ import * as selectors from '../../../shared/reducers'
 
 import { setStagedSample } from '../../../shared/actions/recorder'
 import {
+  setShouldFetchInstances,
   setName as setTrakName,
-  reset as resetTrak,
   updateDimensionsWithAdditionalSample as updateTrackDimensionsWithAdditionalSample } from '../../../shared/actions/trak'
 import { reset as resetSampleLoaderState } from '../../../shared/actions/samples'
 
@@ -138,16 +138,7 @@ class Staging extends React.Component {
             versionId
           } = data
 
-          this.props.setStagedSample({
-            startTime: 0,
-            volume: 0,
-            panning: 0,
-            duration: 0,
-            loopCount: 0,
-            loopPadding: 0
-          })
-
-          this.props.resetTrak()
+          this.props.setShouldFetchInstances(true)
 
           const isANewTrak = trakName !== this.props.trakName
           if (trakName && isANewTrak) {
@@ -181,7 +172,6 @@ class Staging extends React.Component {
           })
         })
         .then(() => {
-          // jump back to /e/:name
           this.props.history.push(`/e/${this.props.trakName}`)
         })
         .catch((err) => {
@@ -248,16 +238,19 @@ class Staging extends React.Component {
       // success
       buffer => {
         const duration = buffer.get().duration
-        this.props.setStagedSample({ duration, loopPadding: duration })
+        const stagedSampleUpdate = { duration }
+        const stateUpdate = { buffer }
+        if (this.props.stagedSample.loopPadding === 0) {
+          stagedSampleUpdate.loopPadding = duration
+          stateUpdate.loopPadding = duration
+        }
+        this.props.setStagedSample(stagedSampleUpdate)
 
         this._updateTrack()
 
-        this.setState({
-          loopPadding: duration,
-          buffer
-        })
-        const mainEditUrl = getMainEditUrl(this.props.match.url)
+        this.setState(stateUpdate)
 
+        const mainEditUrl = getMainEditUrl(this.props.match.url)
         this.props.addItemToNavBar({
           TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(`${mainEditUrl}/cleanup`) },
           BOTTOM_RIGHT: { type: 'CHECK', cb: this._saveRecording }
@@ -344,8 +337,8 @@ const mapActionsToProps = {
   setStagedSample,
   updateTrackDimensionsWithAdditionalSample,
   resetSampleLoaderState,
-  resetTrak,
-  setTrakName
+  setTrakName,
+  setShouldFetchInstances
 }
 
 function mapStateToProps (state) {

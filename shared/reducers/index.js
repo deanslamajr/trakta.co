@@ -47,6 +47,10 @@ export function hasFetched (state) {
 }
 
 // TRAK
+export function getShouldFetchInstances (state) {
+  return FromTrak.getShouldFetchInstances(state.trak)
+}
+
 export function getInstances (state) {
   return FromTrak.getInstances(state.trak)
 }

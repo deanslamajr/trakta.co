@@ -4,6 +4,8 @@ import { connect } from 'react-redux'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import WaveformData from 'waveform-data'
 
+import { reset as resetSampleLoaderState } from '../../../shared/actions/samples'
+import { fetchInstances } from '../../../shared/actions/trak'
 import {
   setStagedObjectUrl,
   setCleanup,
@@ -251,6 +253,11 @@ class Recorder extends React.Component {
 
     this.props.setStagedObjectUrl()
 
+    if (this.props.shouldFetchInstances) {
+      this.props.resetSampleLoaderState()
+      this.props.fetchInstances()
+    }
+
     this.setState({
       canvasWidth: width,
       canvasHeight: height
@@ -329,11 +336,16 @@ class Recorder extends React.Component {
 const mapActionsToProps = {
   setStagedObjectUrl,
   setStagedSample,
-  setCleanup
+  setCleanup,
+  fetchInstances,
+  resetSampleLoaderState
 }
 
 function mapStateToProps (state) {
-  return { objectUrl: selectors.getStagedObjectUrl(state) }
+  return {
+    objectUrl: selectors.getStagedObjectUrl(state),
+    shouldFetchInstances: selectors.getShouldFetchInstances(state)
+  }
 }
 
 export default compose(

@@ -1,26 +1,22 @@
 import React from 'react'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
-import Helmet from 'react-helmet'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
-import classnames from 'classnames'
-
-import config from '../../../../../config'
-
-import * as selectors from '../../../../reducers'
-
-import { fetchInstances, setName as setTrakName } from '../../../../actions/trak'
-import { reset as resetSampleLoaderState } from '../../../../actions/samples'
-import { setStagedSample, setStagedObjectUrl } from '../../../../actions/recorder'
 
 import SampleInstances from '../../../../../client/components/SampleInstances'
 import InstancePlaylist from '../../../../../client/components/InstancePlaylist'
+
+import { reset as resetSampleLoaderState } from '../../../../actions/samples'
+import { fetchInstances } from '../../../../actions/trak'
+import { setStagedSample, setStagedObjectUrl } from '../../../../actions/recorder'
+
+import * as selectors from '../../../../reducers'
 
 import ProgressRing from '../../AsyncProgressRing'
 
 import styles from './styles.css'
 
-class MainRoute extends React.Component {
+class SlicesRoute extends React.Component {
   constructor (props) {
     super(props)
 
@@ -29,9 +25,6 @@ class MainRoute extends React.Component {
   }
 
   _showContribute () {
-    // @todo have this show a menu of contribution options, which would include <Recorder> among others
-    this.props.resetSampleLoaderState()
-
     let urlWithoutTrailingSlash = this.props.match.url
     if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length - 1) === '/') {
       urlWithoutTrailingSlash = urlWithoutTrailingSlash.slice(0, -1)
@@ -53,29 +46,27 @@ class MainRoute extends React.Component {
   componentDidMount () {
     const trakNameFromUrl = this.props.match.path.split('/')[2]
 
-    if (trakNameFromUrl) {
-      this.props.resetSampleLoaderState()
-      this.props.setStagedObjectUrl(undefined)
-      this.props.setStagedSample({
-        startTime: 0,
-        volume: 0,
-        panning: 0,
-        duration: 0,
-        loopCount: 0,
-        loopPadding: 0
-      })
-      // @todo handle the case where a non existant trakName is passed
-
-      // verify that we have updated the store to the correct trakName
-      if (this.props.trakName !== trakNameFromUrl) {
-        this.props.setTrakName(trakNameFromUrl)
-      }
-      this.props.fetchInstances()
-    } else {
+    if (!trakNameFromUrl) {
       // @case - url navigation without trakName in path
       // @todo
       // fetch a random track??
       return this.props.history.push('/new')
+    }
+
+    // reset staging stuff
+    this.props.setStagedObjectUrl(undefined)
+    this.props.setStagedSample({
+      startTime: 0,
+      volume: 0,
+      panning: 0,
+      duration: 0,
+      loopCount: 0,
+      loopPadding: 0
+    })
+
+    if (this.props.shouldFetchInstances) {
+      this.props.resetSampleLoaderState()
+      this.props.fetchInstances()
     }
 
     this.props.addItemToNavBar({
@@ -84,20 +75,11 @@ class MainRoute extends React.Component {
     })
   }
 
-  componentWillUnmount () {
-    this.props.setStagedObjectUrl(undefined)
-  }
-
   render () {
     const { instances } = this.props
-    const currentTrakName = this.props.trakName || ''
 
     return (
       <div className={styles.container}>
-        <Helmet>
-          <title>{`${currentTrakName} - ${config('appTitle')}`}</title>
-        </Helmet>
-
         {
           // don't begin rendering InstancePlaylist and SampleInstances until instances exist
           // Those components won't function properly if they mount before instances exist
@@ -124,6 +106,7 @@ class MainRoute extends React.Component {
 
 function mapStateToProps (state, ownProps) {
   return {
+    shouldFetchInstances: selectors.getShouldFetchInstances(state),
     isLoading: selectors.isLoading(state),
     trackDimensions: selectors.getTrackDimensions(state),
     totalTasks: selectors.getTotalTasks(state),
@@ -134,9 +117,8 @@ function mapStateToProps (state, ownProps) {
 };
 
 const mapActionsToProps = {
-  fetchInstances,
-  setTrakName,
   resetSampleLoaderState,
+  fetchInstances,
   setStagedSample,
   setStagedObjectUrl
 }
@@ -144,6 +126,6 @@ const mapActionsToProps = {
 export default compose(
   withStyles(styles),
   connect(mapStateToProps, mapActionsToProps)
-)(MainRoute)
+)(SlicesRoute)
 
-export { MainRoute }
+export { SlicesRoute }

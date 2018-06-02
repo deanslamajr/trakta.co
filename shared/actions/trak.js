@@ -12,6 +12,7 @@ export const TRAK_INSTANCES_FETCH_REJECTED = 'TRAK_INSTANCES_FETCH_REJECTED'
 export const TRAK_UPDATE_DIMENSIONS_BY_ADDING_SAMPLE = 'TRAK_UPDATE_DIMENSIONS_BY_ADDING_SAMPLE'
 export const TRAK_SET_NAME = 'TRAK_SET_NAME'
 export const TRAK_RESET = 'TRAK_RESET'
+export const TRAK_SET_SHOULD_FETCH_INSTANCES = 'TRAK_SET_SHOULD_FETCH_INSTANCES'
 
 // -----------------------------------------------------------------------------
 // ACTIONS
@@ -22,6 +23,10 @@ function fetched (data) {
 
 function failed (error) {
   return { type: TRAK_INSTANCES_FETCH_REJECTED, payload: error }
+}
+
+export function setShouldFetchInstances (shouldFetchInstances) {
+  return { type: TRAK_SET_SHOULD_FETCH_INSTANCES, payload: shouldFetchInstances }
 }
 
 export function updateDimensionsWithAdditionalSample (newSampleInstance) {

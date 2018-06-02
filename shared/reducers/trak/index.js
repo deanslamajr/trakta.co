@@ -3,12 +3,14 @@ import {
   TRAK_INSTANCES_FETCH_REJECTED,
   TRAK_UPDATE_DIMENSIONS_BY_ADDING_SAMPLE,
   TRAK_SET_NAME,
-  TRAK_RESET
+  TRAK_RESET,
+  TRAK_SET_SHOULD_FETCH_INSTANCES
  } from '../../actions/trak'
 
 import { calculateTrackDimensions } from './trackDimensions'
 
 const defaultState = {
+  shouldFetchInstances: true,
   instances: [],
   dimensions: {
     startTime: 0,
@@ -35,8 +37,9 @@ function trak (state = defaultState, action) {
     return Object.assign({}, stateWithoutInstances,
       {
         instances: newInstances,
-        dimensions,
-        error: null
+        shouldFetchInstances: false,
+        error: null,
+        dimensions
       }
     )
   } else if (action.type === TRAK_INSTANCES_FETCH_REJECTED) {
@@ -57,6 +60,8 @@ function trak (state = defaultState, action) {
     return Object.assign({}, state, { dimensions })
   } else if (action.type === TRAK_RESET) {
     return Object.assign({}, state, { instances: [], name: undefined })
+  } else if (action.type === TRAK_SET_SHOULD_FETCH_INSTANCES) {
+    return Object.assign({}, state, { shouldFetchInstances: action.payload })
   }
 
   return state
@@ -64,6 +69,10 @@ function trak (state = defaultState, action) {
 
 // -----------------------------------------------------------------------------
 // EXPORTED SELECTORS
+
+export function getShouldFetchInstances (state) {
+  return state.shouldFetchInstances
+}
 
 export function getInstances (state) {
   return state.instances
