@@ -240,6 +240,9 @@ class Staging extends React.Component {
         const duration = buffer.get().duration
         const stagedSampleUpdate = { duration }
         const stateUpdate = { buffer }
+        /**
+         * If this is the first time we've seen this, initialize loopPadding to the length of the buffer
+         */
         if (this.props.stagedSample.loopPadding === 0) {
           stagedSampleUpdate.loopPadding = duration
           stateUpdate.loopPadding = duration

@@ -120,12 +120,15 @@ class InstancePlaylist extends React.Component {
       loadTaskCb: this.props.finishLoadTask.bind(this)
     })
       .then(latestPlayer => {
-        this._prepTransport()
-        player = latestPlayer.sync().start()
         this.props.endFetchSample()
-        this.props.addItemToNavBar({
-          TOP_RIGHT: { type: 'PLAY', cb: this._play }
-        }, true)
+
+        if (latestPlayer) {
+          this._prepTransport()
+          player = latestPlayer.sync().start()
+          this.props.addItemToNavBar({
+            TOP_RIGHT: { type: 'PLAY', cb: this._play }
+          }, true)
+        }
       })
       .catch(error => {
         // @todo show an error view with a retry action

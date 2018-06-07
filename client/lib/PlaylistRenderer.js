@@ -116,6 +116,10 @@ class PlaylistRenderer {
     cachedStagedSample = undefined
   }
 
+  clearPlayer () {
+    player = null
+  }
+
   getPlayer ({ trackDimensions, instances, buffer, stagedSample, loadTaskCb }) {
     const {
       startTime: trackStartTime,

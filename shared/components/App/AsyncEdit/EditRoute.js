@@ -46,6 +46,10 @@ class EditRoute extends React.Component {
       loopPadding: 0
     })
     this.props.resetTrak()
+
+    const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
+    const playlistRenderer = getPlaylistRenderer()
+    playlistRenderer.clearPlayer()
   }
 
   render () {
