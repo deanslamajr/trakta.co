@@ -4,12 +4,6 @@ import classnames from 'classnames'
 
 import styles from './listItem.css'
 
-function getWidth (seconds) {
-  return seconds > 5
-    ? '100%'
-    : `${(seconds / 5) * 100}%`
-}
-
 const colorClasses = [
   'red',
   'blue',
@@ -28,16 +22,22 @@ function getColorClass (text) {
   return colorClasses[restrictedValue]
 }
 
-function getOpacity (plays) {
-  return plays >= 50
+function getOpacity (seconds) {
+  return seconds > 5
     ? 1
-    : plays / 50
+    : seconds / 5
+}
+
+function getWidth (plays) {
+  return plays >= 50
+    ? '100%'
+    : `${(plays / 50) * 100}%`
 }
 
 function ListItem ({ trak, handleClick }) {
-  const width = getWidth(trak.duration)
+  const width = getWidth(trak.plays_count)
   const colorClass = getColorClass(trak.name)
-  const opacity = getOpacity(trak.plays_count)
+  const opacity = getOpacity(trak.duration)
   const style = {
     opacity,
     width

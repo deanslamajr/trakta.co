@@ -20,7 +20,6 @@ import {
   setShouldFetchInstances
 } from '../../../actions/trak'
 import { setStagedSample, setStagedObjectUrl } from '../../../actions/recorder'
-import { reset as resetSampleLoaderState } from '../../../actions/samples'
 
 import * as selectors from '../../../reducers'
 
@@ -112,7 +111,6 @@ const mapActionsToProps = {
   resetTrak,
   setStagedSample,
   setStagedObjectUrl,
-  resetSampleLoaderState,
   setShouldFetchInstances
 }
 
