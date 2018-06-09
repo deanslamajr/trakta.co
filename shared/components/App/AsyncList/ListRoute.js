@@ -20,12 +20,17 @@ import styles from './listRoute.css'
 class ListRoute extends React.Component {
   constructor (props) {
     super(props)
-    this._navigateToTrak = this._navigateToTrak.bind(this)
+    this._handleTrakSelect = this._handleTrakSelect.bind(this)
     this._fetchTraks = this._fetchTraks.bind(this)
+
+    this.state = {
+      selectedTrakId: null
+    }
   }
 
-  _navigateToTrak (name) {
-    this.props.history.push(`/e/${name}`)
+  _handleTrakSelect (trakId) {
+    this.props.addItemToNavBar({ TOP_RIGHT: { type: 'LOADING' }}, true)
+    this.setState({ selectedTrakId: trakId })
   }
 
   _fetchTraks () {
@@ -75,7 +80,14 @@ class ListRoute extends React.Component {
         </Helmet>
 
         <div className={styles.label}>
-          {sortedTraks.map(trak => <ListItem key={trak.id} trak={trak} handleClick={this._navigateToTrak} />)}
+          {sortedTraks.map(trak => (
+            <ListItem
+              key={trak.id}
+              trak={trak}
+              handleClick={this._handleTrakSelect}
+              selectedTrakId={this.state.selectedTrakId}
+            />
+          ))}
         </div>
       </div>
     )

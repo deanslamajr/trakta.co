@@ -40,6 +40,10 @@ function renderRefreshButton () {
   return (<MdRefresh className={styles.addIcon} size={50} color={styles.blue} />)
 }
 
+function renderLoadingButton () {
+  return (<div className={styles.loadSpinner}/>)
+}
+
 /**
  * render a button
  * @param {oneOf[buttonMappings]} type the content definition enum
@@ -64,7 +68,8 @@ const buttonMappings = {
   PLAY: renderPlayButton,
   RECORD: renderRecordButton,
   REFRESH: renderRefreshButton,
-  STOP: renderStopButton
+  STOP: renderStopButton,
+  LOADING: renderLoadingButton
 }
 
 const positionMappings = {

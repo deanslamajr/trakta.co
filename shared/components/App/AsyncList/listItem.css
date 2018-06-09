@@ -4,12 +4,10 @@
 .card {
   color: var(--black);
   cursor: pointer;
-  margin: 0 auto;
+  margin: 0 auto 1px;
   max-width: 60rem;
   padding: 0;
   width: 100%;
-  border-bottom: 1px solid var(--white);
-  
   margin-bottom: 1px;
   overflow: hidden;
 }
@@ -26,6 +24,17 @@
   right: 0;
   top: -1.7rem;
   height: 0;
+}
+
+.selected {
+  filter: grayscale(50%);
+  border: 2px solid var(--black);
+  margin-top: -2px;
+  margin-bottom: -2px;
+}
+
+.selected .name {
+  text-align: left;
 }
 
 .red-base {

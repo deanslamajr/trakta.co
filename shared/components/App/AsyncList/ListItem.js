@@ -34,7 +34,7 @@ function getWidth (plays) {
     : `${(plays / 50) * 100}%`
 }
 
-function ListItem ({ trak, handleClick }) {
+function ListItem ({ trak, handleClick, selectedTrakId }) {
   const width = getWidth(trak.plays_count)
   const colorClass = getColorClass(trak.name)
   const opacity = getOpacity(trak.duration)
@@ -43,10 +43,12 @@ function ListItem ({ trak, handleClick }) {
     width
   }
 
+  const isSelected = trak.id === selectedTrakId
+
   return (
     <div
-      className={classnames(styles.card, styles[`${colorClass}Base`])}
-      onClick={() => handleClick(trak.name)}
+      className={classnames(styles.card, styles[`${colorClass}Base`], { [styles.selected]: isSelected })}
+      onClick={() => handleClick(trak.id)}
     >
       <div style={style} className={classnames(styles.cardContainer, styles[colorClass])} />
       <div className={styles.name}>
