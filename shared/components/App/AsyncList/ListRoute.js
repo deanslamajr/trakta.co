@@ -22,10 +22,15 @@ class ListRoute extends React.Component {
     super(props)
     this._navigateToTrak = this._navigateToTrak.bind(this)
     this._fetchTraks = this._fetchTraks.bind(this)
+
+    this.state = {
+      selectedTrakId: null
+    }
   }
 
-  _navigateToTrak (name) {
-    this.props.history.push(`/e/${name}`)
+  _navigateToTrak (trakId) {
+    //this.props.history.push(`/e/${name}`)
+    this.setState({ selectedTrakId: trakId })
   }
 
   _fetchTraks () {
@@ -75,7 +80,14 @@ class ListRoute extends React.Component {
         </Helmet>
 
         <div className={styles.label}>
-          {sortedTraks.map(trak => <ListItem key={trak.id} trak={trak} handleClick={this._navigateToTrak} />)}
+          {sortedTraks.map(trak => (
+            <ListItem
+              key={trak.id}
+              trak={trak}
+              handleClick={this._navigateToTrak}
+              selectedTrakId={this.state.selectedTrakId}
+            />
+          ))}
         </div>
       </div>
     )
