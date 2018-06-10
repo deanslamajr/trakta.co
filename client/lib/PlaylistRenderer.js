@@ -5,15 +5,20 @@ import config from '../../config'
 import { getTrakRenderer } from './TrakRenderer'
 
 const trakRenderer = getTrakRenderer()
-const baseUrl = config('s3SampleBucket')
+const baseSampleUrl = config('s3SampleBucket')
+const baseTrakUrl = config('s3TrakBucket')
 let bufferCache = {}
 let playlistRenderer
 let player = null
 let cachedStagedBuffer
 let cachedStagedSample
 
-function loadSample (instance, loadTaskCb) {
+function loadSample (instance, loadTaskCb, fetchTrak) {
   return new Promise((resolve, reject) => {
+    const baseUrl = fetchTrak
+      ? baseTrakUrl
+      : baseSampleUrl
+      
     const url = `${baseUrl}/${instance.sample.url}`
 
     let downloadAttempts = 0
@@ -120,7 +125,7 @@ class PlaylistRenderer {
     player = null
   }
 
-  getPlayer ({ trackDimensions, instances, buffer, stagedSample, loadTaskCb }) {
+  getPlayer ({ trackDimensions, instances, buffer, stagedSample, loadTaskCb, fetchTrak }) {
     const {
       startTime: trackStartTime,
       length: trackLength
@@ -137,7 +142,7 @@ class PlaylistRenderer {
       // only fetch instances if the instances aren't cached
       // i.e. a change in `stagedSample` shouldn't require refetching of the instances
       const loadSamplesTask = areInstancesCacheMiss || didInstancesCacheMiss(instances)
-        ? Promise.all(instances.map(instance => loadSample(instance, loadTaskCb)))
+        ? Promise.all(instances.map(instance => loadSample(instance, loadTaskCb, fetchTrak)))
         : Promise.resolve()
 
       return loadSamplesTask.then(() => {

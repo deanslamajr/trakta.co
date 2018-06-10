@@ -1,7 +1,7 @@
 import { setTrakFilename } from '../../../shared/actions/player'
 import { fetched } from '../../../shared/actions/traklist'
 import { Traks } from '../../models'
-import { getTrakFilename } from '../../controllers/traks'
+import { getLatestTrak } from '../../controllers/traks'
 
 import logger from '../logger'
 
@@ -26,7 +26,7 @@ async function initializeMainList (store) {
 
 async function initializePlayer (store, url) {
   const urlTokens = url.split('/')
-  let trakFilename = await getTrakFilename(urlTokens[2])
+  const { filename: trakFilename } = await getLatestTrak(urlTokens[2])
   store.dispatch(setTrakFilename(trakFilename))
 }
 

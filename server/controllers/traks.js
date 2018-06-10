@@ -1,11 +1,13 @@
 import { PlayCodes, Traks, Versions } from '../models'
 import { sequelize } from '../adapters/db'
 
-async function getTrakFilename (trakName) {
+async function getLatestTrak (trakName) {
   const versionNumberArray = trakName.match(/\d+/)
   trakName = trakName.replace(versionNumberArray, '')
 
   const trak = await Traks.findOne({ where: { name: trakName } })
+
+  let filename
 
   if (versionNumberArray) {
     const versionNumber = versionNumberArray[0]
@@ -19,22 +21,27 @@ async function getTrakFilename (trakName) {
     })
 
     if (version) {
-      trakFilename = version.filename
+      filename = version.filename
     } else { // if version doesn't exist, get the filename associated with the highest version number
       const latestVersion = await Versions.getHighestVersionByTrakId(trak.id)
-      return latestVersion.filename
+      filename = latestVersion.filename
     }
   } else {
     const latestVersion = await Versions.getHighestVersionByTrakId(trak.id)
-    return latestVersion.filename
+    filename = latestVersion.filename
+  }
+
+  return {
+    filename,
+    duration: trak.duration
   }
 }
 
 async function get (req, res, next) {
   try {
     const trakName = req.params.trakName
-    const trakFilename = await getTrakFilename(trakName)
-    res.json({ trakFilename })
+    const latestTrak = await getLatestTrak(trakName)
+    res.json(latestTrak)
   }
   catch (error) {
     next(error)
@@ -95,6 +102,6 @@ async function getAll (req, res, next) {
 export {
   get,
   getAll,
-  getTrakFilename,
+  getLatestTrak,
   recordPlay
 }

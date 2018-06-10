@@ -17,12 +17,12 @@ export const TRAK_SET_SHOULD_FETCH_INSTANCES = 'TRAK_SET_SHOULD_FETCH_INSTANCES'
 // -----------------------------------------------------------------------------
 // ACTIONS
 
-function fetched (data) {
-  return { type: TRAK_INSTANCES_FETCH_FULFILLED, payload: data }
-}
-
 function failed (error) {
   return { type: TRAK_INSTANCES_FETCH_REJECTED, payload: error }
+}
+
+export function fetched (data) {
+  return { type: TRAK_INSTANCES_FETCH_FULFILLED, payload: data }
 }
 
 export function setShouldFetchInstances (shouldFetchInstances) {
