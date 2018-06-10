@@ -34,24 +34,30 @@ function getWidth (plays) {
     : `${(plays / 50) * 100}%`
 }
 
-function ListItem ({ trak, handleClick, selectedTrakId }) {
+function ListItem ({ trak, handleClick, selectedTrakId, hasViewed }) {
   const width = getWidth(trak.plays_count)
   const colorClass = getColorClass(trak.name)
   const opacity = getOpacity(trak.duration)
-  const style = {
+  const dataVizStyle = {
     opacity,
     width
   }
 
   const isSelected = trak.id === selectedTrakId
+  const hasViewedAndDeselected = hasViewed && !isSelected
 
   return (
     <div
       className={classnames(styles.card, styles[`${colorClass}Base`], { [styles.selected]: isSelected })}
       onClick={() => handleClick(trak)}
     >
-      <div style={style} className={classnames(styles.cardContainer, styles[colorClass])} />
-      <div className={styles.name}>
+      <div className={classnames({ [styles.visible]: hasViewedAndDeselected }, styles.listenedCard)}>
+        <div className={styles.listenedName}>
+          { trak.name }
+        </div>
+      </div>
+      <div style={dataVizStyle} className={classnames(styles.cardContainer, styles[colorClass])} />
+      <div className={classnames(styles.name, { [styles.invisible]: hasViewedAndDeselected })}>
         { trak.name }
       </div>
     </div>

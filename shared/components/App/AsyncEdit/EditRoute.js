@@ -31,9 +31,11 @@ class EditRoute extends React.Component {
 
     const trakNameFromUrl = this.props.match.url.split('/')[2]
     this.props.setTrakName(trakNameFromUrl)
+
+    this._resetTrak = this._resetTrak.bind(this)
   }
 
-  componentWillUnmount () {
+  _resetTrak () {
     this.props.setShouldFetchInstances(true)
     this.props.setStagedObjectUrl(undefined)
     this.props.setStagedSample({
@@ -61,7 +63,11 @@ class EditRoute extends React.Component {
               <Helmet>
                 <title>{`${this.props.trakName} - ${config('appTitle')}`}</title>
               </Helmet>
-              <Slices {...props} addItemToNavBar={this.props.addItemToNavBar} />
+              <Slices
+                {...props}
+                addItemToNavBar={this.props.addItemToNavBar}
+                resetTrak={this._resetTrak}
+              />
             </React.Fragment>
           )} />
           <Route path={`${this.props.match.url}/recorder`} render={props => (

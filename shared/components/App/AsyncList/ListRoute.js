@@ -1,4 +1,5 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 import Helmet from 'react-helmet'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
@@ -12,7 +13,12 @@ import InstancePlaylist from '../../../../client/components/InstancePlaylist'
 
 import config from '../../../../config'
 
-import { fetched as setTrakInstanceArray } from '../../../actions/trak'
+import {
+  setName as setTrakName,
+  setShouldFetchInstances,
+  fetched as setTrakInstanceArray,
+  reset as resetTrak
+} from '../../../actions/trak'
 import { fetchAll as fetchTraks } from '../../../actions/traklist'
 import { reset as resetSampleLoaderState } from '../../../actions/samples'
 
@@ -25,15 +31,51 @@ class ListRoute extends React.Component {
     super(props)
     this._handleTrakSelect = this._handleTrakSelect.bind(this)
     this._fetchTraks = this._fetchTraks.bind(this)
+    this._resetTrak = this._resetTrak.bind(this)
+    this._navigateToEdit = this._navigateToEdit.bind(this)
+    this._navigateToNew = this._navigateToNew.bind(this)
+
+    this.itemRefs = []
 
     this.state = {
-      selectedTrakId: null
+      selectedTrakId: null,
+      viewedTraks: []
     }
   }
 
+  _navigateToEdit (trakName) {
+    this._resetTrak()
+    this.props.history.push(`/e/${trakName}`)
+  }
+
+  _navigateToNew () {
+    this._resetTrak()
+    this.props.history.push(`/e/new/recorder`)
+  }
+
   _handleTrakSelect (trak) {
-    this.props.addItemToNavBar({ TOP_RIGHT: { type: 'LOADING' }}, true)
-    this.setState({ selectedTrakId: trak.id })
+    this.props.addItemToNavBar({
+      TOP_RIGHT: { type: 'LOADING' },
+      TOP_LEFT: {
+        type: 'EDIT',
+        cb: () => this._navigateToEdit(trak.name)
+      }
+    }, true)
+
+    const updatedViewedTraks = Array.from(this.state.viewedTraks)
+    updatedViewedTraks.push(trak.id)
+
+    this.setState({
+      selectedTrakId: trak.id,
+      viewedTraks: updatedViewedTraks
+    }, () => {
+      const itemRef = ReactDOM.findDOMNode(this.itemRefs[trak.id])
+      itemRef.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    })
+    this.props.setTrakName(trak.name)
 
     axios.get(`/api/trak/${trak.name}`)
       .then(({ data }) => {
@@ -43,7 +85,6 @@ class ListRoute extends React.Component {
           {
             sample: {
               url: filename,
-              //url: 'b11b366d-1efe-43b8-8640-6a582c508745.mp3',
               /**
                * @todo investigate using a slidingArray to leverage the PlaylistRenderer cache for the last 5? traks selected
                */
@@ -63,6 +104,23 @@ class ListRoute extends React.Component {
   _fetchTraks () {
     this.props.fetchTraks()
   }
+  _setRef (trakId, ref) {
+    this.itemRefs[trakId] = ref
+  }
+    
+
+  _resetTrak () {
+    this.props.addItemToNavBar(null)
+    this.props.resetTrak()
+    this.props.setShouldFetchInstances(true)
+
+    if (window) {
+      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
+      const playlistRenderer = getPlaylistRenderer()
+      playlistRenderer.clearCache()
+      playlistRenderer.clearPlayer()
+    }
+  }
 
   componentDidMount () {
     if (!this.props.hasFetched) {
@@ -77,23 +135,17 @@ class ListRoute extends React.Component {
       },
       BOTTOM_RIGHT: {
         type: 'ADD',
-        cb: () => this.props.history.push(`/e/new/recorder`)
+        cb: this._navigateToNew
       }
     })
   }
 
-  componentWillUnmount () {
-    this.props.addItemToNavBar(null)
-
-    if (window) {
-      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
-      const playlistRenderer = getPlaylistRenderer()
-      playlistRenderer.clearCache()
-    }
-  }
-
   render () {
     const { traks } = this.props
+    const {
+      selectedTrakId,
+      viewedTraks
+    } = this.state
 
     const sortedTraks = traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
       ? 1
@@ -110,9 +162,11 @@ class ListRoute extends React.Component {
           {sortedTraks.map(trak => (
             <ListItem
               key={trak.id}
+              ref={this._setRef.bind(this, trak.id)}
               trak={trak}
               handleClick={this._handleTrakSelect}
-              selectedTrakId={this.state.selectedTrakId}
+              selectedTrakId={selectedTrakId}
+              hasViewed={viewedTraks.includes(trak.id)}
             />
           ))}
         </div>
@@ -132,8 +186,11 @@ class ListRoute extends React.Component {
 
 const mapActionsToProps = {
   fetchTraks,
+  setShouldFetchInstances,
   setTrakInstanceArray,
-  resetSampleLoaderState
+  resetSampleLoaderState,
+  resetTrak,
+  setTrakName
 }
 
 function mapStateToProps (state) {
