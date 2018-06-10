@@ -27,10 +27,7 @@
 }
 
 .selected {
-  filter: grayscale(50%);
-  border: 2px solid var(--black);
-  margin-top: -2px;
-  margin-bottom: -2px;
+  opacity: .25;
 }
 
 .selected .name {
