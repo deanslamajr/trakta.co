@@ -3,13 +3,16 @@ import Helmet from 'react-helmet'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import moment from 'moment'
+import axios from 'axios'
 
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
 import ListItem from './ListItem'
+import InstancePlaylist from '../../../../client/components/InstancePlaylist'
 
 import config from '../../../../config'
 
+import { fetched as setTrakInstanceArray } from '../../../actions/trak'
 import { fetchAll as fetchTraks } from '../../../actions/traklist'
 import { reset as resetSampleLoaderState } from '../../../actions/samples'
 
@@ -28,9 +31,33 @@ class ListRoute extends React.Component {
     }
   }
 
-  _handleTrakSelect (trakId) {
+  _handleTrakSelect (trak) {
     this.props.addItemToNavBar({ TOP_RIGHT: { type: 'LOADING' }}, true)
-    this.setState({ selectedTrakId: trakId })
+    this.setState({ selectedTrakId: trak.id })
+
+    axios.get(`/api/trak/${trak.name}`)
+      .then(({ data }) => {
+        const { filename, duration } = data
+
+        const trakInstanceInAnArray = [
+          {
+            sample: {
+              url: filename,
+              //url: 'b11b366d-1efe-43b8-8640-6a582c508745.mp3',
+              /**
+               * @todo investigate using a slidingArray to leverage the PlaylistRenderer cache for the last 5? traks selected
+               */
+              id: trak.id,
+              duration
+            },
+            loop_count: 0,
+            loop_padding: 0,
+            start_time: 0
+          }
+        ]
+
+        this.props.setTrakInstanceArray(trakInstanceInAnArray)
+      })
   }
 
   _fetchTraks () {
@@ -89,6 +116,15 @@ class ListRoute extends React.Component {
             />
           ))}
         </div>
+
+        {this.props.instances && this.props.instances.length && (
+          <InstancePlaylist
+            addItemToNavBar={this.props.addItemToNavBar}
+            renderErrorComponent={() => {}}
+            incrementPlaysCount
+            fetchTrak
+          />
+        )}
       </div>
     )
   }
@@ -96,13 +132,15 @@ class ListRoute extends React.Component {
 
 const mapActionsToProps = {
   fetchTraks,
+  setTrakInstanceArray,
   resetSampleLoaderState
 }
 
 function mapStateToProps (state) {
   return {
     traks: selectors.getTraks(state),
-    hasFetched: selectors.hasFetched(state)
+    hasFetched: selectors.hasFetched(state),
+    instances: selectors.getInstances(state)
   }
 }
 

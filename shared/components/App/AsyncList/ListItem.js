@@ -48,7 +48,7 @@ function ListItem ({ trak, handleClick, selectedTrakId }) {
   return (
     <div
       className={classnames(styles.card, styles[`${colorClass}Base`], { [styles.selected]: isSelected })}
-      onClick={() => handleClick(trak.id)}
+      onClick={() => handleClick(trak)}
     >
       <div style={style} className={classnames(styles.cardContainer, styles[colorClass])} />
       <div className={styles.name}>

@@ -106,7 +106,7 @@ class InstancePlaylist extends React.Component {
   _renderTrak (instances, stagedSample, trackDimensions) {
     // remove play button
     this.props.addItemToNavBar({
-      TOP_RIGHT: null
+      TOP_RIGHT: { type: 'LOADING' }
     }, true)
 
     // add task to load animation
@@ -117,7 +117,8 @@ class InstancePlaylist extends React.Component {
       instances,
       buffer: this.props.buffer,
       stagedSample,
-      loadTaskCb: this.props.finishLoadTask.bind(this)
+      loadTaskCb: this.props.finishLoadTask.bind(this),
+      fetchTrak: this.props.fetchTrak
     })
       .then(latestPlayer => {
         this.props.endFetchSample()

@@ -1,6 +1,8 @@
 import { setTrakFilename } from '../../../shared/actions/player'
 import { fetched } from '../../../shared/actions/traklist'
-import { Traks, Versions } from '../../models'
+import { Traks } from '../../models'
+import { getLatestTrak } from '../../controllers/traks'
+
 import logger from '../logger'
 
 //
@@ -23,35 +25,8 @@ async function initializeMainList (store) {
 }
 
 async function initializePlayer (store, url) {
-  let trakFilename
   const urlTokens = url.split('/')
-  const versionNumberArray = urlTokens[2].match(/\d+/)
-  const trakName = urlTokens[2].replace(versionNumberArray, '')
-
-  const trak = await Traks.findOne({ where: { name: trakName } })
-
-  if (versionNumberArray) {
-    const versionNumber = versionNumberArray[0]
-
-    const version = await Versions.findOne({
-      where: {
-        trak_id: trak.id,
-        version_number: versionNumber,
-        active: true
-      }
-    })
-
-    if (version) {
-      trakFilename = version.filename
-    } else { // if version doesn't exist, get the filename associated with the highest version number
-      const latestVersion = await Versions.getHighestVersionByTrakId(trak.id)
-      trakFilename = latestVersion.filename
-    }
-  } else {
-    const latestVersion = await Versions.getHighestVersionByTrakId(trak.id)
-    trakFilename = latestVersion.filename
-  }
-
+  const { filename: trakFilename } = await getLatestTrak(urlTokens[2])
   store.dispatch(setTrakFilename(trakFilename))
 }
 
