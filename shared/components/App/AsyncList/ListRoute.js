@@ -12,7 +12,11 @@ import InstancePlaylist from '../../../../client/components/InstancePlaylist'
 
 import config from '../../../../config'
 
-import { fetched as setTrakInstanceArray } from '../../../actions/trak'
+import {
+  setShouldFetchInstances,
+  fetched as setTrakInstanceArray,
+  reset as resetTrak
+} from '../../../actions/trak'
 import { fetchAll as fetchTraks } from '../../../actions/traklist'
 import { reset as resetSampleLoaderState } from '../../../actions/samples'
 
@@ -32,7 +36,13 @@ class ListRoute extends React.Component {
   }
 
   _handleTrakSelect (trak) {
-    this.props.addItemToNavBar({ TOP_RIGHT: { type: 'LOADING' }}, true)
+    this.props.addItemToNavBar({
+      TOP_RIGHT: { type: 'LOADING' },
+      TOP_LEFT: {
+        type: 'EDIT',
+        cb: () => this.props.history.push(`/e/${trak.name}`)
+      }
+    }, true)
     this.setState({ selectedTrakId: trak.id })
 
     axios.get(`/api/trak/${trak.name}`)
@@ -84,6 +94,8 @@ class ListRoute extends React.Component {
 
   componentWillUnmount () {
     this.props.addItemToNavBar(null)
+    this.props.resetTrak()
+    this.props.setShouldFetchInstances(true)
 
     if (window) {
       const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
@@ -132,8 +144,10 @@ class ListRoute extends React.Component {
 
 const mapActionsToProps = {
   fetchTraks,
+  setShouldFetchInstances,
   setTrakInstanceArray,
-  resetSampleLoaderState
+  resetSampleLoaderState,
+  resetTrak
 }
 
 function mapStateToProps (state) {

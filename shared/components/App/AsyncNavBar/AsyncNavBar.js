@@ -9,6 +9,7 @@ import MdPlayArrow from 'react-icons/lib/md/play-arrow'
 import MdStop from 'react-icons/lib/md/stop'
 import MdAdd from 'react-icons/lib/md/add'
 import MdRefresh from 'react-icons/lib/md/refresh'
+import MdEdit from 'react-icons/lib/md/edit'
 
 import styles from './styles.css'
 
@@ -44,6 +45,10 @@ function renderLoadingButton () {
   return (<div className={styles.loadSpinner}/>)
 }
 
+function renderEditButton () {
+  return (<MdEdit className={styles.editIcon} size={40} color={styles.green} />)
+}
+
 /**
  * render a button
  * @param {oneOf[buttonMappings]} type the content definition enum
@@ -69,7 +74,8 @@ const buttonMappings = {
   RECORD: renderRecordButton,
   REFRESH: renderRefreshButton,
   STOP: renderStopButton,
-  LOADING: renderLoadingButton
+  LOADING: renderLoadingButton,
+  EDIT: renderEditButton
 }
 
 const positionMappings = {
