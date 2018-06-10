@@ -137,8 +137,10 @@ class PlaylistRenderer {
     // check isBufferCacheMiss first bc its quicker than checking the instances cache miss
     const cacheMiss = isBufferCacheMiss(buffer, stagedSample) || (areInstancesCacheMiss = didInstancesCacheMiss(instances))
 
-    // skip all this if the buffers are all cached
-    if (trakAndOrBufferExist && cacheMiss) {
+    // skip all this if
+    // 1. the buffers are all cached OR
+    // 2. this is a trak Fetch (we don't want to cache these)
+    if (fetchTrak || (trakAndOrBufferExist && cacheMiss)) {
       // only fetch instances if the instances aren't cached
       // i.e. a change in `stagedSample` shouldn't require refetching of the instances
       const loadSamplesTask = areInstancesCacheMiss || didInstancesCacheMiss(instances)

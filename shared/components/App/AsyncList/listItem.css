@@ -32,6 +32,13 @@
 
 .selected .name {
   text-align: left;
+  transform: translateX(9rem) translateY(-1.5rem) scale(1.8);
+}
+
+@media (--medium-or-larger-viewport) {
+  .selected .name {
+    transform: translateX(46rem) translateY(-2.5rem) scale(2.5);
+  }
 }
 
 .red-base {
