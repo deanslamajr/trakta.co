@@ -77,3 +77,22 @@
   margin: .05rem;
   margin-left: -.05rem;
 }
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.load-spinner {
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  border: .25rem solid var(--orange);
+  border-top-color: var(--white);
+  animation: spin 1s infinite linear;
+  margin: .9rem auto 0;
+}
