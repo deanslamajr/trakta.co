@@ -3,6 +3,7 @@ import Helmet from 'react-helmet'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import moment from 'moment'
+import axios from 'axios'
 
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
@@ -28,9 +29,10 @@ class ListRoute extends React.Component {
     }
   }
 
-  _handleTrakSelect (trakId) {
+  _handleTrakSelect (trak) {
     this.props.addItemToNavBar({ TOP_RIGHT: { type: 'LOADING' }}, true)
-    this.setState({ selectedTrakId: trakId })
+    this.setState({ selectedTrakId: trak.id })
+    axios.get(`/api/trak/${trak.name}`)
   }
 
   _fetchTraks () {

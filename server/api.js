@@ -2,6 +2,7 @@ import express from 'express'
 
 import { getByTrakName as getTraksSampleInstances } from './controllers/sample-instances'
 import {
+  get as getTrak,
   getAll as getAllTraks,
   recordPlay
 } from './controllers/traks'
@@ -24,6 +25,11 @@ router.post('/play-back', recordPlay)
  * @todo target a particular track's sample instances
  */
 router.get('/sample-instances/:trakName', getTraksSampleInstances)
+
+/**
+ * Fetch a trak
+ */
+router.get('/trak/:trakName', getTrak)
 
 /**
  * Fetch all the traks
