@@ -130,7 +130,7 @@ class PlaylistRenderer {
       startTime: trackStartTime,
       length: trackLength
     } = trackDimensions
-
+    
     const trakAndOrBufferExist = (trackLength && instances && instances.length) || buffer
 
     let areInstancesCacheMiss

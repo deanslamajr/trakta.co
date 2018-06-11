@@ -97,6 +97,7 @@ class ListRoute extends React.Component {
       const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
       const playlistRenderer = getPlaylistRenderer()
       playlistRenderer.clearCache()
+      playlistRenderer.clearPlayer()
     }
   }
 
