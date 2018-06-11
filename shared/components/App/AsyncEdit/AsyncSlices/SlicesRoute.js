@@ -20,11 +20,17 @@ class SlicesRoute extends React.Component {
   constructor (props) {
     super(props)
 
-    this._showContribute = this._showContribute.bind(this)
+    this._navigateToList = this._navigateToList.bind(this)
+    this._navigateToContribute = this._navigateToContribute.bind(this)
     this._renderLoadingComponent = this._renderLoadingComponent.bind(this)
   }
 
-  _showContribute () {
+  _navigateToList () {
+    this.props.resetTrak()
+    this.props.history.push('/')
+  }
+
+  _navigateToContribute () {
     let urlWithoutTrailingSlash = this.props.match.url
     if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length - 1) === '/') {
       urlWithoutTrailingSlash = urlWithoutTrailingSlash.slice(0, -1)
@@ -70,8 +76,8 @@ class SlicesRoute extends React.Component {
     }
 
     this.props.addItemToNavBar({
-      TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push('/') },
-      BOTTOM_RIGHT: { type: 'ADD', cb: this._showContribute }
+      TOP_LEFT: { type: 'BACK', cb: this._navigateToList },
+      BOTTOM_RIGHT: { type: 'ADD', cb: this._navigateToContribute }
     })
   }
 

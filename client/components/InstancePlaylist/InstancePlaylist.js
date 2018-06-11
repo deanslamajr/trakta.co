@@ -130,6 +130,11 @@ class InstancePlaylist extends React.Component {
             TOP_RIGHT: { type: 'PLAY', cb: this._play }
           }, true)
         }
+        else {
+          this.props.addItemToNavBar({
+            TOP_RIGHT: null
+          }, true)
+        }
       })
       .catch(error => {
         // @todo show an error view with a retry action

@@ -29,10 +29,24 @@ class ListRoute extends React.Component {
     super(props)
     this._handleTrakSelect = this._handleTrakSelect.bind(this)
     this._fetchTraks = this._fetchTraks.bind(this)
+    this._resetTrak = this._resetTrak.bind(this)
+    this._navigateToEdit = this._navigateToEdit.bind(this)
+    this._navigateToNew = this._navigateToNew.bind(this)
+
 
     this.state = {
       selectedTrakId: null
     }
+  }
+
+  _navigateToEdit (trakName) {
+    this._resetTrak()
+    this.props.history.push(`/e/${trakName}`)
+  }
+
+  _navigateToNew () {
+    this._resetTrak()
+    this.props.history.push(`/e/new/recorder`)
   }
 
   _handleTrakSelect (trak) {
@@ -40,7 +54,7 @@ class ListRoute extends React.Component {
       TOP_RIGHT: { type: 'LOADING' },
       TOP_LEFT: {
         type: 'EDIT',
-        cb: () => this.props.history.push(`/e/${trak.name}`)
+        cb: () => this._navigateToEdit(trak.name)
       }
     }, true)
     this.setState({ selectedTrakId: trak.id })
@@ -74,6 +88,18 @@ class ListRoute extends React.Component {
     this.props.fetchTraks()
   }
 
+  _resetTrak () {
+    this.props.addItemToNavBar(null)
+    this.props.resetTrak()
+    this.props.setShouldFetchInstances(true)
+
+    if (window) {
+      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
+      const playlistRenderer = getPlaylistRenderer()
+      playlistRenderer.clearCache()
+    }
+  }
+
   componentDidMount () {
     if (!this.props.hasFetched) {
       this._fetchTraks()
@@ -87,21 +113,9 @@ class ListRoute extends React.Component {
       },
       BOTTOM_RIGHT: {
         type: 'ADD',
-        cb: () => this.props.history.push(`/e/new/recorder`)
+        cb: this._navigateToNew
       }
     })
-  }
-
-  componentWillUnmount () {
-    this.props.addItemToNavBar(null)
-    this.props.resetTrak()
-    this.props.setShouldFetchInstances(true)
-
-    if (window) {
-      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
-      const playlistRenderer = getPlaylistRenderer()
-      playlistRenderer.clearCache()
-    }
   }
 
   render () {
