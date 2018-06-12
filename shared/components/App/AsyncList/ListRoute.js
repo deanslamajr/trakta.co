@@ -13,6 +13,7 @@ import InstancePlaylist from '../../../../client/components/InstancePlaylist'
 import config from '../../../../config'
 
 import {
+  setName as setTrakName,
   setShouldFetchInstances,
   fetched as setTrakInstanceArray,
   reset as resetTrak
@@ -58,6 +59,7 @@ class ListRoute extends React.Component {
       }
     }, true)
     this.setState({ selectedTrakId: trak.id })
+    this.props.setTrakName(trak.name)
 
     axios.get(`/api/trak/${trak.name}`)
       .then(({ data }) => {
@@ -162,7 +164,8 @@ const mapActionsToProps = {
   setShouldFetchInstances,
   setTrakInstanceArray,
   resetSampleLoaderState,
-  resetTrak
+  resetTrak,
+  setTrakName
 }
 
 function mapStateToProps (state) {
