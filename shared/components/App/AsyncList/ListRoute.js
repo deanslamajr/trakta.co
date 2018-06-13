@@ -36,7 +36,8 @@ class ListRoute extends React.Component {
 
 
     this.state = {
-      selectedTrakId: null
+      selectedTrakId: null,
+      viewedTraks: []
     }
   }
 
@@ -58,7 +59,14 @@ class ListRoute extends React.Component {
         cb: () => this._navigateToEdit(trak.name)
       }
     }, true)
-    this.setState({ selectedTrakId: trak.id })
+
+    const updatedViewedTraks = Array.from(this.state.viewedTraks)
+    updatedViewedTraks.push(trak.id)
+
+    this.setState({
+      selectedTrakId: trak.id,
+      viewedTraks: updatedViewedTraks
+    })
     this.props.setTrakName(trak.name)
 
     axios.get(`/api/trak/${trak.name}`)
@@ -69,7 +77,6 @@ class ListRoute extends React.Component {
           {
             sample: {
               url: filename,
-              //url: 'b11b366d-1efe-43b8-8640-6a582c508745.mp3',
               /**
                * @todo investigate using a slidingArray to leverage the PlaylistRenderer cache for the last 5? traks selected
                */
@@ -123,6 +130,10 @@ class ListRoute extends React.Component {
 
   render () {
     const { traks } = this.props
+    const {
+      selectedTrakId,
+      viewedTraks
+    } = this.state
 
     const sortedTraks = traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
       ? 1
@@ -141,7 +152,8 @@ class ListRoute extends React.Component {
               key={trak.id}
               trak={trak}
               handleClick={this._handleTrakSelect}
-              selectedTrakId={this.state.selectedTrakId}
+              selectedTrakId={selectedTrakId}
+              hasViewed={viewedTraks.includes(trak.id)}
             />
           ))}
         </div>
