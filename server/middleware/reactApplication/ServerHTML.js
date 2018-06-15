@@ -16,6 +16,7 @@ import getClientBundleEntryAssets from './getClientBundleEntryAssets'
 
 import ClientConfig from '../../../config/components/ClientConfig'
 import HTML from '../../../shared/components/HTML'
+import packageJson from '../../../package.json'
 
 // PRIVATES
 
@@ -32,8 +33,8 @@ function stylesheetTag (stylesheetFilePath) {
   )
 }
 
-function scriptTag (jsFilePath) {
-  return <script type='text/javascript' src={jsFilePath} />
+function scriptTag (jsFilePath, attributes) {
+  return <script type='text/javascript' src={jsFilePath} {...attributes} />
 }
 
 // COMPONENT
@@ -54,6 +55,12 @@ function ServerHTML (props) {
   )
 
   const headerElements = removeNil([
+    // sentry import
+    scriptTag(`https://cdn.ravenjs.com/${config('sentry.clientVersion')}/raven.min.js`, { crossorigin: 'anonymous' }),
+    inlineScript(`Raven.config('${config('sentry.dsn')}', {
+      release: '${packageJson.version}',
+      environment: '${config('ENV')}',
+    }).install()`),
     ...ifElse(helmet)(() => helmet.title.toComponent(), []),
     ...ifElse(helmet)(() => helmet.base.toComponent(), []),
     ...ifElse(helmet)(() => helmet.meta.toComponent(), []),

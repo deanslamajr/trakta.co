@@ -70,10 +70,7 @@ class ListRoute extends React.Component {
       viewedTraks: updatedViewedTraks
     }, () => {
       const itemRef = ReactDOM.findDOMNode(this.itemRefs[trak.id])
-      itemRef.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      })
+      itemRef.scrollIntoView()
     })
     this.props.setTrakName(trak.name)
 

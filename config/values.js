@@ -88,6 +88,11 @@ const values = {
     ]
   },
 
+  sentry: {
+    clientVersion: EnvVars.string('SENTRY_CLIENT_VERSION'),
+    dsn: EnvVars.string('SENTRY_DSN'),
+  },
+
   // Basic configuration for the HTML page that hosts our application.
   // We make use of react-helmet to consume the values below.
   // @see https://github.com/nfl/react-helmet
@@ -111,7 +116,8 @@ const values = {
     scriptSrc: [
       // Allow scripts from cdn.polyfill.io so that we can import the
       // polyfill.
-      'cdn.polyfill.io'
+      'cdn.polyfill.io',
+      'cdn.ravenjs.com'
     ],
     styleSrc: []
   },

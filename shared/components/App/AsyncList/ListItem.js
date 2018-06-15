@@ -37,9 +37,9 @@ function getWidth (plays) {
 function ListItem ({ trak, handleClick, selectedTrakId, hasViewed }) {
   const width = getWidth(trak.plays_count)
   const colorClass = getColorClass(trak.name)
-  const opacity = getOpacity(trak.duration)
+  //const opacity = getOpacity(trak.duration)
   const dataVizStyle = {
-    opacity,
+    //opacity,
     width
   }
 
@@ -56,7 +56,7 @@ function ListItem ({ trak, handleClick, selectedTrakId, hasViewed }) {
           { trak.name }
         </div>
       </div>
-      <div style={dataVizStyle} className={classnames(styles.cardContainer, styles[colorClass])} />
+      <div style={dataVizStyle} className={classnames(styles.cardContainer, styles[colorClass], { [styles.selected]: isSelected })} />
       <div className={classnames(styles.name, { [styles.invisible]: hasViewedAndDeselected })}>
         { trak.name }
       </div>
