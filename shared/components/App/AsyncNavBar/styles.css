@@ -6,15 +6,20 @@
   top: 100%;
 }
 
-.button {
-  border: 2px solid var(--black);
-  background-color: var(--white);
+.button-container {
+  border: 2px solid var(--white);
   cursor: pointer;
   z-index: 1;
   height: 4rem;
   width: 4rem;
   margin: 0;
   user-select: none;
+}
+
+.button {
+  width: 100%;
+  height: 100%;
+  margin: 0;
 }
 
 .top-left {
@@ -83,6 +88,22 @@
   margin-left: -.05rem;
 }
 
+.green-button {
+  background-color: var(--green);
+}
+
+.red-button {
+  background-color: var(--red);
+}
+
+.blue-button {
+  background-color: var(--blue);
+}
+
+.orange-button {
+  background-color: var(--orange);
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -96,7 +117,7 @@
   border-radius: 50%;
   width: 24px;
   height: 24px;
-  border: .25rem solid var(--orange);
+  border: .25rem solid var(--red);
   border-top-color: var(--white);
   animation: spin 1s infinite linear;
   margin: .9rem auto 0;

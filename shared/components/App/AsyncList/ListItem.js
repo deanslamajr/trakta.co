@@ -22,12 +22,6 @@ function getColorClass (text) {
   return colorClasses[restrictedValue]
 }
 
-function getOpacity (seconds) {
-  return seconds > 5
-    ? 1
-    : seconds / 5
-}
-
 function getWidth (plays) {
   return plays >= 50
     ? '100%'
@@ -37,9 +31,7 @@ function getWidth (plays) {
 function ListItem ({ trak, handleClick, selectedTrakId, hasViewed }) {
   const width = getWidth(trak.plays_count)
   const colorClass = getColorClass(trak.name)
-  //const opacity = getOpacity(trak.duration)
   const dataVizStyle = {
-    //opacity,
     width
   }
 

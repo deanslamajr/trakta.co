@@ -14,39 +14,39 @@ import MdEdit from 'react-icons/lib/md/edit'
 import styles from './styles.css'
 
 function renderBackButton () {
-  return (<MdArrowBack className={styles.backIcon} size={50} color={styles.red} />)
+  return (<MdArrowBack className={styles.button} color={styles.white} />)
 }
 
 function renderRecordButton () {
-  return (<MdMic className={styles.icon} size={50} color={styles.green} />)
+  return (<MdMic className={styles.button} color={styles.white} />)
 }
 
 function renderCheckButton () {
-  return (<MdCheck className={styles.icon} size={50} color={styles.green} />)
+  return (<MdCheck className={styles.button} color={styles.white} />)
 }
 
 function renderPlayButton () {
-  return (<MdPlayArrow className={styles.playIcon} size={60} color={styles.blue} />)
+  return (<MdPlayArrow className={styles.button} size={25} color={styles.white} />)
 }
 
 function renderStopButton () {
-  return (<MdStop className={styles.stopIcon} size={60} color={styles.red} />)
+  return (<MdStop className={styles.button} color={styles.white} />)
 }
 
 function renderAddButton () {
-  return (<MdAdd className={styles.addIcon} size={50} color={styles.green} />)
+  return (<MdAdd className={styles.button} color={styles.white} />)
 }
 
 function renderRefreshButton () {
-  return (<MdRefresh className={styles.addIcon} size={50} color={styles.blue} />)
+  return (<MdRefresh className={styles.button} color={styles.white} />)
 }
 
 function renderLoadingButton () {
-  return (<div className={styles.loadSpinner}/>)
+  return (<div className={classnames(styles.loadSpinner, styles.button)}/>)
 }
 
 function renderEditButton () {
-  return (<MdEdit className={styles.editIcon} size={40} color={styles.green} />)
+  return (<MdEdit className={styles.button} color={styles.white} />)
 }
 
 /**
@@ -56,26 +56,53 @@ function renderEditButton () {
  * @param {function} cb function to invoke on a click action
  */
 function renderButton (type, position, cb) {
-  const Icon = buttonMappings[type]
+  const buttonMapping = buttonMappings[type]
   const positionClass = positionMappings[position]
 
   return (
-    <div key={position} className={classnames(styles.button, styles[positionClass])} onClick={cb}>
-      <Icon />
+    <div key={position} className={classnames(styles.buttonContainer, styles[positionClass], buttonMapping.styles)} onClick={cb}>
+      <buttonMapping.Icon />
     </div>
   )
 }
 
 const buttonMappings = {
-  ADD: renderAddButton,
-  BACK: renderBackButton,
-  CHECK: renderCheckButton,
-  PLAY: renderPlayButton,
-  RECORD: renderRecordButton,
-  REFRESH: renderRefreshButton,
-  STOP: renderStopButton,
-  LOADING: renderLoadingButton,
-  EDIT: renderEditButton
+  ADD: {
+    Icon: renderAddButton,
+    styles: styles.greenButton
+  },
+  BACK: {
+    Icon: renderBackButton,
+    styles: styles.redButton
+  },
+  CHECK: {
+    Icon: renderCheckButton,
+    styles: styles.greenButton
+  },
+  PLAY: {
+    Icon: renderPlayButton,
+    styles: styles.redButton
+  },
+  RECORD: {
+    Icon: renderRecordButton,
+    styles: styles.greenButton
+  },
+  REFRESH: {
+    Icon: renderRefreshButton,
+    styles: styles.blueButton
+  },
+  STOP: {
+    Icon: renderStopButton,
+    styles: styles.redButton
+  },
+  LOADING: {
+    Icon: renderLoadingButton,
+    styles: styles.redButton
+  },
+  EDIT: {
+    Icon: renderEditButton,
+    styles: styles.greenButton
+  }
 }
 
 const positionMappings = {

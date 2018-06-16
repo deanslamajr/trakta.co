@@ -4,11 +4,9 @@
 .card {
   color: var(--black);
   cursor: pointer;
-  margin: 0 auto 1px;
-  max-width: 60rem;
+  margin: 0 auto 2px;
   padding: 0;
   width: 100%;
-  margin-bottom: 1px;
   overflow: hidden;
   position: relative;
 }
@@ -25,6 +23,7 @@
   right: 0;
   top: -1.7rem;
   height: 0;
+  color: color( var(--black) whiteness(75%))
 }
 
 .listened-name {
@@ -50,12 +49,15 @@
 }
 
 .selected {
-  opacity: .25;
+  height: 7rem;
 }
 
 .selected .name {
   text-align: left;
   transform: translateX(9rem) translateY(-1.5rem) scale(1.8);
+  color: var(--black);
+  top: -.5rem;
+  font-size: 1rem;
 }
 
 .invisible {
@@ -68,7 +70,8 @@
 
 @media (--medium-or-larger-viewport) {
   .selected .name {
-    transform: translateX(46rem) translateY(-2.5rem) scale(2.5);
+    transform: translateX(0rem) translateY(-3.5rem);
+    font-size: 4rem;
   }
 }
 
@@ -98,26 +101,26 @@
 }
 
 .red {
-  background-color: var(--red);
+  background-color: color(var(--red) saturation(75%));
 }
 .blue {
-  background-color: var(--blue);
+  background-color: color(var(--blue) saturation(75%));
 }
 .green {
-  background-color: var(--green);
+  background-color: color(var(--green) saturation(75%));
 }
 .orange {
-  background-color: var(--orange);
+  background-color: color(var(--orange) saturation(75%));
 }
 .yellow {
-  background-color: var(--yellow);
+  background-color: color(var(--yellow) saturation(75%));
 }
 .purple {
-  background-color: var(--purple);
+  background-color: color(var(--purple) saturation(75%));
 }
 .pink {
-  background-color: var(--pink);
+  background-color: color(var(--pink) saturation(75%));
 }
 .teal {
-  background-color: var(--teal);
+  background-color: color(var(--teal) saturation(75%));
 }
