@@ -41,8 +41,8 @@ function renderRefreshButton () {
   return (<MdRefresh className={styles.button} color={styles.white} />)
 }
 
-function renderLoadingButton () {
-  return (<div className={classnames(styles.loadSpinner, styles.button)} />)
+function renderLoadingButton ({ colorOveride }) {
+  return (<div className={classnames(styles.loadSpinner, { [colorOveride]: colorOveride }, styles.button)} />)
 }
 
 function renderEditButton () {
@@ -55,13 +55,17 @@ function renderEditButton () {
  * @param {oneOf['left', 'center', 'right']} position where to position the button on the navbar
  * @param {function} cb function to invoke on a click action
  */
-function renderButton (type, position, cb) {
+function renderButton (position, { type, cb, color }) {
   const buttonMapping = buttonMappings[type]
   const positionClass = positionMappings[position]
 
+  const colorClass = color
+    ? styles[`${color}Button`]
+    : buttonMapping.styles
+
   return (
-    <div key={position} className={classnames(styles.buttonContainer, styles[positionClass], buttonMapping.styles)} onClick={cb}>
-      <buttonMapping.Icon />
+    <div key={position} className={classnames(styles.buttonContainer, styles[positionClass], colorClass)} onClick={cb}>
+      <buttonMapping.Icon colorOveride={color} />
     </div>
   )
 }
@@ -165,7 +169,7 @@ class NavBar extends React.Component {
               }
 
               const config = positions[position]
-              return renderButton(config.type, position, config.cb)
+              return renderButton(position, config)
             })
           }
         </div>

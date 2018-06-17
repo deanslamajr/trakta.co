@@ -29,7 +29,7 @@
 .listened-name {
   color: var(--white);
   top: 2rem;
-  font-size: 75%;
+  font-size: 65%;
   text-align: end;
   background: none;
   position: relative;
@@ -101,26 +101,26 @@
 }
 
 .red {
-  background-color: color(var(--red) saturation(75%));
+  background-color: color(var(--red) saturation(65%));
 }
 .blue {
-  background-color: color(var(--blue) saturation(75%));
+  background-color: color(var(--blue) saturation(65%));
 }
 .green {
-  background-color: color(var(--green) saturation(75%));
+  background-color: color(var(--green) saturation(65%));
 }
 .orange {
-  background-color: color(var(--orange) saturation(75%));
+  background-color: color(var(--orange) saturation(65%));
 }
 .yellow {
-  background-color: color(var(--yellow) saturation(75%));
+  background-color: color(var(--yellow) saturation(65%));
 }
 .purple {
-  background-color: color(var(--purple) saturation(75%));
+  background-color: color(var(--purple) saturation(65%));
 }
 .pink {
-  background-color: color(var(--pink) saturation(75%));
+  background-color: color(var(--pink) saturation(65%));
 }
 .teal {
-  background-color: color(var(--teal) saturation(75%));
+  background-color: color(var(--teal) saturation(65%));
 }

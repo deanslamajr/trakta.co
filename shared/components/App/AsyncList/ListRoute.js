@@ -11,6 +11,8 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import ListItem from './ListItem'
 import InstancePlaylist from '../../../../client/components/InstancePlaylist'
 
+import getColorFromString from './getColorFromString'
+
 import config from '../../../../config'
 
 import {
@@ -54,11 +56,17 @@ class ListRoute extends React.Component {
   }
 
   _handleTrakSelect (trak) {
+    const trakColor = getColorFromString(trak.name)
+
     this.props.addItemToNavBar({
-      TOP_RIGHT: { type: 'LOADING' },
+      TOP_RIGHT: {
+        type: 'LOADING',
+        color: trakColor
+      },
       TOP_LEFT: {
         type: 'EDIT',
-        cb: () => this._navigateToEdit(trak.name)
+        cb: () => this._navigateToEdit(trak.name),
+        color: trakColor
       }
     }, true)
 
@@ -67,7 +75,8 @@ class ListRoute extends React.Component {
 
     this.setState({
       selectedTrakId: trak.id,
-      viewedTraks: updatedViewedTraks
+      viewedTraks: updatedViewedTraks,
+      trakColor
     }, () => {
       const itemRef = ReactDOM.findDOMNode(this.itemRefs[trak.id])
       itemRef.scrollIntoView()
@@ -140,7 +149,8 @@ class ListRoute extends React.Component {
     const { traks } = this.props
     const {
       selectedTrakId,
-      viewedTraks
+      viewedTraks,
+      trakColor
     } = this.state
 
     const sortedTraks = traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
@@ -171,6 +181,7 @@ class ListRoute extends React.Component {
           <InstancePlaylist
             addItemToNavBar={this.props.addItemToNavBar}
             renderErrorComponent={() => {}}
+            buttonColor={trakColor}
             incrementPlaysCount
             fetchTrak
           />

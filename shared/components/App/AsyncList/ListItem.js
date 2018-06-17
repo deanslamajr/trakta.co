@@ -2,25 +2,9 @@ import React from 'react'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import classnames from 'classnames'
 
+import getColorFromString from './getColorFromString'
+
 import styles from './listItem.css'
-
-const colorClasses = [
-  'red',
-  'blue',
-  'green',
-  'yellow',
-  'purple',
-  'pink',
-  'orange',
-  'teal'
-]
-
-function getColorClass (text) {
-  const chars = text.split('')
-  const charCodesSum = chars.reduce((sum, char) => char.charCodeAt() + sum, 0)
-  const restrictedValue = charCodesSum % colorClasses.length
-  return colorClasses[restrictedValue]
-}
 
 function getWidth (plays) {
   return plays >= 50
@@ -30,7 +14,7 @@ function getWidth (plays) {
 
 function ListItem ({ trak, handleClick, selectedTrakId, hasViewed }) {
   const width = getWidth(trak.plays_count)
-  const colorClass = getColorClass(trak.name)
+  const colorClass = getColorFromString(trak.name)
   const dataVizStyle = {
     width
   }

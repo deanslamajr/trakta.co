@@ -88,10 +88,7 @@
   margin-left: -.05rem;
 }
 
-.green-button {
-  background-color: var(--green);
-}
-
+/** Colors */
 .red-button {
   background-color: var(--red);
 }
@@ -100,8 +97,28 @@
   background-color: var(--blue);
 }
 
+.green-button {
+  background-color: var(--green);
+}
+
+.yellow-button {
+  background-color: var(--yellow);
+}
+
+.purple-button {
+  background-color: var(--purple);
+}
+
+.pink-button {
+  background-color: var(--pink);
+}
+
 .orange-button {
   background-color: var(--orange);
+}
+
+.teal-button {
+  background-color: var(--teal);
 }
 
 @keyframes spin {
@@ -121,4 +138,44 @@
   border-top-color: var(--white);
   animation: spin 1s infinite linear;
   margin: .9rem auto 0;
+}
+
+.red-button > .load-spinner {
+  border: .25rem solid var(--red);
+  border-top-color: var(--white);
+}
+
+.blue-button > .load-spinner {
+  border: .25rem solid var(--blue);
+  border-top-color: var(--white);
+}
+
+.green-button > .load-spinner {
+  border: .25rem solid var(--green);
+  border-top-color: var(--white);
+}
+
+.yellow-button > .load-spinner {
+  border: .25rem solid var(--yellow);
+  border-top-color: var(--white);
+}
+
+.purple-button > .load-spinner {
+  border: .25rem solid var(--purple);
+  border-top-color: var(--white);
+}
+
+.pink-button > .load-spinner {
+  border: .25rem solid var(--pink);
+  border-top-color: var(--white);
+}
+
+.orange-button > .load-spinner {
+  border: .25rem solid var(--orange);
+  border-top-color: var(--white);
+}
+
+.teal-button > .load-spinner {
+  border: .25rem solid var(--teal);
+  border-top-color: var(--white);
 }
