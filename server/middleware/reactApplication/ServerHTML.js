@@ -56,7 +56,7 @@ function ServerHTML (props) {
 
   const headerElements = removeNil([
     // sentry import
-    scriptTag(`https://cdn.ravenjs.com/${config('sentry.clientVersion')}/raven.min.js`, { crossorigin: 'anonymous' }),
+    scriptTag(`https://cdn.ravenjs.com/${config('sentry.clientVersion')}/raven.min.js`, { crossOrigin: 'anonymous' }),
     inlineScript(`Raven.config('${config('sentry.dsn')}', {
       release: '${packageJson.version}',
       environment: '${config('ENV')}',

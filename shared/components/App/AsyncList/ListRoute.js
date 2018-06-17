@@ -104,7 +104,6 @@ class ListRoute extends React.Component {
   _setRef (trakId, ref) {
     this.itemRefs[trakId] = ref
   }
-    
 
   _resetTrak () {
     this.props.addItemToNavBar(null)

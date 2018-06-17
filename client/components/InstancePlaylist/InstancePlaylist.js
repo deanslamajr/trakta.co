@@ -129,8 +129,7 @@ class InstancePlaylist extends React.Component {
           this.props.addItemToNavBar({
             TOP_RIGHT: { type: 'PLAY', cb: this._play }
           }, true)
-        }
-        else {
+        } else {
           this.props.addItemToNavBar({
             TOP_RIGHT: null
           }, true)

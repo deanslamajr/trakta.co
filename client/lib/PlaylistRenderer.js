@@ -18,7 +18,7 @@ function loadSample (instance, loadTaskCb, fetchTrak) {
     const baseUrl = fetchTrak
       ? baseTrakUrl
       : baseSampleUrl
-      
+
     const url = `${baseUrl}/${instance.sample.url}`
 
     let downloadAttempts = 0
@@ -130,7 +130,7 @@ class PlaylistRenderer {
       startTime: trackStartTime,
       length: trackLength
     } = trackDimensions
-    
+
     const trakAndOrBufferExist = (trackLength && instances && instances.length) || buffer
 
     let areInstancesCacheMiss

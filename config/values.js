@@ -90,7 +90,7 @@ const values = {
 
   sentry: {
     clientVersion: EnvVars.string('SENTRY_CLIENT_VERSION'),
-    dsn: EnvVars.string('SENTRY_DSN'),
+    dsn: EnvVars.string('SENTRY_DSN')
   },
 
   // Basic configuration for the HTML page that hosts our application.

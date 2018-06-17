@@ -42,7 +42,7 @@ function renderRefreshButton () {
 }
 
 function renderLoadingButton () {
-  return (<div className={classnames(styles.loadSpinner, styles.button)}/>)
+  return (<div className={classnames(styles.loadSpinner, styles.button)} />)
 }
 
 function renderEditButton () {

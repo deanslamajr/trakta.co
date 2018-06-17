@@ -42,8 +42,7 @@ async function get (req, res, next) {
     const trakName = req.params.trakName
     const latestTrak = await getLatestTrak(trakName)
     res.json(latestTrak)
-  }
-  catch (error) {
+  } catch (error) {
     next(error)
   }
 }

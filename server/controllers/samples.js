@@ -9,12 +9,12 @@ import { sequelize } from '../adapters/db'
 import { saveBlobToS3 } from '../adapters/s3'
 
 async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName) {
-  const duration = queryStrings.duration || 0.0
-  const start_time = queryStrings.startTime || 0.0 // eslint-disable-line 
+  const duration = Number.parseFloat(queryStrings.duration) || 0.0
+  const start_time = Number.parseFloat(queryStrings.startTime) || 0.0 // eslint-disable-line 
   const volume = queryStrings.volume || -6.0
   const panning = queryStrings.panning || 0.0
-  const loop_count = queryStrings.loopCount || 0 // eslint-disable-line 
-  const loop_padding = queryStrings.loopPadding || 0.0 // eslint-disable-line 
+  const loop_count = Number.parseFloat(queryStrings.loopCount) || 0 // eslint-disable-line 
+  const loop_padding = Number.parseFloat(queryStrings.loopPadding) || 0.0 // eslint-disable-line 
   let trakName = queryStrings.trakName
   let trak
   let version
@@ -43,10 +43,14 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
 
       // @todo ensure that trakName is not already in use!!!
 
+      const sampleDurationWithLoops = loop_count === 0 // eslint-disable-line 
+      ? duration
+      : (loop_count * loop_padding) + duration // eslint-disable-line 
+
       trak = await player.createTrak({
         name: trakName,
         start_time: 0,
-        duration
+        duration: sampleDurationWithLoops
       }, { transaction })
 
       version = await trak.createVersion({ active: false }, { transaction })
@@ -69,8 +73,11 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
       }
 
       const currentDuration = Number.parseFloat(trak.duration)
-      const sampleStartTime = Number.parseFloat(start_time)
-      const sampleDuration = Number.parseFloat(duration)
+      const sampleStartTime = start_time // eslint-disable-line
+
+      const sampleDuration = loop_count === 0 // eslint-disable-line 
+        ? duration
+        : (loop_count * loop_padding) + duration // eslint-disable-line 
 
       /**
        * update trak.start_time ??
