@@ -26,7 +26,7 @@ function renderCheckButton () {
 }
 
 function renderPlayButton () {
-  return (<MdPlayArrow className={styles.button} size={25} color={styles.white} />)
+  return (<MdPlayArrow className={styles.button} color={styles.white} />)
 }
 
 function renderStopButton () {

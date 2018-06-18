@@ -20,12 +20,17 @@ function ListItem ({ trak, handleClick, selectedTrakId, hasViewed }) {
   }
 
   const isSelected = trak.id === selectedTrakId
+
   const hasViewedAndDeselected = hasViewed && !isSelected
+
+  const clickHandler = isSelected
+    ? () => {} // shouldn't be able to select a selected item
+    : () => handleClick(trak)
 
   return (
     <div
       className={classnames(styles.card, styles[`${colorClass}Base`], { [styles.selected]: isSelected })}
-      onClick={() => handleClick(trak)}
+      onClick={clickHandler}
     >
       <div className={classnames({ [styles.visible]: hasViewedAndDeselected }, styles.listenedCard)}>
         <div className={styles.listenedName}>
