@@ -114,7 +114,6 @@ function mapStateToProps (state, ownProps) {
   return {
     shouldFetchInstances: selectors.getShouldFetchInstances(state),
     isLoading: selectors.isLoading(state),
-    trackDimensions: selectors.getTrackDimensions(state),
     totalTasks: selectors.getTotalTasks(state),
     finishedTasks: selectors.getFinishedTasks(state),
     instances: selectors.getInstances(state),

@@ -6,9 +6,11 @@ import ReactSlider from 'react-slider'
 import classnames from 'classnames'
 
 import * as selectors from '../../../shared/reducers'
+import { updateDimensionsWithAdditionalSample } from '../../../shared/actions/trak'
 import {
   setStagedObjectUrl,
-  setCleanup } from '../../../shared/actions/recorder'
+  setCleanup
+} from '../../../shared/actions/recorder'
 
 import { getSampleCreator } from '../../lib/SampleCreator'
 
@@ -55,6 +57,7 @@ class Cleanup extends React.Component {
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
     this._renderSample = this._renderSample.bind(this)
     this._onEndPlaybackLoop = this._onEndPlaybackLoop.bind(this)
+    this._handleBackAction = this._handleBackAction.bind(this)
   }
 
   _clickUseThisSelection () {
@@ -197,6 +200,16 @@ class Cleanup extends React.Component {
     })
   }
 
+  _handleBackAction () {
+    /**
+     * reset the dimensions of the trak to that without staged sample
+     */
+    this.props.updateDimensionsWithAdditionalSample({})
+
+    const mainEditUrl = getMainEditUrl(this.props.match.url)
+    this.props.history.push(`${mainEditUrl}/recorder`)
+  }
+
   componentWillReceiveProps (nextProps) {
     if (this.props.cleanup.clipStart !== nextProps.cleanup.clipStart || this.props.cleanup.clipEnd !== nextProps.cleanup.clipEnd) {
       if (this.state.isPlaying) {
@@ -233,10 +246,8 @@ class Cleanup extends React.Component {
           this._drawWaveForm()
           this._renderSample(this.props.cleanup.clipStart, this.props.cleanup.clipEnd)
 
-          const mainEditUrl = getMainEditUrl(this.props.match.url)
-
           this.props.addItemToNavBar({
-            TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(`${mainEditUrl}/recorder`) },
+            TOP_LEFT: { type: 'BACK', cb: this._handleBackAction },
             BOTTOM_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
             TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
           })
@@ -306,6 +317,7 @@ class Cleanup extends React.Component {
 }
 
 const mapActionsToProps = {
+  updateDimensionsWithAdditionalSample,
   setStagedObjectUrl,
   setCleanup
 }
