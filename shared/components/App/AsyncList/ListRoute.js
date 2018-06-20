@@ -179,6 +179,9 @@ class ListRoute extends React.Component {
 
         {this.props.instances && this.props.instances.length && (
           <InstancePlaylist
+            instances={this.props.instances}
+            trackDimensions={this.props.trackDimensions}
+
             addItemToNavBar={this.props.addItemToNavBar}
             renderErrorComponent={() => {}}
             buttonColor={trakColor}
@@ -204,7 +207,8 @@ function mapStateToProps (state) {
   return {
     traks: selectors.getTraks(state),
     hasFetched: selectors.hasFetched(state),
-    instances: selectors.getInstances(state)
+    instances: selectors.getInstances(state),
+    trackDimensions: selectors.getTrackDimensions(state)
   }
 }
 

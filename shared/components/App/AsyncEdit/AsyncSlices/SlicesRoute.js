@@ -94,6 +94,9 @@ class SlicesRoute extends React.Component {
               <div className={styles.canvasContainer}>
                 <div className={styles.label}>
                   <InstancePlaylist
+                    instances={this.props.instances}
+                    trackDimensions={this.props.trackDimensions}
+
                     addItemToNavBar={this.props.addItemToNavBar}
                     incrementPlaysCount
                   />
@@ -117,7 +120,8 @@ function mapStateToProps (state, ownProps) {
     totalTasks: selectors.getTotalTasks(state),
     finishedTasks: selectors.getFinishedTasks(state),
     instances: selectors.getInstances(state),
-    trakName: selectors.getTrakName(state)
+    trakName: selectors.getTrakName(state),
+    trackDimensions: selectors.getTrackDimensions(state)
   }
 };
 

@@ -315,6 +315,9 @@ class Recorder extends React.Component {
         {
           !this.state.disableRecording && (
             <InstancePlaylist
+              instances={this.props.instances}
+              trackDimensions={this.props.trackDimensions}
+
               addItemToNavBar={this.props.addItemToNavBar}
               renderErrorComponent={() => {}}
               incrementPlaysCount
@@ -344,7 +347,9 @@ const mapActionsToProps = {
 function mapStateToProps (state) {
   return {
     objectUrl: selectors.getStagedObjectUrl(state),
-    shouldFetchInstances: selectors.getShouldFetchInstances(state)
+    shouldFetchInstances: selectors.getShouldFetchInstances(state),
+    instances: selectors.getInstances(state),
+    trackDimensions: selectors.getTrackDimensions(state)
   }
 }
 

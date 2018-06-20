@@ -5,6 +5,8 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import ReactSlider from 'react-slider'
 import classnames from 'classnames'
 
+import InstancePlaylist from '../InstancePlaylist'
+
 import * as selectors from '../../../shared/reducers'
 import { updateDimensionsWithAdditionalSample } from '../../../shared/actions/trak'
 import {
@@ -44,7 +46,7 @@ class Cleanup extends React.Component {
 
     this.state = {
       isPlaying: false,
-      duration: 0,
+      //duration: 0,
       isFirstRender: true
     }
 
@@ -52,8 +54,8 @@ class Cleanup extends React.Component {
     this._onLeftSliderFinish = this._onLeftSliderFinish.bind(this)
     this._onRightSliderChange = this._onRightSliderChange.bind(this)
     this._onRightSliderFinish = this._onRightSliderFinish.bind(this)
-    this._startPlayback = this._startPlayback.bind(this)
-    this._stopPlayback = this._stopPlayback.bind(this)
+    //this._startPlayback = this._startPlayback.bind(this)
+    //this._stopPlayback = this._stopPlayback.bind(this)
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
     this._renderSample = this._renderSample.bind(this)
     this._onEndPlaybackLoop = this._onEndPlaybackLoop.bind(this)
@@ -101,19 +103,19 @@ class Cleanup extends React.Component {
     this.canvasContext.closePath()
   }
 
-  _stopPlayback () {
-    stopPlayback()
-    audioElement.removeEventListener('ended', onEndPlaybackLoop)
-    audioElement._isPlaying = false
-    clearInterval(intervalAnimationId)
-    this.playIndicatorEl.style.backgroundColor = 'transparent'
+  // _stopPlayback () {
+  //   stopPlayback()
+  //   audioElement.removeEventListener('ended', onEndPlaybackLoop)
+  //   audioElement._isPlaying = false
+  //   clearInterval(intervalAnimationId)
+  //   this.playIndicatorEl.style.backgroundColor = 'transparent'
 
-    this.setState({ isPlaying: false }, () => {
-      this.props.addItemToNavBar({
-        TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
-      }, true)
-    })
-  }
+  //   this.setState({ isPlaying: false }, () => {
+  //     this.props.addItemToNavBar({
+  //       TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
+  //     }, true)
+  //   })
+  // }
 
   _redrawPosition (bottom, displacementPerFrame, top) {
     position = position <= bottom
@@ -156,27 +158,27 @@ class Cleanup extends React.Component {
     audioElement._isPlaying = true
   }
 
-  _startPlayback () {
-    this.props.addItemToNavBar({
-      TOP_RIGHT: { type: 'STOP', cb: this._stopPlayback }
-    }, true)
+  // _startPlayback () {
+  //   this.props.addItemToNavBar({
+  //     TOP_RIGHT: { type: 'STOP', cb: this._stopPlayback }
+  //   }, true)
 
-    const maxClipValue = this.sampleCreator.getDataBufferLength()
-    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
-    const bottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue)
-    const animationDistance = bottom - top
+  //   const maxClipValue = this.sampleCreator.getDataBufferLength()
+  //   const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
+  //   const bottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue)
+  //   const animationDistance = bottom - top
 
-    const animationInterval = 20
-    const sampleDuration = audioElement.duration * 1000
-    const numberOfFrames = (sampleDuration / animationInterval) + 1
+  //   const animationInterval = 20
+  //   const sampleDuration = audioElement.duration * 1000
+  //   const numberOfFrames = (sampleDuration / animationInterval) + 1
 
-    const displacementPerFrame = animationDistance / numberOfFrames
+  //   const displacementPerFrame = animationDistance / numberOfFrames
 
-    this.setState({
-      isPlaying: true,
-      duration: audioElement.duration
-    }, () => this._startPlaybackAudioAndAnimation(top, bottom, displacementPerFrame, animationInterval))
-  }
+  //   this.setState({
+  //     isPlaying: true,
+  //     duration: audioElement.duration
+  //   }, () => this._startPlaybackAudioAndAnimation(top, bottom, displacementPerFrame, animationInterval))
+  // }
 
   _onLeftSliderChange (value) {
     this.props.setCleanup({ leftSliderValue: value })
@@ -249,7 +251,7 @@ class Cleanup extends React.Component {
           this.props.addItemToNavBar({
             TOP_LEFT: { type: 'BACK', cb: this._handleBackAction },
             BOTTOM_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
-            TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
+            //TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
           })
         }
       })
@@ -268,6 +270,15 @@ class Cleanup extends React.Component {
 
     const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
     const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue))
+
+    const objectUrlInstance = {
+      startTime: 0,
+      loopCount: 0,
+      loopPadding: 0,
+      volume: 0,
+      panning: 0,
+      objectUrl: this.props.objectUrl
+    }
 
     return (
       <div ref={(container) => { this.container = container }}>
@@ -307,6 +318,11 @@ class Cleanup extends React.Component {
                 />
                 <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
                 <div ref={(ref) => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
+                <InstancePlaylist
+                  objectUrlInstance={objectUrlInstance}
+                  addItemToNavBar={this.props.addItemToNavBar}
+                  renderErrorComponent={() => {}}
+                />
               </div>
             )
           }

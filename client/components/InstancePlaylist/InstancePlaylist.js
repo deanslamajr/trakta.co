@@ -71,8 +71,8 @@ class InstancePlaylist extends React.Component {
     }
   }
 
-  _prepTransport () {
-    const { length: trakDuration } = this.props.trackDimensions
+  _prepTransport (trakDuration) {
+    //const { length: trakDuration } = this.props.trackDimensions
     const width = viewportDimensions
       ? viewportDimensions.width() && viewportDimensions.width()
       : 300
@@ -116,6 +116,7 @@ class InstancePlaylist extends React.Component {
     this.props.beginInitialFetch()
 
     this.playlistRenderer.getPlayer({
+      objectUrlInstance: this.props.objectUrlInstance,
       trackDimensions,
       instances,
       buffer: this.props.buffer,
@@ -127,7 +128,7 @@ class InstancePlaylist extends React.Component {
         this.props.endFetchSample()
 
         if (latestPlayer) {
-          this._prepTransport()
+          this._prepTransport(latestPlayer.buffer.get().duration)
           player = latestPlayer.sync().start()
           this.props.addItemToNavBar({
             TOP_RIGHT: {
@@ -233,9 +234,7 @@ const mapActionsToProps = {
 function mapStateToProps (state, ownProps) {
   return {
     isLoading: selectors.isLoading(state),
-    instances: selectors.getInstances(state),
     stagedSample: selectors.getStagedSample(state),
-    trackDimensions: selectors.getTrackDimensions(state),
     trakName: selectors.getTrakName(state)
   }
 }
