@@ -47,7 +47,8 @@ class Cleanup extends React.Component {
     this.state = {
       isPlaying: false,
       //duration: 0,
-      isFirstRender: true
+      isFirstRender: true,
+      isObjectUrlReady: false
     }
 
     this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
@@ -71,9 +72,13 @@ class Cleanup extends React.Component {
   _renderSample (start, stop) {
     const objectUrl = this.sampleCreator.clipBlobAndReturnObjectUrl(start, stop)
 
-    audioElement = new Audio([objectUrl]) // eslint-disable-line
+    //audioElement = new Audio([objectUrl]) // eslint-disable-line
 
     this.props.setStagedObjectUrl(objectUrl)
+    this.setState({
+      objectUrl,
+      isObjectUrlReady: true
+    })
   }
 
   _drawWaveForm () {
@@ -181,10 +186,12 @@ class Cleanup extends React.Component {
   // }
 
   _onLeftSliderChange (value) {
+    this.setState({ isObjectUrlReady: false })
     this.props.setCleanup({ leftSliderValue: value })
   }
 
   _onRightSliderChange (value) {
+    this.setState({ isObjectUrlReady: false })
     this.props.setCleanup({ rightSliderValue: value })
   }
 
@@ -214,9 +221,9 @@ class Cleanup extends React.Component {
 
   componentWillReceiveProps (nextProps) {
     if (this.props.cleanup.clipStart !== nextProps.cleanup.clipStart || this.props.cleanup.clipEnd !== nextProps.cleanup.clipEnd) {
-      if (this.state.isPlaying) {
-        this._stopPlayback()
-      }
+      // if (this.state.isPlaying) {
+      //   this._stopPlayback()
+      // }
       this._renderSample(nextProps.cleanup.clipStart, nextProps.cleanup.clipEnd)
     }
   }
@@ -258,11 +265,11 @@ class Cleanup extends React.Component {
     }
   }
 
-  componentWillUnmount () {
-    if (this.state.isPlaying) {
-      this._stopPlayback()
-    }
-  }
+  // componentWillUnmount () {
+  //   if (this.state.isPlaying) {
+  //     this._stopPlayback()
+  //   }
+  // }
 
   render () {
     const maxClipValue = this.sampleCreator.getDataBufferLength()
@@ -277,7 +284,7 @@ class Cleanup extends React.Component {
       loopPadding: 0,
       volume: 0,
       panning: 0,
-      objectUrl: this.props.objectUrl
+      objectUrl: this.state.objectUrl
     }
 
     return (
@@ -318,11 +325,16 @@ class Cleanup extends React.Component {
                 />
                 <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
                 <div ref={(ref) => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
-                <InstancePlaylist
-                  objectUrlInstance={objectUrlInstance}
-                  addItemToNavBar={this.props.addItemToNavBar}
-                  renderErrorComponent={() => {}}
-                />
+                {
+                  this.state.isObjectUrlReady &&
+                    (
+                      <InstancePlaylist
+                        objectUrlInstance={objectUrlInstance}
+                        addItemToNavBar={this.props.addItemToNavBar}
+                        renderErrorComponent={() => {}}
+                      />
+                    )
+                }
               </div>
             )
           }
