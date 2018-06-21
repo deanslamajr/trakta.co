@@ -10,6 +10,7 @@ import InstancePlaylist from '../InstancePlaylist'
 import * as selectors from '../../../shared/reducers'
 import { updateDimensionsWithAdditionalSample } from '../../../shared/actions/trak'
 import {
+  setStagedSample,
   setStagedObjectUrl,
   setCleanup
 } from '../../../shared/actions/recorder'
@@ -48,7 +49,9 @@ class Cleanup extends React.Component {
       isPlaying: false,
       //duration: 0,
       isFirstRender: true,
-      isObjectUrlReady: false
+      isObjectUrlReady: false,
+      showVolumeSlider: false,
+      volume: this.props.stagedSample.volume
     }
 
     this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
@@ -61,6 +64,8 @@ class Cleanup extends React.Component {
     this._renderSample = this._renderSample.bind(this)
     this._onEndPlaybackLoop = this._onEndPlaybackLoop.bind(this)
     this._handleBackAction = this._handleBackAction.bind(this)
+    this._toggleVolumeSlider = this._toggleVolumeSlider.bind(this)
+    this._onVolumeSliderFinish = this._onVolumeSliderFinish.bind(this)
   }
 
   _clickUseThisSelection () {
@@ -121,6 +126,10 @@ class Cleanup extends React.Component {
   //     }, true)
   //   })
   // }
+
+  _toggleVolumeSlider () {
+    this.setState({ showVolumeSlider: !this.state.showVolumeSlider })
+  }
 
   _redrawPosition (bottom, displacementPerFrame, top) {
     position = position <= bottom
@@ -195,6 +204,16 @@ class Cleanup extends React.Component {
     this.props.setCleanup({ rightSliderValue: value })
   }
 
+  _onVolumeSliderFinish (value) {
+    /** fix for slider being upside down */
+    const volume = value * -1
+
+    this.setState({ volume })
+    this.props.setStagedSample({
+      volume
+    })
+  }
+
   _onLeftSliderFinish (value) {
     this.props.setCleanup({
       clipStart: value,
@@ -258,6 +277,7 @@ class Cleanup extends React.Component {
           this.props.addItemToNavBar({
             TOP_LEFT: { type: 'BACK', cb: this._handleBackAction },
             BOTTOM_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
+            BOTTOM_LEFT: { type: 'VOLUME', cb: this._toggleVolumeSlider }
             //TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
           })
         }
@@ -282,7 +302,7 @@ class Cleanup extends React.Component {
       startTime: 0,
       loopCount: 0,
       loopPadding: 0,
-      volume: 0,
+      volume: this.state.volume,
       panning: 0,
       objectUrl: this.state.objectUrl
     }
@@ -335,6 +355,21 @@ class Cleanup extends React.Component {
                       />
                     )
                 }
+
+                {
+                  this.state.showVolumeSlider && (
+                    <ReactSlider
+                      orientation='vertical'
+                      className={styles.volumeSlider}
+                      handleClassName={styles.volumeSliderHandle}
+                      max={25}
+                      min={-25}
+                      step={1}
+                      onAfterChange={this._onVolumeSliderFinish}
+                      defaultValue={this.state.volume}
+                    />
+                  )
+                }
               </div>
             )
           }
@@ -346,12 +381,14 @@ class Cleanup extends React.Component {
 
 const mapActionsToProps = {
   updateDimensionsWithAdditionalSample,
+  setStagedSample,
   setStagedObjectUrl,
   setCleanup
 }
 
 function mapStateToProps (state) {
   return {
+    stagedSample: selectors.getStagedSample(state),
     objectUrl: selectors.getStagedObjectUrl(state),
     cleanup: selectors.getCleanup(state)
   }

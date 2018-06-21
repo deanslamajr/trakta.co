@@ -126,20 +126,10 @@ class PlaylistRenderer {
   }
 
   getPlayer ({ trackDimensions, objectUrlInstance, instances, buffer, stagedSample, loadTaskCb, fetchTrak }) {
-    console.log('trackDimensions')
-    console.dir(trackDimensions)
-    console.log('buffer')
-    console.dir(buffer)
-    console.log('stagedSample')
-    console.dir(stagedSample)
-
     /**
      * @todo allow for both objectUrl and instances to be on the same player
      */
-    if (objectUrlInstance) {
-      console.log('objectUrlInstance')
-      console.dir(objectUrlInstance)
-      
+    if (objectUrlInstance) {     
       return new Promise((resolve, reject) => new Tone.Buffer(objectUrlInstance.objectUrl, resolve, reject))
         .then(objectUrlBuffer => {
           return Tone.Offline(OfflineTransport => {

@@ -10,6 +10,7 @@ import MdStop from 'react-icons/lib/md/stop'
 import MdAdd from 'react-icons/lib/md/add'
 import MdRefresh from 'react-icons/lib/md/refresh'
 import MdEdit from 'react-icons/lib/md/edit'
+import MdVolumeUp from 'react-icons/lib/md/volume-up'
 
 import styles from './styles.css'
 
@@ -47,6 +48,10 @@ function renderLoadingButton ({ colorOveride }) {
 
 function renderEditButton () {
   return (<MdEdit className={styles.button} color={styles.white} />)
+}
+
+function renderVolumeButton () {
+  return (<MdVolumeUp className={styles.button} color={styles.white} />)
 }
 
 /**
@@ -106,6 +111,10 @@ const buttonMappings = {
   EDIT: {
     Icon: renderEditButton,
     styles: styles.greenButton
+  },
+  VOLUME: {
+    Icon: renderVolumeButton,
+    styles: styles.blueButton
   }
 }
 

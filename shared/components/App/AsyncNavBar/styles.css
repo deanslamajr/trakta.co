@@ -10,8 +10,8 @@
   border: 2px solid var(--white);
   cursor: pointer;
   z-index: 1;
-  height: 4rem;
-  width: 4rem;
+  height: var(--navBarButtonSideLength);
+  width: var(--navBarButtonSideLength);
   margin: 0;
   user-select: none;
 }

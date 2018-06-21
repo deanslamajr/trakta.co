@@ -1,4 +1,5 @@
 @import "../../../shared/styles/colors.css";
+@import "../../../shared/styles/constants.css";
 
 .label {
   position: absolute;
@@ -20,6 +21,13 @@
   right: 15%;
 }
 
+.volume-slider {
+  position: fixed !important;
+  top: var(--navBarButtonSideLength);
+  bottom: var(--navBarButtonSideLength);
+  left: 0;
+}
+
 .slider-left {
   height: 100%;
   position: fixed !important;
@@ -36,6 +44,17 @@
   left: 80%;
   display: flex;
   justify-content: flex-end;
+}
+
+.volume-slider-handle {
+  background-color: var(--blue);
+  border: 2px solid var(--white);
+  cursor: pointer;
+  z-index: 99999;
+  height: var(--navBarButtonSideLength);
+  width: var(--navBarButtonSideLength);
+  user-select: none;
+  margin: 0;
 }
 
 .handle {

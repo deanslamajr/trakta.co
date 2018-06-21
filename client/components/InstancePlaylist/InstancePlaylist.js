@@ -103,7 +103,7 @@ class InstancePlaylist extends React.Component {
     }, 0)
   }
 
-  _renderTrak (instances, stagedSample, trackDimensions) {
+  _renderTrak (instances, stagedSample, trackDimensions, objectUrlInstance) {
     // remove play button
     this.props.addItemToNavBar({
       TOP_RIGHT: {
@@ -116,7 +116,7 @@ class InstancePlaylist extends React.Component {
     this.props.beginInitialFetch()
 
     this.playlistRenderer.getPlayer({
-      objectUrlInstance: this.props.objectUrlInstance,
+      objectUrlInstance,
       trackDimensions,
       instances,
       buffer: this.props.buffer,
@@ -189,19 +189,20 @@ class InstancePlaylist extends React.Component {
   }
 
   componentDidMount () {
-    this._renderTrak(this.props.instances, this.props.stagedSample, this.props.trackDimensions)
+    this._renderTrak(this.props.instances, this.props.stagedSample, this.props.trackDimensions, this.props.objectUrlInstance)
   }
 
   componentWillReceiveProps (nextProps) {
     const instancesHaveChanged = !isEqual(this.props.instances, nextProps.instances)
     const stagedSamplePropsHaveChanged = !isEqual(this.props.stagedSample, nextProps.stagedSample)
+    const objectUrlInstanceHasChanged = !isEqual(this.props.objectUrlInstance, nextProps.objectUrlInstance)
 
-    if (instancesHaveChanged || stagedSamplePropsHaveChanged) {
+    if (instancesHaveChanged || stagedSamplePropsHaveChanged || objectUrlInstanceHasChanged) {
       if (Tone.Transport.state === 'started') {
         this._stopPlaybackAndSendSignal()
       }
 
-      this._renderTrak(nextProps.instances, nextProps.stagedSample, nextProps.trackDimensions)
+      this._renderTrak(nextProps.instances, nextProps.stagedSample, nextProps.trackDimensions, nextProps.objectUrlInstance)
     }
   }
 
