@@ -1,4 +1,5 @@
 :root {
   --bottomOfTopNav: 7%;
   --navBarButtonSideLength: 4rem;
+  --buttonOutlineThickness: 1px;
 }

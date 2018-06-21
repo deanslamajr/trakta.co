@@ -66,6 +66,7 @@
   height: 32px;
   height: 2rem;
   width: 20rem;
+  max-width: 70%;
 }
 
 .left-handle {
