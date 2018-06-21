@@ -132,13 +132,17 @@ class PlaylistRenderer {
     if (objectUrlInstance) {     
       return new Promise((resolve, reject) => new Tone.Buffer(objectUrlInstance.objectUrl, resolve, reject))
         .then(objectUrlBuffer => {
+          const fullDuration = objectUrlInstance.loopCount === 0
+            ? objectUrlBuffer.get().duration
+            : (objectUrlInstance.loopCount * objectUrlInstance.loopPadding) + objectUrlBuffer.get().duration
+
           return Tone.Offline(OfflineTransport => {
             OfflineTransport.position = 0
 
             addBufferToTrak(objectUrlBuffer, objectUrlInstance, 0, OfflineTransport)
 
             OfflineTransport.start()
-          }, objectUrlBuffer.get().duration)
+          }, fullDuration)
         })
         .then(buffer => {
           loadTaskCb()

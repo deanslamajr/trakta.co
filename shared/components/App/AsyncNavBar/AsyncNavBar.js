@@ -11,6 +11,7 @@ import MdAdd from 'react-icons/lib/md/add'
 import MdRefresh from 'react-icons/lib/md/refresh'
 import MdEdit from 'react-icons/lib/md/edit'
 import MdVolumeUp from 'react-icons/lib/md/volume-up'
+import MdEqualizer from 'react-icons/lib/md/equalizer'
 
 import styles from './styles.css'
 
@@ -52,6 +53,10 @@ function renderEditButton () {
 
 function renderVolumeButton () {
   return (<MdVolumeUp className={styles.button} color={styles.white} />)
+}
+
+function renderMenuButton () {
+  return (<MdEqualizer className={styles.button} color={styles.white} />)
 }
 
 /**
@@ -114,6 +119,10 @@ const buttonMappings = {
   },
   VOLUME: {
     Icon: renderVolumeButton,
+    styles: styles.blueButton
+  },
+  MENU: {
+    Icon: renderMenuButton,
     styles: styles.blueButton
   }
 }

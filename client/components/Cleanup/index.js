@@ -51,7 +51,10 @@ class Cleanup extends React.Component {
       isFirstRender: true,
       isObjectUrlReady: false,
       showVolumeSlider: false,
-      volume: this.props.stagedSample.volume
+      volume: this.props.stagedSample.volume,
+      showEffectsModal: false,
+      loopCount: this.props.stagedSample.loopCount,
+      loopPadding: this.props.stagedSample.loopPadding
     }
 
     this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
@@ -66,6 +69,7 @@ class Cleanup extends React.Component {
     this._handleBackAction = this._handleBackAction.bind(this)
     this._toggleVolumeSlider = this._toggleVolumeSlider.bind(this)
     this._onVolumeSliderFinish = this._onVolumeSliderFinish.bind(this)
+    this._toggleEffectsModal = this._toggleEffectsModal.bind(this)
   }
 
   _clickUseThisSelection () {
@@ -129,6 +133,10 @@ class Cleanup extends React.Component {
 
   _toggleVolumeSlider () {
     this.setState({ showVolumeSlider: !this.state.showVolumeSlider })
+  }
+
+  _toggleEffectsModal () {
+    this.setState({ showEffectsModal: !this.state.showEffectsModal })
   }
 
   _redrawPosition (bottom, displacementPerFrame, top) {
@@ -238,6 +246,20 @@ class Cleanup extends React.Component {
     this.props.history.push(`${mainEditUrl}/recorder`)
   }
 
+  _handleChange (type, event) {
+    let parsedValue = parseFloat(event.target.value)
+
+    if (Number.isNaN(parsedValue)) {
+      parsedValue = 0
+    }
+
+    let stateUpdate = {
+      [type]: parsedValue
+    }
+
+    this.setState(stateUpdate, () => this.props.setStagedSample({ [type]: parsedValue }))
+  }
+
   componentWillReceiveProps (nextProps) {
     if (this.props.cleanup.clipStart !== nextProps.cleanup.clipStart || this.props.cleanup.clipEnd !== nextProps.cleanup.clipEnd) {
       // if (this.state.isPlaying) {
@@ -277,7 +299,8 @@ class Cleanup extends React.Component {
           this.props.addItemToNavBar({
             TOP_LEFT: { type: 'BACK', cb: this._handleBackAction },
             BOTTOM_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
-            BOTTOM_LEFT: { type: 'VOLUME', cb: this._toggleVolumeSlider }
+            BOTTOM_LEFT: { type: 'VOLUME', cb: this._toggleVolumeSlider },
+            BOTTOM_CENTER: { type: 'MENU', cb: this._toggleEffectsModal }
             //TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
           })
         }
@@ -300,8 +323,8 @@ class Cleanup extends React.Component {
 
     const objectUrlInstance = {
       startTime: 0,
-      loopCount: 0,
-      loopPadding: 0,
+      loopCount: this.state.loopCount,
+      loopPadding: this.state.loopPadding,
       volume: this.state.volume,
       panning: 0,
       objectUrl: this.state.objectUrl
@@ -368,6 +391,34 @@ class Cleanup extends React.Component {
                       onAfterChange={this._onVolumeSliderFinish}
                       defaultValue={this.state.volume * -1}
                     />
+                  )
+                }
+
+                {
+                  this.state.showEffectsModal && (
+                    <div className={styles.container}>
+                      <span className={styles.inputContainer}>
+                        <label htmlFor='loopCount'># of loops</label>
+                        <input id='loopCount'
+                          type='number'
+                          step='1'
+                          value={this.state.loopCount}
+                          onChange={this._handleChange.bind(this, 'loopCount')}
+                          placeholder='# of loops'
+                          className={styles.formInput} />
+                      </span>
+
+                      <span className={styles.inputContainer}>
+                        <label htmlFor='loopPadding'>Space between loops</label>
+                        <input id='loopPadding'
+                          type='number'
+                          step='1'
+                          value={this.state.loopPadding}
+                          onChange={this._handleChange.bind(this, 'loopPadding')}
+                          placeholder='padding'
+                          className={styles.formInput} />
+                      </span>
+                    </div>
                   )
                 }
               </div>

@@ -1,6 +1,32 @@
 @import "../../../shared/styles/colors.css";
 @import "../../../shared/styles/constants.css";
 
+
+.container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  background: var(--blue);
+  margin: 20vh 15vw;
+  left: 0;
+  right: 0;
+  z-index: 999;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0 3rem 0 1rem;
+}
+
+.form-input {
+  width: 20%;
+  margin: .75rem 0 .75rem 1rem;
+}
+
+
+
 .label {
   position: absolute;
   top: 20%;

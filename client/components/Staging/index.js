@@ -291,27 +291,7 @@ class Staging extends React.Component {
               : null
           }
 
-          <span className={styles.inputContainer}>
-            <label htmlFor='loopCount'># of loops</label>
-            <input id='loopCount'
-              type='number'
-              step='1'
-              value={this.state.loopCount}
-              onChange={this._handleChange.bind(this, 'loopCount')}
-              placeholder='# of loops'
-              className={styles.formInput} />
-          </span>
-
-          <span className={styles.inputContainer}>
-            <label htmlFor='loopPadding'>Space between loops</label>
-            <input id='loopPadding'
-              type='number'
-              step='1'
-              value={this.state.loopPadding}
-              onChange={this._handleChange.bind(this, 'loopPadding')}
-              placeholder='padding'
-              className={styles.formInput} />
-          </span>
+          
 
           <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} />
         </form>
