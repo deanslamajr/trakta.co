@@ -196,8 +196,9 @@ class InstancePlaylist extends React.Component {
     const instancesHaveChanged = !isEqual(this.props.instances, nextProps.instances)
     const stagedSamplePropsHaveChanged = !isEqual(this.props.stagedSample, nextProps.stagedSample)
     const objectUrlInstanceHasChanged = !isEqual(this.props.objectUrlInstance, nextProps.objectUrlInstance)
+    const trackDimensionsHasChanged = !isEqual(this.props.trackDimensions, nextProps.trackDimensions)
 
-    if (instancesHaveChanged || stagedSamplePropsHaveChanged || objectUrlInstanceHasChanged) {
+    if (instancesHaveChanged || stagedSamplePropsHaveChanged || objectUrlInstanceHasChanged || trackDimensionsHasChanged) {
       if (Tone.Transport.state === 'started') {
         this._stopPlaybackAndSendSignal()
       }
