@@ -314,6 +314,25 @@ class Cleanup extends React.Component {
             this.props.objectUrl &&
             (
               <div>
+                <canvas
+                  className={styles.canvas}
+                  width={this.state.canvasWidth || 0}
+                  height={this.state.canvasHeight || 0}
+                  ref={(canvas) => { this.canvas = canvas }}
+                />
+                <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
+                <div ref={(ref) => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
+                {
+                  this.state.isObjectUrlReady &&
+                    (
+                      <InstancePlaylist
+                        objectUrlInstance={objectUrlInstance}
+                        addItemToNavBar={this.props.addItemToNavBar}
+                        renderErrorComponent={() => {}}
+                      />
+                    )
+                }
+
                 <div>
                   <ReactSlider
                     orientation='vertical'
@@ -337,25 +356,6 @@ class Cleanup extends React.Component {
                   />
                 </div>
 
-                <canvas
-                  className={styles.canvas}
-                  width={this.state.canvasWidth || 0}
-                  height={this.state.canvasHeight || 0}
-                  ref={(canvas) => { this.canvas = canvas }}
-                />
-                <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
-                <div ref={(ref) => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
-                {
-                  this.state.isObjectUrlReady &&
-                    (
-                      <InstancePlaylist
-                        objectUrlInstance={objectUrlInstance}
-                        addItemToNavBar={this.props.addItemToNavBar}
-                        renderErrorComponent={() => {}}
-                      />
-                    )
-                }
-
                 {
                   this.state.showVolumeSlider && (
                     <ReactSlider
@@ -366,7 +366,7 @@ class Cleanup extends React.Component {
                       min={-25}
                       step={1}
                       onAfterChange={this._onVolumeSliderFinish}
-                      defaultValue={this.state.volume}
+                      defaultValue={this.state.volume * -1}
                     />
                   )
                 }

@@ -50,7 +50,6 @@ class Staging extends React.Component {
     this.state = {
       isSaving: false,
       startTime: props.stagedSample.startTime,
-      volume: props.stagedSample.volume,
       loopPadding: props.stagedSample.loopPadding,
       loopCount: props.stagedSample.loopCount
     }
@@ -291,17 +290,6 @@ class Staging extends React.Component {
                 )
               : null
           }
-
-          <span className={styles.inputContainer}>
-            <label htmlFor='volume'>volume (-infinity to +infinity)</label>
-            <input id='volume'
-              type='number'
-              step='1'
-              value={this.state.volume}
-              onChange={this._handleChange.bind(this, 'volume')}
-              placeholder='volume'
-              className={styles.formInput} />
-          </span>
 
           <span className={styles.inputContainer}>
             <label htmlFor='loopCount'># of loops</label>
