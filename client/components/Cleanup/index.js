@@ -351,7 +351,6 @@ class Cleanup extends React.Component {
                       <InstancePlaylist
                         objectUrlInstance={objectUrlInstance}
                         addItemToNavBar={this.props.addItemToNavBar}
-                        renderErrorComponent={() => {}}
                       />
                     )
                 }

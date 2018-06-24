@@ -219,10 +219,7 @@ class InstancePlaylist extends React.Component {
 
   render () {
     return (
-      <div>
-        {/* {this.state.error && this.props.renderErrorComponent(this._downloadAndArrangeSampleInstances.bind(this, this.props.instances))} */}
-        <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
-      </div>
+      <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
     )
   }
 }

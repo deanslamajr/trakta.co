@@ -319,7 +319,6 @@ class Recorder extends React.Component {
               trackDimensions={this.props.trackDimensions}
 
               addItemToNavBar={this.props.addItemToNavBar}
-              renderErrorComponent={() => {}}
               incrementPlaysCount
             />
           )

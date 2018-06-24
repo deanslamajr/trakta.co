@@ -1,0 +1,35 @@
+@import "../../../shared/styles/colors.css";
+
+.container {
+  display: flex;
+  justify-content: center;
+  z-index: 90;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  width: 4rem;
+  height: 4rem;
+  background-color: color(var(--blue) alpha(50%));
+  margin: 1px;
+}
+
+.selected {
+  background-color: color(var(--blue) blackness(50%) alpha(50%))
+}
+
+.second-column {
+  margin-top: 1rem
+}
+
+.third-column {
+  margin-top: 2rem
+}
+
+.fourth-column {
+  margin-top: 3rem
+}

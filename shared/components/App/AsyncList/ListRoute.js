@@ -181,9 +181,7 @@ class ListRoute extends React.Component {
           <InstancePlaylist
             instances={this.props.instances}
             trackDimensions={this.props.trackDimensions}
-
             addItemToNavBar={this.props.addItemToNavBar}
-            renderErrorComponent={() => {}}
             buttonColor={trakColor}
             incrementPlaysCount
             fetchTrak

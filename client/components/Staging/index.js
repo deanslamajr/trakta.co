@@ -6,6 +6,7 @@ import axios from 'axios'
 import classnames from 'classnames'
 import Tone from 'tone'
 
+import Sequencer from './Sequencer'
 import InstancePlaylist from '../InstancePlaylist'
 import SampleInstances from '../SampleInstances'
 import { getTrakRenderer } from '../../lib/TrakRenderer'
@@ -51,13 +52,15 @@ class Staging extends React.Component {
       isSaving: false,
       startTime: props.stagedSample.startTime,
       loopPadding: props.stagedSample.loopPadding,
-      loopCount: props.stagedSample.loopCount
+      loopCount: props.stagedSample.loopCount,
+      selectedItems: {}
     }
 
     this._saveRecording = this._saveRecording.bind(this)
     this._renderTrackPlayer = this._renderTrackPlayer.bind(this)
     this._getBlobFromObjectUrl = this._getBlobFromObjectUrl.bind(this)
     this._updateTrack = this._updateTrack.bind(this)
+    this._onSequencerItemSelect = this._onSequencerItemSelect.bind(this)
   }
 
   _updateTrack (stagedSample) {
@@ -191,16 +194,8 @@ class Staging extends React.Component {
       .then(({ data }) => data)
   }
 
-  _renderErrorComponent (clickHandler) {
-    return (
-      <div onClick={clickHandler} className={classnames()}>
-        <div className={classnames(styles.icon)}>&#9888;</div>
-      </div>
-    )
-  }
-
   _renderTrackPlayer () {
-    const { buffer } = this.state
+    const { buffer, selectedItems } = this.state
 
     return (
       <div>
@@ -211,15 +206,25 @@ class Staging extends React.Component {
             trackDimensions={this.props.trackDimensions}
 
             addItemToNavBar={this.props.addItemToNavBar}
-            renderErrorComponent={this._renderErrorComponent}
             buffer={buffer}
             />
         </div>
 
-        <SampleInstances />
+        <Sequencer
+          onItemSelect={this._onSequencerItemSelect}
+          selectedItems={selectedItems}
+          />
+
+        {/* <SampleInstances /> */}
 
       </div>
     )
+  }
+
+  _onSequencerItemSelect (itemId) {
+    const currentSelectedState = Object.assign({}, this.state.selectedItems)
+    currentSelectedState[itemId] = Boolean(!currentSelectedState[itemId])
+    this.setState({ selectedItems: currentSelectedState })
   }
 
   componentWillReceiveProps (nextProps) {
@@ -272,7 +277,7 @@ class Staging extends React.Component {
   render () {
     return (
       <div>
-        <form className={styles.container} onSubmit={this._saveRecording}>
+        {/* <form className={styles.container} onSubmit={this._saveRecording}>
           {
             this.props.instances && this.props.instances.length
               ? (
@@ -294,7 +299,7 @@ class Staging extends React.Component {
           
 
           <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} />
-        </form>
+        </form> */}
 
         {
           this.state.buffer
