@@ -57,6 +57,13 @@ function syncPlayerToTransport (samplePlayer, playerStartTime, transport = Tone.
   }, playerStartTime)
 }
 
+function addPlayerToTransport (samplePlayer, time, transport = Tone.Transport) {
+  const playerStartTime = `0:0:${time}`
+  transport.schedule(() => {
+    samplePlayer.start()
+  }, playerStartTime)
+}
+
 function addPluginsToPlayer (samplePlayer, volume, panning) {
   // Plugins
   //
@@ -66,16 +73,34 @@ function addPluginsToPlayer (samplePlayer, volume, panning) {
   samplePlayer.chain(panVol, /* limiter, */ Tone.Master)
 }
 
-function addBufferToTrak (buffer, instance, trakStartTime, transport) {
-  let i = 0
-  do {
-    const samplePlayer = new Tone.Player(buffer)
-    const playerStartTime = (instance.startTime + (i * instance.loopPadding)) - trakStartTime
+function addBufferToTrak (buffer, instance, trakStartTime, transport, times) {
+  if (times) {
+    const timesArray = Object.keys(times)
 
-    addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
-    syncPlayerToTransport(samplePlayer, playerStartTime, transport)
-    i++
-  } while (i <= (instance.loopCount || 0))
+    timesArray.forEach(time => {
+      if (times[time]) {
+        const samplePlayer = new Tone.Player(buffer)
+
+        addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
+        // syncPlayerToTransport(samplePlayer, time, transport)
+        addPlayerToTransport(samplePlayer, time, transport)
+      }
+    })
+  }
+
+  /** @todo deprecate the logic in this else block */
+  else {
+    let i = 0
+
+    do {
+      const samplePlayer = new Tone.Player(buffer)
+      const playerStartTime = (instance.startTime + (i * instance.loopPadding)) - trakStartTime
+
+      addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
+      syncPlayerToTransport(samplePlayer, playerStartTime, transport)
+      i++
+    } while (i <= (instance.loopCount || 0))
+  }
 }
 
 function didInstancesCacheMiss (instances) {
@@ -125,7 +150,7 @@ class PlaylistRenderer {
     player = null
   }
 
-  getPlayer ({ trackDimensions, objectUrlInstance, instances, buffer, stagedSample, loadTaskCb, fetchTrak }) {
+  getPlayer ({ trackDimensions, objectUrlInstance, instances, sequencerInstance, stagedSample, loadTaskCb, fetchTrak }) {
     /**
      * @todo allow for both objectUrl and instances to be on the same player
      */
@@ -155,11 +180,11 @@ class PlaylistRenderer {
         length: trackLength
       } = trackDimensions
 
-      const trakAndOrBufferExist = (trackLength && instances && instances.length) || buffer
+      const trakAndOrBufferExist = (trackLength && instances && instances.length) || sequencerInstance
 
       let areInstancesCacheMiss
       // check isBufferCacheMiss first bc its quicker than checking the instances cache miss
-      const cacheMiss = isBufferCacheMiss(buffer, stagedSample) || (areInstancesCacheMiss = didInstancesCacheMiss(instances))
+      const cacheMiss = isBufferCacheMiss(sequencerInstance && sequencerInstance.buffer, stagedSample) || (areInstancesCacheMiss = didInstancesCacheMiss(instances))
 
       // skip all this if
       // 1. this is a trak Fetch (we don't want to cache these) OR
@@ -178,10 +203,17 @@ class PlaylistRenderer {
               ? trackStartTime
               : 0
 
-            // if buffer exists, add the staged sample to the track
-            if (buffer) {
-              cachedStagedBuffer = buffer
-              addBufferToTrak(buffer, stagedSample, trackStartTime, OfflineTransport)
+
+            if (sequencerInstance) {
+              cachedStagedBuffer = sequencerInstance.buffer
+
+              addBufferToTrak(
+                sequencerInstance.buffer,
+                stagedSample,
+                trackStartTime,
+                OfflineTransport,
+                sequencerInstance.times
+              )
             }
 
             instances.forEach(instance => {
@@ -196,7 +228,7 @@ class PlaylistRenderer {
             })
 
             OfflineTransport.start()
-          }, trackLength || buffer.get().duration)
+          }, (sequencerInstance && 6) || trackLength) /** 6 seconds is the default timeslice length */
         })
         .then(buffer => {
           loadTaskCb()

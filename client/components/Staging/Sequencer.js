@@ -38,6 +38,16 @@ class Sequencer extends React.Component {
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[21]})} onClick={() => onItemSelect(21)} />
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[25]})} onClick={() => onItemSelect(25)} />
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[29]})} onClick={() => onItemSelect(29)} />
+
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[33]})} onClick={() => onItemSelect(33)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[37]})} onClick={() => onItemSelect(37)} />
+
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[41]})} onClick={() => onItemSelect(41)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[45]})} onClick={() => onItemSelect(45)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[49]})} onClick={() => onItemSelect(49)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[53]})} onClick={() => onItemSelect(53)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[57]})} onClick={() => onItemSelect(57)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[61]})} onClick={() => onItemSelect(61)} />
         </span>
 
         <span className={classnames(styles.column, styles.secondColumn)}>
@@ -49,6 +59,16 @@ class Sequencer extends React.Component {
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[22]})} onClick={() => onItemSelect(22)} />
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[26]})} onClick={() => onItemSelect(26)} />
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[30]})} onClick={() => onItemSelect(30)} />
+
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[34]})} onClick={() => onItemSelect(34)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[38]})} onClick={() => onItemSelect(38)} />
+
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[42]})} onClick={() => onItemSelect(42)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[46]})} onClick={() => onItemSelect(46)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[50]})} onClick={() => onItemSelect(50)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[54]})} onClick={() => onItemSelect(54)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[58]})} onClick={() => onItemSelect(58)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[62]})} onClick={() => onItemSelect(62)} />
         </span>
 
         <span className={classnames(styles.column, styles.thirdColumn)}>
@@ -60,6 +80,16 @@ class Sequencer extends React.Component {
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[23]})} onClick={() => onItemSelect(23)} />
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[27]})} onClick={() => onItemSelect(27)} />
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[31]})} onClick={() => onItemSelect(31)} />
+
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[35]})} onClick={() => onItemSelect(35)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[39]})} onClick={() => onItemSelect(39)} />
+
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[43]})} onClick={() => onItemSelect(43)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[47]})} onClick={() => onItemSelect(47)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[51]})} onClick={() => onItemSelect(51)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[55]})} onClick={() => onItemSelect(55)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[59]})} onClick={() => onItemSelect(59)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[63]})} onClick={() => onItemSelect(63)} />
         </span>
 
         <span className={classnames(styles.column, styles.fourthColumn)}>
@@ -71,6 +101,16 @@ class Sequencer extends React.Component {
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[24]})} onClick={() => onItemSelect(24)} />
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[28]})} onClick={() => onItemSelect(28)} />
           <div className={classnames(styles.item, {[styles.selected]: selectedItems[32]})} onClick={() => onItemSelect(32)} />
+
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[36]})} onClick={() => onItemSelect(36)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[40]})} onClick={() => onItemSelect(40)} />
+
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[44]})} onClick={() => onItemSelect(44)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[48]})} onClick={() => onItemSelect(48)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[52]})} onClick={() => onItemSelect(52)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[56]})} onClick={() => onItemSelect(56)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[60]})} onClick={() => onItemSelect(60)} />
+          <div className={classnames(styles.item, {[styles.selected]: selectedItems[64]})} onClick={() => onItemSelect(64)} />
         </span>
       </div>
     )

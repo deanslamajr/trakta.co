@@ -197,6 +197,11 @@ class Staging extends React.Component {
   _renderTrackPlayer () {
     const { buffer, selectedItems } = this.state
 
+    const sequencerInstance = {
+      times: selectedItems,
+      buffer
+    }
+
     return (
       <div>
         <div className={styles.label}>
@@ -206,7 +211,7 @@ class Staging extends React.Component {
             trackDimensions={this.props.trackDimensions}
 
             addItemToNavBar={this.props.addItemToNavBar}
-            buffer={buffer}
+            sequencerInstance={sequencerInstance}
             />
         </div>
 

@@ -103,7 +103,7 @@ class InstancePlaylist extends React.Component {
     }, 0)
   }
 
-  _renderTrak (instances, stagedSample, trackDimensions, objectUrlInstance) {
+  _renderTrak (instances, stagedSample, trackDimensions, objectUrlInstance, sequencerInstance) {
     // remove play button
     this.props.addItemToNavBar({
       TOP_RIGHT: {
@@ -119,7 +119,7 @@ class InstancePlaylist extends React.Component {
       objectUrlInstance,
       trackDimensions,
       instances,
-      buffer: this.props.buffer,
+      sequencerInstance,
       stagedSample,
       loadTaskCb: this.props.finishLoadTask.bind(this),
       fetchTrak: this.props.fetchTrak
@@ -189,7 +189,7 @@ class InstancePlaylist extends React.Component {
   }
 
   componentDidMount () {
-    this._renderTrak(this.props.instances, this.props.stagedSample, this.props.trackDimensions, this.props.objectUrlInstance)
+    this._renderTrak(this.props.instances, this.props.stagedSample, this.props.trackDimensions, this.props.objectUrlInstance, this.props.sequencerInstance)
   }
 
   componentWillReceiveProps (nextProps) {
@@ -198,12 +198,21 @@ class InstancePlaylist extends React.Component {
     const objectUrlInstanceHasChanged = !isEqual(this.props.objectUrlInstance, nextProps.objectUrlInstance)
     const trackDimensionsHasChanged = !isEqual(this.props.trackDimensions, nextProps.trackDimensions)
 
-    if (instancesHaveChanged || stagedSamplePropsHaveChanged || objectUrlInstanceHasChanged || trackDimensionsHasChanged) {
+    const sequencerTimesHaveChanged = this.props.sequencerInstance
+      ? !isEqual(this.props.sequencerInstance.times, nextProps.sequencerInstance.times)
+      : false
+
+    if (instancesHaveChanged ||
+      stagedSamplePropsHaveChanged ||
+      objectUrlInstanceHasChanged ||
+      trackDimensionsHasChanged ||
+      sequencerTimesHaveChanged
+    ) {
       if (Tone.Transport.state === 'started') {
         this._stopPlaybackAndSendSignal()
       }
 
-      this._renderTrak(nextProps.instances, nextProps.stagedSample, nextProps.trackDimensions, nextProps.objectUrlInstance)
+      this._renderTrak(nextProps.instances, nextProps.stagedSample, nextProps.trackDimensions, nextProps.objectUrlInstance, nextProps.sequencerInstance)
     }
   }
 
