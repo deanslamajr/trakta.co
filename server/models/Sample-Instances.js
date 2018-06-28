@@ -10,30 +10,10 @@ const SampleInstances = sequelize.define('sample_instances',
       primaryKey: true,
       allowNull: false
     },
-    start_time: {
-      type: Sequelize.DOUBLE,
+    sequencer_csv: {
+      type: Sequelize.STRING,
       allowNull: false,
-      defaultValue: 0.0
-    },
-    volume: {
-      type: Sequelize.DOUBLE,
-      allowNull: false,
-      defaultValue: -6.0
-    },
-    panning: {
-      type: Sequelize.DOUBLE,
-      allowNull: false,
-      defaultValue: 0.0
-    },
-    loop_count: {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-      defaultValue: 0
-    },
-    loop_padding: {
-      type: Sequelize.DOUBLE,
-      allowNull: false,
-      defaultValue: 0.0
+      defaultValue: '1'
     }
   },
   {

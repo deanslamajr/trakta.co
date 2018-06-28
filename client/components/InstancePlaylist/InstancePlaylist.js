@@ -117,7 +117,6 @@ class InstancePlaylist extends React.Component {
 
     this.playlistRenderer.getPlayer({
       objectUrlInstance,
-      trackDimensions,
       instances,
       sequencerInstance,
       stagedSample,

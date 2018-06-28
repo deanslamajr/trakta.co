@@ -9,12 +9,10 @@ import { sequelize } from '../adapters/db'
 import { saveBlobToS3 } from '../adapters/s3'
 
 async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName) {
-  const duration = Number.parseFloat(queryStrings.duration) || 0.0
-  const start_time = Number.parseFloat(queryStrings.startTime) || 0.0 // eslint-disable-line 
-  const volume = queryStrings.volume || -6.0
-  const panning = queryStrings.panning || 0.0
-  const loop_count = Number.parseFloat(queryStrings.loopCount) || 0 // eslint-disable-line 
-  const loop_padding = Number.parseFloat(queryStrings.loopPadding) || 0.0 // eslint-disable-line 
+  const duration = Number.parseFloat(queryStrings.sampleDuration) || 0.0
+  const trakDuration = Number.parseFloat(queryStrings.trakDuration) || 0.0
+  const sequencerCsv = queryStrings.sequencerCsv || '1'
+
   let trakName = queryStrings.trakName
   let trak
   let version
@@ -43,14 +41,9 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
 
       // @todo ensure that trakName is not already in use!!!
 
-      const sampleDurationWithLoops = loop_count === 0 // eslint-disable-line 
-      ? duration
-      : (loop_count * loop_padding) + duration // eslint-disable-line 
-
       trak = await player.createTrak({
         name: trakName,
-        start_time: 0,
-        duration: sampleDurationWithLoops
+        duration: trakDuration
       }, { transaction })
 
       version = await trak.createVersion({ active: false }, { transaction })
@@ -72,44 +65,20 @@ async function createSampleTrakSampleInstance (queryStrings = {}, s3ResourceName
         last_contribution_date: sequelize.fn('NOW')
       }
 
-      const currentDuration = Number.parseFloat(trak.duration)
-      const sampleStartTime = start_time // eslint-disable-line
-
-      const sampleDuration = loop_count === 0 // eslint-disable-line 
-        ? duration
-        : (loop_count * loop_padding) + duration // eslint-disable-line 
-
       /**
        * update trak.start_time ??
        */
-      if (sampleStartTime < trak.start_time) {
-        updates = Object.assign({}, updates, {
-          start_time: sampleStartTime,
-          duration: currentDuration + (trak.start_time - sampleStartTime)
-        })
-      }
-
-      /**
-       * update trak.duration ??
-       */
-      if ((sampleStartTime + sampleDuration) > trak.start_time + currentDuration) {
-        const currentDurationUpdate = updates.duration || currentDuration
-        const endPointDiff = (sampleStartTime + sampleDuration) - (trak.start_time + currentDuration)
-        const newDuration = currentDurationUpdate + endPointDiff
-        updates = Object.assign({}, updates, { duration: newDuration })
+      if (trak.duration < trakDuration) {
+        updates.duration = trakDuration
       }
 
       await trak.update(updates, { transaction })
     }
 
     await sample.createSample_instance({
-      start_time,
-      volume,
-      panning,
-      player_id: ANONYMOUS_PLAYER_ID,
+      sequencer_csv: sequencerCsv,
+      player_id: player.id,
       trak_id: trak.id,
-      loop_count,
-      loop_padding,
       version_id: version.id
     }, { transaction })
 

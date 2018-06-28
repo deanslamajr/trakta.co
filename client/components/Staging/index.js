@@ -10,6 +10,7 @@ import Sequencer from './Sequencer'
 import InstancePlaylist from '../InstancePlaylist'
 import SampleInstances from '../SampleInstances'
 import { getTrakRenderer } from '../../lib/TrakRenderer'
+import { getPlaylistRenderer } from '../../lib/PlaylistRenderer'
 
 import * as selectors from '../../../shared/reducers'
 
@@ -26,18 +27,6 @@ function isNotANumber (unknown) {
   return isNaN(parseFloat(unknown))
 }
 
-function validateData (absoluteStartTime, duration, volume, panning, loopCount, loopPadding) {
-  if (isNotANumber(absoluteStartTime) ||
-    isNotANumber(duration) ||
-    isNotANumber(volume) ||
-    isNotANumber(panning) ||
-    isNotANumber(loopCount) ||
-    isNotANumber(loopPadding)
-  ) {
-    throw new Error('Malformed submit data')
-  }
-}
-
 function getMainEditUrl (url) {
   return url.replace('/staging', '')
 }
@@ -47,6 +36,7 @@ class Staging extends React.Component {
     super(props)
 
     this.trakRenderer = getTrakRenderer()
+    this.playlistRenderer = getPlaylistRenderer()
 
     this.state = {
       isSaving: false,
@@ -95,17 +85,15 @@ class Staging extends React.Component {
   }
 
   _saveRecording (event) {
-    const {
-      startTime: stagedSampleStartTime,
-      volume,
-      panning,
-      duration,
-      loopCount,
-      loopPadding
-    } = this.props.stagedSample
-
     // prevent page refresh
     event.preventDefault()
+
+    const {
+      buffer,
+      selectedItems
+    } = this.state
+
+    const sampleDuration = this.state.buffer.get().duration
 
     this.props.addItemToNavBar(null)
 
@@ -122,15 +110,12 @@ class Staging extends React.Component {
         }
       }
 
-      // validate that data is properly formatted
-      // @todo handle invalid data state gracefully
-      validateData(stagedSampleStartTime, duration, volume, panning, loopCount, loopPadding)
-
       const trakName = this.props.trakName || this.props.match.url.split('/')[2]
+      const sequencerCsv = Object.keys(selectedItems).filter(item => selectedItems[item]).join(',')
 
       // @todo pass along some kind of token (cookie?) that the backend can verify that this POST has authority to make an update
       // e.g. user is actually looking at the page and is not a robot
-      const queryString = `?trakName=${trakName}&startTime=${stagedSampleStartTime}&duration=${duration}&volume=${volume}&panning=${panning}&loopCount=${loopCount}&loopPadding=${loopPadding}`
+      const queryString = `?trakName=${trakName}&sampleDuration=${sampleDuration}&sequencerCsv=${sequencerCsv}&trakDuration=${this.playlistRenderer.getDuration()}`
 
       this._getBlobFromObjectUrl()
         .then((data) => axios.post(`/api/sample${queryString}`, data, config))
@@ -205,7 +190,6 @@ class Staging extends React.Component {
     return (
       <div>
         <div className={styles.label}>
-          {/* Play button  */}
           <InstancePlaylist
             instances={this.props.instances}
             trackDimensions={this.props.trackDimensions}
@@ -282,36 +266,12 @@ class Staging extends React.Component {
   render () {
     return (
       <div>
-        {/* <form className={styles.container} onSubmit={this._saveRecording}>
-          {
-            this.props.instances && this.props.instances.length
-              ? (
-                <span className={styles.inputContainer}>
-                  <label htmlFor='startTime'>startTime</label>
-                  <input
-                    id='startTime'
-                    type='number'
-                    step='0.01'
-                    value={this.state.startTime}
-                    onChange={this._handleChange.bind(this, 'startTime')}
-                    placeholder='startTime'
-                    className={styles.formInput} />
-                </span>
-                )
-              : null
-          }
-
-          
-
-          <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} />
-        </form> */}
-
         {
           this.state.buffer
             ? this._renderTrackPlayer()
             : null
         }
-
+        <div className={classnames({ [styles.loadSpinner]: this.state.isSaving })} />
       </div>
     )
   }
