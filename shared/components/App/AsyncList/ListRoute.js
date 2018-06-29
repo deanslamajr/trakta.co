@@ -97,9 +97,7 @@ class ListRoute extends React.Component {
               id: trak.id,
               duration
             },
-            loop_count: 0,
-            loop_padding: 0,
-            start_time: 0
+            sequencer_csv: '1'
           }
         ]
 
