@@ -9,12 +9,14 @@ import randToken from 'rand-token'
 import viewportDimensions from 'viewport-dimensions'
 
 import { getPlaylistRenderer } from '../../lib/PlaylistRenderer'
+import { getTrakRenderer } from '../../lib/TrakRenderer'
 
 import * as selectors from '../../../shared/reducers'
 import {
   beginInitialFetch,
   endFetchSample,
   finishLoadTask } from '../../../shared/actions/samples'
+import { setStagedObjectUrl } from '../../../shared/actions/recorder'
 
 import styles from './InstancePlaylist.css'
 
@@ -51,6 +53,7 @@ class InstancePlaylist extends React.Component {
     super(props)
 
     this.playlistRenderer = getPlaylistRenderer()
+    this.getTrakRenderer = getTrakRenderer()
 
     this.state = {
       error: null
@@ -128,6 +131,12 @@ class InstancePlaylist extends React.Component {
 
         if (latestPlayer) {
           this._prepTransport(latestPlayer.buffer.get().duration)
+
+          if (this.props.saveObjectUrl) {
+            const objectUrl = this.getTrakRenderer.createObjectUrlFromBuffer(latestPlayer.buffer)
+            this.props.setStagedObjectUrl(objectUrl)
+          }
+
           player = latestPlayer.sync().start()
           this.props.addItemToNavBar({
             TOP_RIGHT: {
@@ -235,7 +244,8 @@ class InstancePlaylist extends React.Component {
 const mapActionsToProps = {
   endFetchSample,
   beginInitialFetch,
-  finishLoadTask
+  finishLoadTask,
+  setStagedObjectUrl
 }
 
 function mapStateToProps (state, ownProps) {

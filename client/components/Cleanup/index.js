@@ -83,7 +83,6 @@ class Cleanup extends React.Component {
 
     //audioElement = new Audio([objectUrl]) // eslint-disable-line
 
-    this.props.setStagedObjectUrl(objectUrl)
     this.setState({
       objectUrl,
       isObjectUrlReady: true
@@ -334,94 +333,92 @@ class Cleanup extends React.Component {
       <div ref={(container) => { this.container = container }}>
         <div className={styles.label}>
           {
-            this.props.objectUrl &&
-            (
-              <div>
-                <canvas
-                  className={styles.canvas}
-                  width={this.state.canvasWidth || 0}
-                  height={this.state.canvasHeight || 0}
-                  ref={(canvas) => { this.canvas = canvas }}
-                />
-                <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
-                <div ref={(ref) => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
-                {
-                  this.state.isObjectUrlReady &&
-                    (
-                      <InstancePlaylist
-                        objectUrlInstance={objectUrlInstance}
-                        addItemToNavBar={this.props.addItemToNavBar}
-                      />
-                    )
-                }
-
-                <div>
-                  <ReactSlider
-                    orientation='vertical'
-                    className={styles.sliderLeft}
-                    handleClassName={classnames(styles.leftHandle, styles.handle)}
-                    onChange={this._onLeftSliderChange}
-                    max={maxClipValue}
-                    step={stepValue}
-                    onAfterChange={this._onLeftSliderFinish}
-                    defaultValue={this.props.cleanup.clipStart}
-                  />
-                  <ReactSlider
-                    orientation='vertical'
-                    className={styles.sliderRight}
-                    handleClassName={classnames(styles.rightHandle, styles.handle)}
-                    onChange={this._onRightSliderChange}
-                    max={maxClipValue}
-                    step={stepValue}
-                    onAfterChange={this._onRightSliderFinish}
-                    defaultValue={this.props.cleanup.clipEnd}
-                  />
-                </div>
-
-                {
-                  this.state.showVolumeSlider && (
-                    <ReactSlider
-                      orientation='vertical'
-                      className={styles.volumeSlider}
-                      handleClassName={styles.volumeSliderHandle}
-                      max={25}
-                      min={-25}
-                      step={1}
-                      onAfterChange={this._onVolumeSliderFinish}
-                      defaultValue={this.state.volume * -1}
+            <div>
+              <canvas
+                className={styles.canvas}
+                width={this.state.canvasWidth || 0}
+                height={this.state.canvasHeight || 0}
+                ref={(canvas) => { this.canvas = canvas }}
+              />
+              <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
+              <div ref={(ref) => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
+              {
+                this.state.isObjectUrlReady &&
+                  (
+                    <InstancePlaylist
+                      objectUrlInstance={objectUrlInstance}
+                      addItemToNavBar={this.props.addItemToNavBar}
+                      saveObjectUrl
                     />
                   )
-                }
+              }
 
-                {
-                  this.state.showEffectsModal && (
-                    <div className={styles.container}>
-                      <span className={styles.inputContainer}>
-                        <label htmlFor='loopCount'># of loops</label>
-                        <input id='loopCount'
-                          type='number'
-                          step='1'
-                          value={this.state.loopCount}
-                          onChange={this._handleChange.bind(this, 'loopCount')}
-                          placeholder='# of loops'
-                          className={styles.formInput} />
-                      </span>
-
-                      <span className={styles.inputContainer}>
-                        <label htmlFor='loopPadding'>Space between loops</label>
-                        <input id='loopPadding'
-                          type='number'
-                          step='1'
-                          value={this.state.loopPadding}
-                          onChange={this._handleChange.bind(this, 'loopPadding')}
-                          placeholder='padding'
-                          className={styles.formInput} />
-                      </span>
-                    </div>
-                  )
-                }
+              <div>
+                <ReactSlider
+                  orientation='vertical'
+                  className={styles.sliderLeft}
+                  handleClassName={classnames(styles.leftHandle, styles.handle)}
+                  onChange={this._onLeftSliderChange}
+                  max={maxClipValue}
+                  step={stepValue}
+                  onAfterChange={this._onLeftSliderFinish}
+                  defaultValue={this.props.cleanup.clipStart}
+                />
+                <ReactSlider
+                  orientation='vertical'
+                  className={styles.sliderRight}
+                  handleClassName={classnames(styles.rightHandle, styles.handle)}
+                  onChange={this._onRightSliderChange}
+                  max={maxClipValue}
+                  step={stepValue}
+                  onAfterChange={this._onRightSliderFinish}
+                  defaultValue={this.props.cleanup.clipEnd}
+                />
               </div>
-            )
+
+              {
+                this.state.showVolumeSlider && (
+                  <ReactSlider
+                    orientation='vertical'
+                    className={styles.volumeSlider}
+                    handleClassName={styles.volumeSliderHandle}
+                    max={25}
+                    min={-25}
+                    step={1}
+                    onAfterChange={this._onVolumeSliderFinish}
+                    defaultValue={this.state.volume * -1}
+                  />
+                )
+              }
+
+              {
+                this.state.showEffectsModal && (
+                  <div className={styles.container}>
+                    <span className={styles.inputContainer}>
+                      <label htmlFor='loopCount'># of loops</label>
+                      <input id='loopCount'
+                        type='number'
+                        step='1'
+                        value={this.state.loopCount}
+                        onChange={this._handleChange.bind(this, 'loopCount')}
+                        placeholder='# of loops'
+                        className={styles.formInput} />
+                    </span>
+
+                    <span className={styles.inputContainer}>
+                      <label htmlFor='loopPadding'>Space between loops</label>
+                      <input id='loopPadding'
+                        type='number'
+                        step='1'
+                        value={this.state.loopPadding}
+                        onChange={this._handleChange.bind(this, 'loopPadding')}
+                        placeholder='padding'
+                        className={styles.formInput} />
+                    </span>
+                  </div>
+                )
+              }
+            </div>
           }
         </div>
       </div>
@@ -432,7 +429,6 @@ class Cleanup extends React.Component {
 const mapActionsToProps = {
   updateDimensionsWithAdditionalSample,
   setStagedSample,
-  setStagedObjectUrl,
   setCleanup
 }
 
