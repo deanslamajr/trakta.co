@@ -8,7 +8,6 @@ import Tone from 'tone'
 
 import Sequencer from './Sequencer'
 import InstancePlaylist from '../InstancePlaylist'
-import SampleInstances from '../SampleInstances'
 import { getTrakRenderer } from '../../lib/TrakRenderer'
 import { getPlaylistRenderer } from '../../lib/PlaylistRenderer'
 
@@ -22,10 +21,6 @@ import {
 import { reset as resetSampleLoaderState } from '../../../shared/actions/samples'
 
 import styles from './staging.css'
-
-function isNotANumber (unknown) {
-  return isNaN(parseFloat(unknown))
-}
 
 function getMainEditUrl (url) {
   return url.replace('/staging', '')
@@ -93,7 +88,7 @@ class Staging extends React.Component {
       selectedItems
     } = this.state
 
-    const sampleDuration = this.state.buffer.get().duration
+    const sampleDuration = buffer.get().duration
 
     this.props.addItemToNavBar(null)
 
@@ -196,16 +191,13 @@ class Staging extends React.Component {
 
             addItemToNavBar={this.props.addItemToNavBar}
             sequencerInstance={sequencerInstance}
-            />
+          />
         </div>
 
         <Sequencer
           onItemSelect={this._onSequencerItemSelect}
           selectedItems={selectedItems}
-          />
-
-        {/* <SampleInstances /> */}
-
+        />
       </div>
     )
   }

@@ -12,7 +12,7 @@ import styles from './Sequencer.css'
 const numberOfColumns = 4
 const durationOfTrakInSeconds = 6
 const durationOfSixteenthInSeconds = (new Tone.Time('0:0:1')).toSeconds()
-const totalNumberOfSixteenths = Math.ceil(durationOfTrakInSeconds/durationOfSixteenthInSeconds)
+const totalNumberOfSixteenths = Math.ceil(durationOfTrakInSeconds / durationOfSixteenthInSeconds)
 
 class Sequencer extends React.Component {
   render () {
@@ -43,7 +43,7 @@ class Sequencer extends React.Component {
                 className={styles.column}
                 style={{ marginTop: `${index}rem` }}
               >
-              {
+                {
                 column.map(itemNumber => (
                   <div
                     key={itemNumber}

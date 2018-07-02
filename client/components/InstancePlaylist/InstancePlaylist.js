@@ -16,7 +16,10 @@ import {
   beginInitialFetch,
   endFetchSample,
   finishLoadTask } from '../../../shared/actions/samples'
-import { setStagedObjectUrl } from '../../../shared/actions/recorder'
+import {
+  setStagedObjectUrl,
+  setStagedSample
+} from '../../../shared/actions/recorder'
 
 import styles from './InstancePlaylist.css'
 
@@ -75,7 +78,6 @@ class InstancePlaylist extends React.Component {
   }
 
   _prepTransport (trakDuration) {
-    //const { length: trakDuration } = this.props.trackDimensions
     const width = viewportDimensions
       ? viewportDimensions.width() && viewportDimensions.width()
       : 300
@@ -245,7 +247,8 @@ const mapActionsToProps = {
   endFetchSample,
   beginInitialFetch,
   finishLoadTask,
-  setStagedObjectUrl
+  setStagedObjectUrl,
+  setStagedSample
 }
 
 function mapStateToProps (state, ownProps) {

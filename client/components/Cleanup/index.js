@@ -11,7 +11,6 @@ import * as selectors from '../../../shared/reducers'
 import { updateDimensionsWithAdditionalSample } from '../../../shared/actions/trak'
 import {
   setStagedSample,
-  setStagedObjectUrl,
   setCleanup
 } from '../../../shared/actions/recorder'
 
@@ -19,15 +18,7 @@ import { getSampleCreator } from '../../lib/SampleCreator'
 
 import styles from './cleanup.css'
 
-let audioElement
-let intervalAnimationId
-let position
-let onEndPlaybackLoop
-
-function stopPlayback () {
-  audioElement.pause()
-  audioElement.currentTime = 0.0
-}
+const maxLoopCount = 30
 
 function getMainEditUrl (url) {
   return url.replace('/cleanup', '')
@@ -47,29 +38,27 @@ class Cleanup extends React.Component {
 
     this.state = {
       isPlaying: false,
-      //duration: 0,
       isFirstRender: true,
       isObjectUrlReady: false,
       showVolumeSlider: false,
       volume: this.props.stagedSample.volume,
       showEffectsModal: false,
       loopCount: this.props.stagedSample.loopCount,
-      loopPadding: this.props.stagedSample.loopPadding
+      loopPadding: this.props.stagedSample.loopPadding || null
     }
 
     this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
     this._onLeftSliderFinish = this._onLeftSliderFinish.bind(this)
     this._onRightSliderChange = this._onRightSliderChange.bind(this)
     this._onRightSliderFinish = this._onRightSliderFinish.bind(this)
-    //this._startPlayback = this._startPlayback.bind(this)
-    //this._stopPlayback = this._stopPlayback.bind(this)
     this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
     this._renderSample = this._renderSample.bind(this)
-    this._onEndPlaybackLoop = this._onEndPlaybackLoop.bind(this)
     this._handleBackAction = this._handleBackAction.bind(this)
     this._toggleVolumeSlider = this._toggleVolumeSlider.bind(this)
     this._onVolumeSliderFinish = this._onVolumeSliderFinish.bind(this)
     this._toggleEffectsModal = this._toggleEffectsModal.bind(this)
+    this._onLoopCountSliderFinish = this._onLoopCountSliderFinish.bind(this)
+    this._onLoopPaddingSliderFinish = this._onLoopPaddingSliderFinish.bind(this)
   }
 
   _clickUseThisSelection () {
@@ -81,12 +70,17 @@ class Cleanup extends React.Component {
   _renderSample (start, stop) {
     const objectUrl = this.sampleCreator.clipBlobAndReturnObjectUrl(start, stop)
 
-    //audioElement = new Audio([objectUrl]) // eslint-disable-line
+    this.sampleCreator.createBuffer(objectUrl)
+      .then(buffer => {
+        const duration = buffer.get().duration
+        this.setState({
+          duration,
+          objectUrl,
+          isObjectUrlReady: true
+        })
 
-    this.setState({
-      objectUrl,
-      isObjectUrlReady: true
-    })
+        this.props.setStagedSample({ duration })
+      })
   }
 
   _drawWaveForm () {
@@ -116,20 +110,6 @@ class Cleanup extends React.Component {
     this.canvasContext.closePath()
   }
 
-  // _stopPlayback () {
-  //   stopPlayback()
-  //   audioElement.removeEventListener('ended', onEndPlaybackLoop)
-  //   audioElement._isPlaying = false
-  //   clearInterval(intervalAnimationId)
-  //   this.playIndicatorEl.style.backgroundColor = 'transparent'
-
-  //   this.setState({ isPlaying: false }, () => {
-  //     this.props.addItemToNavBar({
-  //       TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
-  //     }, true)
-  //   })
-  // }
-
   _toggleVolumeSlider () {
     this.setState({ showVolumeSlider: !this.state.showVolumeSlider })
   }
@@ -137,69 +117,6 @@ class Cleanup extends React.Component {
   _toggleEffectsModal () {
     this.setState({ showEffectsModal: !this.state.showEffectsModal })
   }
-
-  _redrawPosition (bottom, displacementPerFrame, top) {
-    position = position <= bottom
-      ? position + displacementPerFrame
-      : bottom
-
-    if (this.playIndicatorEl) {
-      this.playIndicatorEl.style.top = `${position}px`
-    }
-  }
-
-  _onEndPlaybackLoop (top, bottom, displacementPerFrame, animationInterval) {
-    clearInterval(intervalAnimationId)
-    this.playIndicatorEl.style.backgroundColor = 'transparent'
-    if (audioElement._isPlaying) {
-      this._startPlaybackAudioAndAnimation(top, bottom, displacementPerFrame, animationInterval)
-    }
-  }
-
-  _startPlaybackAudioAndAnimation (top, bottom, displacementPerFrame, animationInterval) {
-    position = top
-
-    audioElement.addEventListener('play', () => {
-      if (this.playIndicatorEl) {
-        this.playIndicatorEl.style.backgroundColor = 'black'
-      }
-
-      const redrawPosition = this._redrawPosition.bind(this)
-      onEndPlaybackLoop = this._onEndPlaybackLoop.bind(this, top, bottom, displacementPerFrame, animationInterval)
-
-      redrawPosition(bottom, displacementPerFrame, top)
-
-      intervalAnimationId = setInterval(() => redrawPosition(bottom, displacementPerFrame, top), animationInterval)
-
-      audioElement.addEventListener('ended', onEndPlaybackLoop, { once: true })
-    },
-    { once: true })
-
-    audioElement.play()
-    audioElement._isPlaying = true
-  }
-
-  // _startPlayback () {
-  //   this.props.addItemToNavBar({
-  //     TOP_RIGHT: { type: 'STOP', cb: this._stopPlayback }
-  //   }, true)
-
-  //   const maxClipValue = this.sampleCreator.getDataBufferLength()
-  //   const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
-  //   const bottom = this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue)
-  //   const animationDistance = bottom - top
-
-  //   const animationInterval = 20
-  //   const sampleDuration = audioElement.duration * 1000
-  //   const numberOfFrames = (sampleDuration / animationInterval) + 1
-
-  //   const displacementPerFrame = animationDistance / numberOfFrames
-
-  //   this.setState({
-  //     isPlaying: true,
-  //     duration: audioElement.duration
-  //   }, () => this._startPlaybackAudioAndAnimation(top, bottom, displacementPerFrame, animationInterval))
-  // }
 
   _onLeftSliderChange (value) {
     this.setState({ isObjectUrlReady: false })
@@ -219,6 +136,16 @@ class Cleanup extends React.Component {
     this.props.setStagedSample({
       volume
     })
+  }
+
+  _onLoopCountSliderFinish (value) {
+    this.setState({ loopCount: value })
+    this.props.setStagedSample({ loopCount: value })
+  }
+
+  _onLoopPaddingSliderFinish (value) {
+    this.setState({ loopPadding: value })
+    this.props.setStagedSample({ loopPadding: value })
   }
 
   _onLeftSliderFinish (value) {
@@ -245,25 +172,8 @@ class Cleanup extends React.Component {
     this.props.history.push(`${mainEditUrl}/recorder`)
   }
 
-  _handleChange (type, event) {
-    let parsedValue = parseFloat(event.target.value)
-
-    if (Number.isNaN(parsedValue)) {
-      parsedValue = 0
-    }
-
-    let stateUpdate = {
-      [type]: parsedValue
-    }
-
-    this.setState(stateUpdate, () => this.props.setStagedSample({ [type]: parsedValue }))
-  }
-
   componentWillReceiveProps (nextProps) {
     if (this.props.cleanup.clipStart !== nextProps.cleanup.clipStart || this.props.cleanup.clipEnd !== nextProps.cleanup.clipEnd) {
-      // if (this.state.isPlaying) {
-      //   this._stopPlayback()
-      // }
       this._renderSample(nextProps.cleanup.clipStart, nextProps.cleanup.clipEnd)
     }
   }
@@ -300,18 +210,11 @@ class Cleanup extends React.Component {
             BOTTOM_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
             BOTTOM_LEFT: { type: 'VOLUME', cb: this._toggleVolumeSlider },
             BOTTOM_CENTER: { type: 'MENU', cb: this._toggleEffectsModal }
-            //TOP_RIGHT: { type: 'PLAY', cb: this._startPlayback }
           })
         }
       })
     }
   }
-
-  // componentWillUnmount () {
-  //   if (this.state.isPlaying) {
-  //     this._stopPlayback()
-  //   }
-  // }
 
   render () {
     const maxClipValue = this.sampleCreator.getDataBufferLength()
@@ -320,10 +223,14 @@ class Cleanup extends React.Component {
     const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
     const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue))
 
+    const sampleDuration = this.props.stagedSample.duration
+
     const objectUrlInstance = {
       startTime: 0,
       loopCount: this.state.loopCount,
-      loopPadding: this.state.loopPadding,
+      loopPadding: this.state.loopPadding === null
+        ? sampleDuration /** First time hitting this view, set loopPadding to the length of the sample */
+        : this.state.loopPadding,
       volume: this.state.volume,
       panning: 0,
       objectUrl: this.state.objectUrl
@@ -341,7 +248,6 @@ class Cleanup extends React.Component {
                 ref={(canvas) => { this.canvas = canvas }}
               />
               <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
-              <div ref={(ref) => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
               {
                 this.state.isObjectUrlReady &&
                   (
@@ -392,29 +298,36 @@ class Cleanup extends React.Component {
               }
 
               {
-                this.state.showEffectsModal && (
+                this.state.showEffectsModal && sampleDuration && (
                   <div className={styles.container}>
-                    <span className={styles.inputContainer}>
-                      <label htmlFor='loopCount'># of loops</label>
-                      <input id='loopCount'
-                        type='number'
-                        step='1'
-                        value={this.state.loopCount}
-                        onChange={this._handleChange.bind(this, 'loopCount')}
-                        placeholder='# of loops'
-                        className={styles.formInput} />
-                    </span>
-
-                    <span className={styles.inputContainer}>
-                      <label htmlFor='loopPadding'>Space between loops</label>
-                      <input id='loopPadding'
-                        type='number'
-                        step='1'
-                        value={this.state.loopPadding}
-                        onChange={this._handleChange.bind(this, 'loopPadding')}
-                        placeholder='padding'
-                        className={styles.formInput} />
-                    </span>
+                    <React.Fragment>
+                      <div>
+                      # of loops
+                      </div>
+                      <ReactSlider
+                        orientation='horizontal'
+                        className={styles.loopsSlider}
+                        handleClassName={styles.loopsSliderHandle}
+                        max={maxLoopCount}
+                        min={0}
+                        step={1}
+                        onAfterChange={this._onLoopCountSliderFinish}
+                        defaultValue={this.props.stagedSample.loopCount || 0}
+                      />
+                      <div>
+                      Space between loops
+                      </div>
+                      <ReactSlider
+                        orientation='horizontal'
+                        className={styles.loopsSlider}
+                        handleClassName={styles.loopsSliderHandle}
+                        max={sampleDuration}
+                        min={0}
+                        step={sampleDuration / 500}
+                        onAfterChange={this._onLoopPaddingSliderFinish}
+                        defaultValue={this.props.stagedSample.loopPadding || sampleDuration}
+                      />
+                    </React.Fragment>
                   </div>
                 )
               }

@@ -6,10 +6,12 @@
   display: flex;
   flex-direction: column;
   position: absolute;
-  background: var(--blue);
-  margin: 20vh 15vw;
-  left: 0;
-  right: 0;
+  background: color(var(--blue) alpha(50%));
+  position: fixed !important;
+  top: calc(4rem + 2px);
+  bottom: calc(4rem + 2px);
+  left: calc(4rem + 2px);
+  right: calc(4rem + 2px);
   z-index: 999;
 }
 
@@ -24,8 +26,6 @@
   width: 20%;
   margin: .75rem 0 .75rem 1rem;
 }
-
-
 
 .label {
   position: absolute;
@@ -54,6 +54,10 @@
   left: 0;
 }
 
+.loops-slider {
+  width: 100%;
+}
+
 .slider-left {
   height: 100%;
   position: fixed !important;
@@ -74,7 +78,18 @@
 
 .volume-slider-handle {
   background-color: var(--blue);
-  border: 2px solid var(--white);
+  border: 1px solid var(--white);
+  cursor: pointer;
+  z-index: 99999;
+  height: var(--navBarButtonSideLength);
+  width: var(--navBarButtonSideLength);
+  user-select: none;
+  margin: 0;
+}
+
+.loops-slider-handle {
+  background-color: var(--red);
+  border: 1px solid var(--white);
   cursor: pointer;
   z-index: 99999;
   height: var(--navBarButtonSideLength);

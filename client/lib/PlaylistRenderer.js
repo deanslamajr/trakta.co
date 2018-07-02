@@ -78,16 +78,13 @@ function addPluginsToPlayer (samplePlayer, volume, panning) {
 function addBufferToTrak (buffer, instance, transport, times) {
   if (times) {
     times.forEach(time => {
-        const samplePlayer = new Tone.Player(buffer)
+      const samplePlayer = new Tone.Player(buffer)
 
-        addPluginsToPlayer(samplePlayer, 0, 0)
+      addPluginsToPlayer(samplePlayer, 0, 0)
         // syncPlayerToTransport(samplePlayer, time, transport)
-        addPlayerToTransport(samplePlayer, time, transport)
+      addPlayerToTransport(samplePlayer, time, transport)
     })
-  }
-
-  /** @todo deprecate the logic in this else block */
-  else {
+  } else { /** @todo deprecate the logic in this else block */
     let i = 0
 
     do {
@@ -167,18 +164,16 @@ function getOfflineTransportduration (instances, sequencerInstance) {
   if (sequencerInstance) {
     sequencerDuration = getSequencerDuration(sequencerInstance)
   }
-  
+
   if (instances && instances.length) {
     instancesDuration = getInstancesDuration(instances)
   }
 
   if (sequencerDuration && instancesDuration) {
     return Math.max(sequencerDuration, instancesDuration)
-  }
-  else if (instancesDuration) {
+  } else if (instancesDuration) {
     return instancesDuration
-  }
-  else {
+  } else {
     return sequencerDuration
   }
 }
@@ -199,14 +194,16 @@ class PlaylistRenderer {
   }
 
   getDuration () {
-    return playlistBuffer.get().duration
+    return playlistBuffer
+      ? playlistBuffer.get().duration
+      : null
   }
 
   getPlayer ({ objectUrlInstance, instances, sequencerInstance, stagedSample, loadTaskCb, fetchTrak }) {
     /**
      * @todo allow for both objectUrl and instances to be on the same player
      */
-    if (objectUrlInstance) {     
+    if (objectUrlInstance) {
       return new Promise((resolve, reject) => new Tone.Buffer(objectUrlInstance.objectUrl, resolve, reject))
         .then(objectUrlBuffer => {
           const fullDuration = objectUrlInstance.loopCount === 0
@@ -226,8 +223,7 @@ class PlaylistRenderer {
           loadTaskCb()
           return new Tone.Player(buffer).toMaster()
         })
-    }
-    else {
+    } else {
       const trakAndOrBufferExist = (instances && instances.length) || sequencerInstance
 
       let areInstancesCacheMiss

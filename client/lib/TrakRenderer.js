@@ -40,7 +40,7 @@ export default class TrakRenderer {
     return createBlobFromBuffer(buffer, mp3Encoder)
   }
 
-  createObjectUrlFromBuffer(buf) {
+  createObjectUrlFromBuffer (buf) {
     const mp3Encoder = new Encoder(buf.sampleRate)
     const blob = createBlobFromBuffer(buf, mp3Encoder)
     return mp3Encoder.createBlobObjectUrl(blob)
