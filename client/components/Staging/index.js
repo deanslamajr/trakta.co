@@ -128,30 +128,10 @@ class Staging extends React.Component {
           }
 
           // get new trak blob
-          const blob = this.trakRenderer.getBlobFromBuffer()
-          // POST to backend
-          return axios.post(`/api/version/${versionId}`, blob, config)
-        })
-        /**
-         * Mp3 Encoding results in Tone.Transport being unresponsive for an amount of time
-         * proportional to the length of Mp3 encoding
-         *
-         * Consequently, don't proceed until Tone.Transport is responsive once again
-         */
-        .then(() => {
-          return new Promise(resolve => {
-            Tone.Transport.cancel()
-            Tone.Transport.loop = true
-            Tone.Transport.setLoopPoints(0, 0.5)
-
-            Tone.Transport.schedule((time) => {
-              Tone.Transport.stop()
-              Tone.Transport.cancel()
-              resolve()
-            }, 0)
-
-            Tone.Transport.start()
-          })
+          return this.trakRenderer.getBlobFromBuffer()
+            .then(blob => {
+              return axios.post(`/api/version/${versionId}`, blob, config)
+            })
         })
         .then(() => {
           this.props.history.push(`/e/${this.props.trakName}`)

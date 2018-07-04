@@ -24,7 +24,6 @@ import {
 import styles from './InstancePlaylist.css'
 
 let playCode
-let player // eslint-disable-line
 let intervalAnimationId
 let position = 0
 
@@ -56,7 +55,7 @@ class InstancePlaylist extends React.Component {
     super(props)
 
     this.playlistRenderer = getPlaylistRenderer()
-    this.getTrakRenderer = getTrakRenderer()
+    this.trakRenderer = getTrakRenderer()
 
     this.state = {
       error: null
@@ -108,6 +107,17 @@ class InstancePlaylist extends React.Component {
     }, 0)
   }
 
+  _finishPlayerInit (player) {
+    player.sync().start()
+    this.props.addItemToNavBar({
+      TOP_RIGHT: {
+        type: 'PLAY',
+        cb: this._play,
+        color: this.props.buttonColor
+      }
+    }, true)
+  }
+
   _renderTrak (instances, stagedSample, trackDimensions, objectUrlInstance, sequencerInstance) {
     // remove play button
     this.props.addItemToNavBar({
@@ -135,18 +145,15 @@ class InstancePlaylist extends React.Component {
           this._prepTransport(latestPlayer.buffer.get().duration)
 
           if (this.props.saveObjectUrl) {
-            const objectUrl = this.getTrakRenderer.createObjectUrlFromBuffer(latestPlayer.buffer)
-            this.props.setStagedObjectUrl(objectUrl)
+            this.trakRenderer.createObjectUrlFromBuffer(latestPlayer.buffer)
+              .then(objectUrl => {
+                this.props.setStagedObjectUrl(objectUrl)
+                this._finishPlayerInit(latestPlayer)
+              })
           }
-
-          player = latestPlayer.sync().start()
-          this.props.addItemToNavBar({
-            TOP_RIGHT: {
-              type: 'PLAY',
-              cb: this._play,
-              color: this.props.buttonColor
-            }
-          }, true)
+          else {
+            this._finishPlayerInit(latestPlayer)
+          }
         } else {
           this.props.addItemToNavBar({
             TOP_RIGHT: null

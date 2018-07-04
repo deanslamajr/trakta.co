@@ -213,28 +213,29 @@ class Recorder extends React.Component {
 
     clearCanvas(this.canvasContext)
 
-    const objectUrl = this.sampleCreator.stopAndFinishRecording()
-
-    this.props.setStagedSample({
-      startTime: 0,
-      volume: 0,
-      panning: 0,
-      duration: 0,
-      loopCount: 0,
-      loopPadding: 0
-    })
-    this.props.setStagedObjectUrl(objectUrl)
-
-    const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
-    const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
-    this.props.setCleanup({
-      leftSliderValue: initialStartValue,
-      rightSliderValue: initialEndValue,
-      clipStart: initialStartValue,
-      clipEnd: initialEndValue
-    })
-
-    this._navigateToCleanup()
+    this.sampleCreator.stopAndFinishRecording()
+      .then(objectUrl => {
+        this.props.setStagedSample({
+          startTime: 0,
+          volume: 0,
+          panning: 0,
+          duration: 0,
+          loopCount: 0,
+          loopPadding: 0
+        })
+        this.props.setStagedObjectUrl(objectUrl)
+    
+        const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
+        const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
+        this.props.setCleanup({
+          leftSliderValue: initialStartValue,
+          rightSliderValue: initialEndValue,
+          clipStart: initialStartValue,
+          clipEnd: initialEndValue
+        })
+    
+        this._navigateToCleanup()
+      })
   }
 
   _renderUSER_MEDIA_DENIED () { // eslint-disable-line
