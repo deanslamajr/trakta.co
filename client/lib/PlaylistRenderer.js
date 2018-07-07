@@ -199,6 +199,48 @@ class PlaylistRenderer {
       : null
   }
 
+
+
+
+
+  createCurrentTrakPlayer (instances, loadTaskCb) {
+    return Promise.all(instances.map(instance => loadSample(instance, loadTaskCb, false)))
+      .then(() => {
+        const offlineTransportDuration = getOfflineTransportduration(instances, false)
+
+        // render audio
+        return Tone.Offline(OfflineTransport => {
+          OfflineTransport.position = 0
+
+          instances.forEach(instance => {
+            const times = instance.sequencer_csv.split(',')
+
+            addBufferToTrak(bufferCache[instance.sample.id],
+              instance,
+              OfflineTransport,
+              times
+            )
+          })
+
+          OfflineTransport.start()
+        }, offlineTransportDuration)
+      })
+      .then(buffer => {
+        loadTaskCb()
+        player = new Tone.Player(buffer).toMaster()
+        return player
+      })
+  }
+
+
+
+
+
+
+
+
+
+
   getPlayer ({ objectUrlInstance, instances, sequencerInstance, stagedSample, loadTaskCb, fetchTrak }) {
     /**
      * @todo allow for both objectUrl and instances to be on the same player

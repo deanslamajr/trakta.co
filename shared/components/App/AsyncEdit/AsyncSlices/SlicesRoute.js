@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
@@ -6,8 +7,6 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import SampleInstances from '../../../../../client/components/SampleInstances'
 import InstancePlaylist from '../../../../../client/components/InstancePlaylist'
 
-import { reset as resetSampleLoaderState } from '../../../../actions/samples'
-import { fetchInstances } from '../../../../actions/trak'
 import { setStagedSample, setStagedObjectUrl } from '../../../../actions/recorder'
 
 import * as selectors from '../../../../reducers'
@@ -17,20 +16,11 @@ import ProgressRing from '../../AsyncProgressRing'
 import styles from './styles.css'
 
 class SlicesRoute extends React.Component {
-  constructor (props) {
-    super(props)
-
-    this._navigateToList = this._navigateToList.bind(this)
-    this._navigateToContribute = this._navigateToContribute.bind(this)
-    this._renderLoadingComponent = this._renderLoadingComponent.bind(this)
-  }
-
-  _navigateToList () {
-    this.props.resetTrak()
+  _navigateToList = () => {
     this.props.history.push('/')
   }
 
-  _navigateToContribute () {
+  _navigateToContribute = () => {
     let urlWithoutTrailingSlash = this.props.match.url
     if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length - 1) === '/') {
       urlWithoutTrailingSlash = urlWithoutTrailingSlash.slice(0, -1)
@@ -39,7 +29,7 @@ class SlicesRoute extends React.Component {
     this.props.history.push(`${urlWithoutTrailingSlash}/recorder`)
   }
 
-  _renderLoadingComponent () {
+  _renderLoadingComponent = () => {
     const progress = this.props.finishedTasks / this.props.totalTasks
 
     return (
@@ -50,28 +40,14 @@ class SlicesRoute extends React.Component {
   }
 
   componentDidMount () {
-    const trakNameFromUrl = this.props.match.path.split('/')[2]
-
-    if (!trakNameFromUrl) {
-      // @case - url navigation without trakName in path
-      // @todo
-      // fetch a random track??
+    /** @case - url navigation without trakName in path */
+    if (!this.props.trakName) {
       return this.props.history.push('/new')
     }
 
-    // reset staging stuff
-    this.props.setStagedObjectUrl(undefined)
-    this.props.setStagedSample({
-      startTime: 0,
-      volume: 0,
-      panning: 0,
-      duration: 0,
-      loopCount: 0,
-      loopPadding: 0
-    })
+    this.props.resetStagedSample()
 
     if (this.props.shouldFetchInstances) {
-      this.props.resetSampleLoaderState()
       this.props.fetchInstances()
     }
 
@@ -113,21 +89,25 @@ class SlicesRoute extends React.Component {
   }
 }
 
+SlicesRoute.propTypes = {
+  addItemToNavBar: PropTypes.func.required,
+  fetchInstances: PropTypes.func.required,
+  history: PropTypes.func.required,
+  shouldFetchInstances: PropTypes.bool.required,
+  trakName: PropTypes.string,
+}
+
 function mapStateToProps (state, ownProps) {
   return {
-    shouldFetchInstances: selectors.getShouldFetchInstances(state),
     isLoading: selectors.isLoading(state),
     totalTasks: selectors.getTotalTasks(state),
     finishedTasks: selectors.getFinishedTasks(state),
     instances: selectors.getInstances(state),
-    trakName: selectors.getTrakName(state),
     trackDimensions: selectors.getTrackDimensions(state)
   }
 };
 
 const mapActionsToProps = {
-  resetSampleLoaderState,
-  fetchInstances,
   setStagedSample,
   setStagedObjectUrl
 }

@@ -1,25 +1,10 @@
 import React from 'react'
-import { compose } from 'redux'
-import { connect } from 'react-redux'
+import PropTypes from 'prop-types'
 import Tone from 'tone'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
-import isEqual from 'lodash.isequal'
 import axios from 'axios'
 import randToken from 'rand-token'
 import viewportDimensions from 'viewport-dimensions'
-
-import { getPlaylistRenderer } from '../../lib/PlaylistRenderer'
-import { getTrakRenderer } from '../../lib/TrakRenderer'
-
-import * as selectors from '../../../shared/reducers'
-import {
-  beginInitialFetch,
-  endFetchSample,
-  finishLoadTask } from '../../../shared/actions/samples'
-import {
-  setStagedObjectUrl,
-  setStagedSample
-} from '../../../shared/actions/recorder'
 
 import styles from './InstancePlaylist.css'
 
@@ -54,19 +39,10 @@ class InstancePlaylist extends React.Component {
   constructor (props) {
     super(props)
 
-    this.playlistRenderer = getPlaylistRenderer()
-    this.trakRenderer = getTrakRenderer()
-
-    this.state = {
-      error: null
-    }
-
-    this._play = this._play.bind(this)
-    this._stop = this._stop.bind(this)
-    this._renderTrak = this._renderTrak.bind(this)
+    this._initializePlayer(this.props.player)
   }
 
-  _drawPosition (displacementPerFrame, endPosition) {
+  _drawPosition = (displacementPerFrame, endPosition) => {
     position = position <= endPosition
       ? position + displacementPerFrame
       : endPosition
@@ -76,7 +52,7 @@ class InstancePlaylist extends React.Component {
     }
   }
 
-  _prepTransport (trakDuration) {
+  _prepTransport = (trakDuration) => {
     const width = viewportDimensions
       ? viewportDimensions.width() && viewportDimensions.width()
       : 300
@@ -107,7 +83,7 @@ class InstancePlaylist extends React.Component {
     }, 0)
   }
 
-  _finishPlayerInit (player) {
+  _finishPlayerInit = (player) => {
     player.sync().start()
     this.props.addItemToNavBar({
       TOP_RIGHT: {
@@ -118,56 +94,7 @@ class InstancePlaylist extends React.Component {
     }, true)
   }
 
-  _renderTrak (instances, stagedSample, trackDimensions, objectUrlInstance, sequencerInstance) {
-    // remove play button
-    this.props.addItemToNavBar({
-      TOP_RIGHT: {
-        type: 'LOADING',
-        color: this.props.buttonColor
-      }
-    }, true)
-
-    // add task to load animation
-    this.props.beginInitialFetch()
-
-    this.playlistRenderer.getPlayer({
-      objectUrlInstance,
-      instances,
-      sequencerInstance,
-      stagedSample,
-      loadTaskCb: this.props.finishLoadTask.bind(this),
-      fetchTrak: this.props.fetchTrak
-    })
-      .then(latestPlayer => {
-        this.props.endFetchSample()
-
-        if (latestPlayer) {
-          this._prepTransport(latestPlayer.buffer.get().duration)
-
-          if (this.props.saveObjectUrl) {
-            this.trakRenderer.createObjectUrlFromBuffer(latestPlayer.buffer)
-              .then(objectUrl => {
-                this.props.setStagedObjectUrl(objectUrl)
-                this._finishPlayerInit(latestPlayer)
-              })
-          }
-          else {
-            this._finishPlayerInit(latestPlayer)
-          }
-        } else {
-          this.props.addItemToNavBar({
-            TOP_RIGHT: null
-          }, true)
-        }
-      })
-      .catch(error => {
-        // @todo show an error view with a retry action
-        console.error(error)
-        this.setState({ error })
-      })
-  }
-
-  _stopPlaybackAndSendSignal () {
+  _stopPlaybackAndSendSignal = () => {
     clearInterval(intervalAnimationId)
     this.playIndicatorEl.style.backgroundColor = 'transparent'
     position = 0
@@ -178,7 +105,7 @@ class InstancePlaylist extends React.Component {
     }
   }
 
-  _stop () {
+  _stop = () => {
     this._stopPlaybackAndSendSignal()
     this.props.addItemToNavBar({
       TOP_RIGHT: {
@@ -189,7 +116,7 @@ class InstancePlaylist extends React.Component {
     }, true)
   }
 
-  _play () {
+  _play = () => {
     playArrangement()
 
     this.setState({ isPlaying: true })
@@ -205,31 +132,20 @@ class InstancePlaylist extends React.Component {
     }
   }
 
-  componentDidMount () {
-    this._renderTrak(this.props.instances, this.props.stagedSample, this.props.trackDimensions, this.props.objectUrlInstance, this.props.sequencerInstance)
+  _initializePlayer = (player) => {
+    if (player) {
+      /**
+       * @todo is player is playing, stop old player and start new player
+       */
+      this._prepTransport(player.buffer.get().duration)
+      this._finishPlayerInit(player)
+    }
   }
 
   componentWillReceiveProps (nextProps) {
-    const instancesHaveChanged = !isEqual(this.props.instances, nextProps.instances)
-    const stagedSamplePropsHaveChanged = !isEqual(this.props.stagedSample, nextProps.stagedSample)
-    const objectUrlInstanceHasChanged = !isEqual(this.props.objectUrlInstance, nextProps.objectUrlInstance)
-    const trackDimensionsHasChanged = !isEqual(this.props.trackDimensions, nextProps.trackDimensions)
-
-    const sequencerTimesHaveChanged = this.props.sequencerInstance
-      ? !isEqual(this.props.sequencerInstance.times, nextProps.sequencerInstance.times)
-      : false
-
-    if (instancesHaveChanged ||
-      stagedSamplePropsHaveChanged ||
-      objectUrlInstanceHasChanged ||
-      trackDimensionsHasChanged ||
-      sequencerTimesHaveChanged
-    ) {
-      if (Tone.Transport.state === 'started') {
-        this._stopPlaybackAndSendSignal()
-      }
-
-      this._renderTrak(nextProps.instances, nextProps.stagedSample, nextProps.trackDimensions, nextProps.objectUrlInstance, nextProps.sequencerInstance)
+    const playerHasChanged = this.props.player !== nextProps.player
+    if (playerHasChanged) {
+      this._initializePlayer(nextProps.player)
     }
   }
 
@@ -250,23 +166,11 @@ class InstancePlaylist extends React.Component {
   }
 }
 
-const mapActionsToProps = {
-  endFetchSample,
-  beginInitialFetch,
-  finishLoadTask,
-  setStagedObjectUrl,
-  setStagedSample
+InstancePlaylist.propTypes = {
+  addItemToNavBar: PropTypes.func.required,
+  incrementPlaysCount: PropTypes.bool,
+  player: PropTypes.required,
+  trakName: PropTypes.string.required
 }
 
-function mapStateToProps (state, ownProps) {
-  return {
-    isLoading: selectors.isLoading(state),
-    stagedSample: selectors.getStagedSample(state),
-    trakName: selectors.getTrakName(state)
-  }
-}
-
-export default compose(
-  withStyles(styles),
-  connect(mapStateToProps, mapActionsToProps)
-)(InstancePlaylist)
+export default withStyles(styles)(InstancePlaylist)

@@ -370,7 +370,8 @@ export default function webpackConfigFactory (buildOptions) {
                   // and the resulting allocations. More importantly, it tells
                   // React that the subtree hasn’t changed so React can completely
                   // skip it when reconciling.
-                  ifProd('transform-react-constant-elements')
+                  ifProd('transform-react-constant-elements'),
+                  'transform-class-properties'
                 ].filter(x => x != null)
               },
               buildOptions
