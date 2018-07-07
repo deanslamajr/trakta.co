@@ -203,8 +203,8 @@ class PlaylistRenderer {
 
 
 
-  createCurrentTrakPlayer (instances, loadTaskCb) {
-    return Promise.all(instances.map(instance => loadSample(instance, loadTaskCb, false)))
+  createCurrentTrakPlayer (instances, completeSpinnerTask) {
+    return Promise.all(instances.map(instance => loadSample(instance, completeSpinnerTask, false)))
       .then(() => {
         const offlineTransportDuration = getOfflineTransportduration(instances, false)
 
@@ -226,7 +226,7 @@ class PlaylistRenderer {
         }, offlineTransportDuration)
       })
       .then(buffer => {
-        loadTaskCb()
+        completeSpinnerTask(instances.length)
         player = new Tone.Player(buffer).toMaster()
         return player
       })

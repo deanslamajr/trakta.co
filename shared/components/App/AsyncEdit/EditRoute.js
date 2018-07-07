@@ -12,16 +12,10 @@ import Staging from './AsyncStaging'
 import Cleanup from './AsyncCleanup'
 import Recorder from './AsyncRecorder'
 import Slices from './AsyncSlices'
+import ProgressRing from '../AsyncProgressRing'
 import InstancePlaylist from '../../../../client/components/InstancePlaylist'
 
 import config from '../../../../config'
-
-import {
-  setName as setTrakName,
-  reset as resetTrak,
-  setShouldFetchInstances
-} from '../../../actions/trak'
-import { setStagedSample, setStagedObjectUrl } from '../../../actions/recorder'
 
 import * as selectors from '../../../reducers'
 
@@ -44,6 +38,10 @@ class EditRoute extends React.Component {
       incrementPlaysCount: true,
       trakName: this.props.match.url.split('/')[2],
       shouldFetchInstances: true,
+      spinnerTasks: {
+        count: 0,
+        completedCount: 0
+      },
       stagedSample: defaultStagedSample
     }
   }
@@ -53,24 +51,69 @@ class EditRoute extends React.Component {
   }
 
   _fetchInstances = () => {
+    this._addSpinnerTask()
     axios.get(`/api/sample-instances/${this.state.trakName}`)
       .then(({ data: instances }) => {
         this.setState({ instances })
+        this._addSpinnerTask(instances.length * 2) /** x2 to account for the rendering task taking ~50% of the total time */
+        this._completeSpinnerTask()
 
         const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
         const PlaylistRenderer = getPlaylistRenderer()
         
-        return PlaylistRenderer.createCurrentTrakPlayer(instances, () => { console.log('a load task has completed!')})
+        return PlaylistRenderer.createCurrentTrakPlayer(instances, this._completeSpinnerTask)
       })
       .then(currentTrakPlayer => {
         this.setState({
           currentTrakPlayer,
-          activePlayer: currentTrakPlayer
+          activePlayer: currentTrakPlayer,
+          shouldFetchInstances: false
         })
       })
   }
 
+  _renderLoadingComponent = (progress) => {
+    return (
+      <div className={styles.spinner}>
+        <ProgressRing radius={50} stroke={2} progress={progress} />
+      </div>
+    )
+  }
+
+  _addSpinnerTask = (count = 1) => {
+    this.setState(({ spinnerTasks: previousSpinnerTasks }) => {
+      const updatedSpinnerTasks = Object.assign({}, previousSpinnerTasks, {
+        count: previousSpinnerTasks.count + count
+      })
+      
+      return { spinnerTasks: updatedSpinnerTasks }
+    })
+  }
+
+  _completeSpinnerTask = (count = 1) => {
+    this.setState(({ spinnerTasks: previousSpinnerTasks }) => {
+      const updatedSpinnerTasks = Object.assign({}, previousSpinnerTasks, {
+        completedCount: previousSpinnerTasks.completedCount + count
+      })
+      
+      return { spinnerTasks: updatedSpinnerTasks }
+    })
+  }
+
+  _setShouldFetchInstances = (shouldFetchInstances) => {
+    this.setState({ shouldFetchInstances })
+  }
+
   render () {
+    const {
+      spinnerTasks
+    } = this.state
+
+    const loadingProgress = spinnerTasks.count
+      ? spinnerTasks.completedCount / spinnerTasks.count
+      : 0
+    const showLoadSpinner = 0 < loadingProgress && loadingProgress < 1
+
     return (
       <div className={styles.container}>
         <Switch>
@@ -94,7 +137,7 @@ class EditRoute extends React.Component {
           <Route path={`${this.props.match.url}/recorder`} render={props => (
             <React.Fragment>
               <Helmet>
-                <title>{`${this.props.trakName} - recorder - ${config('appTitle')}`}</title>
+                <title>{`${this.state.trakName} - recorder - ${config('appTitle')}`}</title>
               </Helmet>
               <Recorder {...props} addItemToNavBar={this.props.addItemToNavBar} />
             </React.Fragment>
@@ -104,7 +147,7 @@ class EditRoute extends React.Component {
               <Route key={0} path={`${this.props.match.url}/cleanup`} render={props => (
                 <React.Fragment>
                   <Helmet>
-                    <title>{`${this.props.trakName} - cleanup - ${config('appTitle')}`}</title>
+                    <title>{`${this.state.trakName} - cleanup - ${config('appTitle')}`}</title>
                   </Helmet>
                   <Cleanup {...props} addItemToNavBar={this.props.addItemToNavBar} />
                 </React.Fragment>
@@ -112,7 +155,7 @@ class EditRoute extends React.Component {
               <Route key={1} path={`${this.props.match.url}/staging`} render={props => (
                 <React.Fragment>
                   <Helmet>
-                    <title>{`${this.props.trakName} - staging - ${config('appTitle')}`}</title>
+                    <title>{`${this.state.trakName} - staging - ${config('appTitle')}`}</title>
                   </Helmet>
                   <Staging {...props} addItemToNavBar={this.props.addItemToNavBar} />
                 </React.Fragment>
@@ -131,6 +174,9 @@ class EditRoute extends React.Component {
             />
           )
         }
+        {
+          showLoadSpinner && this._renderLoadingComponent(loadingProgress)
+        }
       </div>
     )
   }
@@ -138,22 +184,13 @@ class EditRoute extends React.Component {
 
 function mapStateToProps (state) {
   return {
-    objectUrl: selectors.getStagedObjectUrl(state),
-    trakName: selectors.getTrakName(state)
+    objectUrl: selectors.getStagedObjectUrl(state)
   }
-}
-
-const mapActionsToProps = {
-  setTrakName,
-  resetTrak,
-  setStagedSample,
-  setStagedObjectUrl,
-  setShouldFetchInstances
 }
 
 export { EditRoute }
 
 export default compose(
   withStyles(styles),
-  connect(mapStateToProps, mapActionsToProps)
+  connect(mapStateToProps)
 )(EditRoute)
