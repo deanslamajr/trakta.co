@@ -1,18 +1,15 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import WaveformData from 'waveform-data'
 
-import { reset as resetSampleLoaderState } from '../../../shared/actions/samples'
-import { fetchInstances } from '../../../shared/actions/trak'
 import {
-  setStagedObjectUrl,
   setCleanup,
   setStagedSample } from '../../../shared/actions/recorder'
 import * as selectors from '../../../shared/reducers'
 
-import InstancePlaylist from '../InstancePlaylist'
 import { getSampleCreator } from '../../lib/SampleCreator'
 
 import styles from './Recorder.css'
@@ -43,6 +40,12 @@ function getMainEditUrl (url, isGoingBack) {
 }
 
 class Recorder extends React.Component {
+  static propTypes = {
+    addItemToNavBar: PropTypes.func,
+    fetchInstances: PropTypes.func,
+    shouldFetchInstances: PropTypes.bool
+  }
+
   constructor (props) {
     super(props)
 
@@ -66,15 +69,9 @@ class Recorder extends React.Component {
       // Tone.UserMedia is not supported
       // @todo catch this earlier
     }
-
-    this._startRecording = this._startRecording.bind(this)
-    this._stopRecording = this._stopRecording.bind(this)
-    this._beginDrawingWaves = this._beginDrawingWaves.bind(this)
-    this._drawWave = this._drawWave.bind(this)
-    this._drawSample = this._drawSample.bind(this)
   }
 
-  _beginDrawingWaves () {
+  _beginDrawingWaves = () => {
     this.canvasContext = this.canvas.getContext('2d')
 
     // @todo have these resize with window resize
@@ -87,7 +84,7 @@ class Recorder extends React.Component {
     this._drawWave()
   }
 
-  _drawWave () {
+  _drawWave = () => {
     const canvasWidth = this.canvasContext.canvas.width
     const canvasHeight = this.canvasContext.canvas.height
 
@@ -139,7 +136,7 @@ class Recorder extends React.Component {
     this.canvasContext.closePath()
   }
 
-  _drawSample (buffer) {
+  _drawSample = (buffer) => {
     const waveFormData = WaveformData.create(buffer)
     waveFormData.offset(0, buffer.byteLength / 4)
 
@@ -179,7 +176,7 @@ class Recorder extends React.Component {
     )
   }
 
-  _startRecording () {
+  _startRecording = () => {
     this.sampleCreator.startRecording()
 
     this.props.addItemToNavBar({
@@ -205,7 +202,7 @@ class Recorder extends React.Component {
     this.props.history.push(`${mainEditUrl}/cleanup`)
   }
 
-  _stopRecording () {
+  _stopRecording = () => {
     this.setState({
       isRecording: false,
       drawWave: false
@@ -223,7 +220,6 @@ class Recorder extends React.Component {
           loopCount: 0,
           loopPadding: 0
         })
-        this.props.setStagedObjectUrl(objectUrl)
     
         const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
         const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
@@ -252,10 +248,7 @@ class Recorder extends React.Component {
         ? this.container.parentNode.clientWidth
         : 0
 
-    this.props.setStagedObjectUrl()
-
     if (this.props.shouldFetchInstances) {
-      this.props.resetSampleLoaderState()
       this.props.fetchInstances()
     }
 
@@ -313,18 +306,6 @@ class Recorder extends React.Component {
             )
         }
 
-        {
-          !this.state.disableRecording && (
-            <InstancePlaylist
-              instances={this.props.instances}
-              trackDimensions={this.props.trackDimensions}
-
-              addItemToNavBar={this.props.addItemToNavBar}
-              incrementPlaysCount
-            />
-          )
-        }
-
         <canvas
           className={styles.container}
           width={this.state.canvasWidth || 0}
@@ -337,17 +318,13 @@ class Recorder extends React.Component {
 }
 
 const mapActionsToProps = {
-  setStagedObjectUrl,
   setStagedSample,
   setCleanup,
-  fetchInstances,
-  resetSampleLoaderState
 }
 
 function mapStateToProps (state) {
   return {
     objectUrl: selectors.getStagedObjectUrl(state),
-    shouldFetchInstances: selectors.getShouldFetchInstances(state),
     instances: selectors.getInstances(state),
     trackDimensions: selectors.getTrackDimensions(state)
   }

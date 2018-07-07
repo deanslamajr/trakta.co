@@ -7,6 +7,14 @@ import SampleInstances from '../../../../../client/components/SampleInstances'
 import styles from './styles.css'
 
 class SlicesRoute extends React.Component {
+  static propTypes = {
+    addItemToNavBar: PropTypes.func,
+    fetchInstances: PropTypes.func,
+    history: PropTypes.func,
+    shouldFetchInstances: PropTypes.bool,
+    trakName: PropTypes.string,
+  }
+
   _navigateToList = () => {
     this.props.history.push('/')
   }
@@ -19,8 +27,6 @@ class SlicesRoute extends React.Component {
 
     this.props.history.push(`${urlWithoutTrailingSlash}/recorder`)
   }
-
-  
 
   componentDidMount () {
     /** @case - url navigation without trakName in path */
@@ -47,14 +53,6 @@ class SlicesRoute extends React.Component {
       </div>
     )
   }
-}
-
-SlicesRoute.propTypes = {
-  addItemToNavBar: PropTypes.func.required,
-  fetchInstances: PropTypes.func.required,
-  history: PropTypes.func.required,
-  shouldFetchInstances: PropTypes.bool.required,
-  trakName: PropTypes.string,
 }
 
 export default withStyles(styles)(SlicesRoute)

@@ -139,7 +139,13 @@ class EditRoute extends React.Component {
               <Helmet>
                 <title>{`${this.state.trakName} - recorder - ${config('appTitle')}`}</title>
               </Helmet>
-              <Recorder {...props} addItemToNavBar={this.props.addItemToNavBar} />
+
+              <Recorder
+                {...props}
+                addItemToNavBar={this.props.addItemToNavBar}
+                fetchInstances={this._fetchInstances}
+                shouldFetchInstances={this.state.shouldFetchInstances}
+              />
             </React.Fragment>
           )} />
           {

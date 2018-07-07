@@ -36,6 +36,13 @@ function stopArrangement () {
 }
 
 class InstancePlaylist extends React.Component {
+  static propTypes = {
+    addItemToNavBar: PropTypes.func.required,
+    incrementPlaysCount: PropTypes.bool,
+    player: PropTypes.required,
+    trakName: PropTypes.string.required
+  }
+
   constructor (props) {
     super(props)
 
@@ -164,13 +171,6 @@ class InstancePlaylist extends React.Component {
       <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
     )
   }
-}
-
-InstancePlaylist.propTypes = {
-  addItemToNavBar: PropTypes.func.required,
-  incrementPlaysCount: PropTypes.bool,
-  player: PropTypes.required,
-  trakName: PropTypes.string.required
 }
 
 export default withStyles(styles)(InstancePlaylist)
