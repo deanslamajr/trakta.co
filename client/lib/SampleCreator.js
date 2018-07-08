@@ -160,9 +160,7 @@ export default class SampleCreator {
     return mp3Encoder.encode(summedBuffer)
       .then(buffer => {
         dataBuffer = buffer
-        // create blob and return the associated object URL
-        const blob = mp3Encoder.createBlob(dataBuffer)
-        return mp3Encoder.createBlobObjectUrl(blob)
+        return mp3Encoder.createBlob(dataBuffer)
       })
   }
 

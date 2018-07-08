@@ -11,7 +11,7 @@ import styles from './styles.css'
 class SlicesRoute extends React.Component {
   static propTypes = {
     fetchInstances: PropTypes.func,
-    history: PropTypes.func,
+    history: PropTypes.object,
     shouldFetchInstances: PropTypes.bool,
     trakName: PropTypes.string,
   }

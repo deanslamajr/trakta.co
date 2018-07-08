@@ -42,6 +42,7 @@ class EditRoute extends React.Component {
         count: 0,
         completedCount: 0
       },
+      sourceBlob: null,
       stagedSample: defaultStagedSample
     }
   }
@@ -104,6 +105,17 @@ class EditRoute extends React.Component {
     this.setState({ shouldFetchInstances })
   }
 
+  _setSourceBlob = (blob) => {
+    this.setState({ sourceBlob: blob })
+  }
+
+  _setCleanupState = (cleanupState) => {
+    this.setState(({ cleanupState: prevCleanupState }) => {
+      const newCleanupState = Object.assign({}, prevCleanupState, cleanupState)
+      return { cleanupState: newCleanupState }
+    })
+  }
+
   render () {
     const {
       spinnerTasks
@@ -142,6 +154,9 @@ class EditRoute extends React.Component {
               <Recorder
                 {...props}
                 fetchInstances={this._fetchInstances}
+                resetStagedSample={this._resetStagedSample}
+                setCleanupState={this._setCleanupState}
+                setSourceBlob={this._setSourceBlob}
                 shouldFetchInstances={this.state.shouldFetchInstances}
               />
             </React.Fragment>

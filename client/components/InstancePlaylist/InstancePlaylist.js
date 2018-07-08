@@ -59,8 +59,8 @@ class InstancePlaylist extends React.Component {
   static propTypes = {
     buttonColor: PropTypes.string,
     incrementPlaysCount: PropTypes.bool,
-    player: PropTypes.required,
-    trakName: PropTypes.string.required
+    player: PropTypes.object,
+    trakName: PropTypes.string
   }
 
   state = {

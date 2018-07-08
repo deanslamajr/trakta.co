@@ -1,16 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { compose } from 'redux'
-import { connect } from 'react-redux'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import WaveformData from 'waveform-data'
 
 import { renderButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
-
-import {
-  setCleanup,
-  setStagedSample } from '../../../shared/actions/recorder'
-import * as selectors from '../../../shared/reducers'
 
 import { getSampleCreator } from '../../lib/SampleCreator'
 
@@ -45,6 +38,9 @@ class Recorder extends React.Component {
   static propTypes = {
     history: PropTypes.object,
     fetchInstances: PropTypes.func,
+    resetStagedSample: PropTypes.func,
+    setCleanupState: PropTypes.func,
+    setSourceBlob: PropTypes.func,
     shouldFetchInstances: PropTypes.bool
   }
 
@@ -234,19 +230,13 @@ class Recorder extends React.Component {
     clearCanvas(this.canvasContext)
 
     this.sampleCreator.stopAndFinishRecording()
-      .then(objectUrl => {
-        this.props.setStagedSample({
-          startTime: 0,
-          volume: 0,
-          panning: 0,
-          duration: 0,
-          loopCount: 0,
-          loopPadding: 0
-        })
+      .then(blob => {
+        this.props.resetStagedSample()
+        this.props.setSourceBlob(blob)
     
         const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
         const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
-        this.props.setCleanup({
+        this.props.setCleanupState({
           leftSliderValue: initialStartValue,
           rightSliderValue: initialEndValue,
           clipStart: initialStartValue,
@@ -345,20 +335,4 @@ class Recorder extends React.Component {
   }
 }
 
-const mapActionsToProps = {
-  setStagedSample,
-  setCleanup,
-}
-
-function mapStateToProps (state) {
-  return {
-    objectUrl: selectors.getStagedObjectUrl(state),
-    instances: selectors.getInstances(state),
-    trackDimensions: selectors.getTrackDimensions(state)
-  }
-}
-
-export default compose(
-  withStyles(styles),
-  connect(mapStateToProps, mapActionsToProps)
-)(Recorder)
+export default withStyles(styles)(Recorder)
