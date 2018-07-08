@@ -126,7 +126,6 @@ class EditRoute extends React.Component {
 
               <Slices
                 {...props}
-                addItemToNavBar={this.props.addItemToNavBar}
                 fetchInstances={this._fetchInstances}
                 resetStagedSample={this._resetStagedSample}
                 shouldFetchInstances={this.state.shouldFetchInstances}
@@ -142,7 +141,6 @@ class EditRoute extends React.Component {
 
               <Recorder
                 {...props}
-                addItemToNavBar={this.props.addItemToNavBar}
                 fetchInstances={this._fetchInstances}
                 shouldFetchInstances={this.state.shouldFetchInstances}
               />
@@ -170,10 +168,10 @@ class EditRoute extends React.Component {
           }
           <Redirect to={{ pathname: this.props.match.url }} />
         </Switch>
+
         {
           this.state.activePlayer && (
             <InstancePlaylist
-              addItemToNavBar={this.props.addItemToNavBar}
               incrementPlaysCount={this.state.incrementPlaysCount}
               player={this.state.activePlayer}
               trakName={this.state.trakName}

@@ -5,6 +5,8 @@ import { connect } from 'react-redux'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import WaveformData from 'waveform-data'
 
+import { renderButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
+
 import {
   setCleanup,
   setStagedSample } from '../../../shared/actions/recorder'
@@ -41,7 +43,7 @@ function getMainEditUrl (url, isGoingBack) {
 
 class Recorder extends React.Component {
   static propTypes = {
-    addItemToNavBar: PropTypes.func,
+    history: PropTypes.object,
     fetchInstances: PropTypes.func,
     shouldFetchInstances: PropTypes.bool
   }
@@ -57,10 +59,11 @@ class Recorder extends React.Component {
 
     this.state = {
       isRecording: false,
-      disableRecording: true,
       currentPrompt: this.prompts.START,
+      disableRecording: true,
       drawWave: false,
-      duration: undefined
+      duration: undefined,
+      renderRecordingButton: null
     }
 
     try {
@@ -176,20 +179,40 @@ class Recorder extends React.Component {
     )
   }
 
+  _renderStartRecordingButton = () => {
+    const config = {
+      cb: this._startRecording,
+      type: 'RECORD',
+    }
+    return renderButton('BOTTOM_RIGHT', config)
+  }
+  
+  _renderStopRecordingButton = () => {
+    const config = {
+      cb: this._stopRecording,
+      type: 'CHECK',
+    }
+    return renderButton('BOTTOM_RIGHT', config)
+  }
+
+  _renderBackButton = () => {
+    const mainEditUrl = getMainEditUrl(this.props.match.url, true)
+
+    const config = {
+      cb: () => this.props.history.push(mainEditUrl),
+      type: 'BACK',
+    }
+    return renderButton('TOP_LEFT', config)
+  }
+
   _startRecording = () => {
     this.sampleCreator.startRecording()
-
-    this.props.addItemToNavBar({
-      BOTTOM_RIGHT: {
-        type: 'CHECK',
-        cb: this._stopRecording
-      }
-    }, true)
 
     this.setState({
       recordingStartTime: Date.now(),
       isRecording: true,
-      currentPrompt: this.prompts.STOP
+      currentPrompt: this.prompts.STOP,
+      renderRecordingButton: this._renderStopRecordingButton
     })
   }
 
@@ -263,15 +286,11 @@ class Recorder extends React.Component {
           .then(() => {
             // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
             // don't do this stuff
-            if (this.canvas) {
-              const mainEditUrl = getMainEditUrl(this.props.match.url, true)
-              // @todo if trakName = new, set back action to '/'
-              this.props.addItemToNavBar({
-                TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push(mainEditUrl) },
-                BOTTOM_RIGHT: { type: 'RECORD', cb: this._startRecording }
+            if (this.canvas) {              
+              this.setState({
+                disableRecording: false, // overlay 'start recording' mask
+                renderRecordingButton: this._renderStartRecordingButton
               })
-              // overlay 'start recording' mask
-              this.setState({ disableRecording: false })
               this._beginDrawingWaves()
             }
           })
@@ -285,14 +304,20 @@ class Recorder extends React.Component {
   }
 
   render () {
+    const {
+      canvasWidth,
+      canvasHeight,
+      currentPrompt,
+      renderRecordingButton
+    } = this.state
+
     return (
-      // @todo replace with imported css
       <div ref={(container) => { this.container = container }}>
         {
           this.sampleCreator
             ? (
               <div>
-                {this.state.currentPrompt()}
+                {currentPrompt()}
               </div>
             )
             : (
@@ -306,10 +331,13 @@ class Recorder extends React.Component {
             )
         }
 
+        {this._renderBackButton()}
+        {renderRecordingButton && renderRecordingButton()}
+
         <canvas
           className={styles.container}
-          width={this.state.canvasWidth || 0}
-          height={this.state.canvasHeight || 0}
+          width={canvasWidth || 0}
+          height={canvasHeight || 0}
           ref={(canvas) => { this.canvas = canvas }}
         />
       </div>

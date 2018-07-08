@@ -4,11 +4,12 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
 import SampleInstances from '../../../../../client/components/SampleInstances'
 
+import { renderButton } from '../../AsyncNavBar/AsyncNavBar'
+
 import styles from './styles.css'
 
 class SlicesRoute extends React.Component {
   static propTypes = {
-    addItemToNavBar: PropTypes.func,
     fetchInstances: PropTypes.func,
     history: PropTypes.func,
     shouldFetchInstances: PropTypes.bool,
@@ -28,6 +29,22 @@ class SlicesRoute extends React.Component {
     this.props.history.push(`${urlWithoutTrailingSlash}/recorder`)
   }
 
+  _renderBackButton = () => {
+    const config = {
+      cb: this._navigateToList,
+      type: 'BACK',
+    }
+    return renderButton('TOP_LEFT', config)
+  }
+  
+  _renderContributeButton = () => {
+    const config = {
+      cb: this._navigateToContribute,
+      type: 'ADD',
+    }
+    return renderButton('BOTTOM_RIGHT', config)
+  }
+
   componentDidMount () {
     /** @case - url navigation without trakName in path */
     if (!this.props.trakName) {
@@ -39,17 +56,14 @@ class SlicesRoute extends React.Component {
     if (this.props.shouldFetchInstances) {
       this.props.fetchInstances()
     }
-
-    this.props.addItemToNavBar({
-      TOP_LEFT: { type: 'BACK', cb: this._navigateToList },
-      BOTTOM_RIGHT: { type: 'ADD', cb: this._navigateToContribute }
-    })
   }
 
   render () {
     return (
       <div className={styles.container}>
         <SampleInstances />
+        { this._renderBackButton() }
+        { this._renderContributeButton() }
       </div>
     )
   }

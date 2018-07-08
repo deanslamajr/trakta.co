@@ -196,6 +196,9 @@ class NavBar extends React.Component {
   }
 }
 
-export { NavBar }
+export {
+  NavBar,
+  renderButton
+}
 
 export default withStyles(styles)(NavBar)

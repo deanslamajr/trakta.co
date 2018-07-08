@@ -6,6 +6,8 @@ import axios from 'axios'
 import randToken from 'rand-token'
 import viewportDimensions from 'viewport-dimensions'
 
+import { renderButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
+
 import styles from './InstancePlaylist.css'
 
 let playCode
@@ -35,18 +37,34 @@ function stopArrangement () {
   Tone.Transport.stop()
 }
 
+function PlayButton ({ cb, color, position }) {
+  const config = {
+    cb,
+    color,
+    type: 'PLAY',
+  }
+  return renderButton(position, config)
+}
+
+function StopButton ({ cb, color, position }) {
+  const config = {
+    cb,
+    color,
+    type: 'STOP',
+  }
+  return renderButton(position, config)
+}
+
 class InstancePlaylist extends React.Component {
   static propTypes = {
-    addItemToNavBar: PropTypes.func.required,
+    buttonColor: PropTypes.string,
     incrementPlaysCount: PropTypes.bool,
     player: PropTypes.required,
     trakName: PropTypes.string.required
   }
 
-  constructor (props) {
-    super(props)
-
-    this._initializePlayer(this.props.player)
+  state = {
+    activeButton: null
   }
 
   _drawPosition = (displacementPerFrame, endPosition) => {
@@ -92,48 +110,33 @@ class InstancePlaylist extends React.Component {
 
   _finishPlayerInit = (player) => {
     player.sync().start()
-    this.props.addItemToNavBar({
-      TOP_RIGHT: {
-        type: 'PLAY',
-        cb: this._play,
-        color: this.props.buttonColor
-      }
-    }, true)
+    this.setState({ activeButton: 'PLAY' })
   }
 
-  _stopPlaybackAndSendSignal = () => {
+  _stop = () => {
     clearInterval(intervalAnimationId)
     this.playIndicatorEl.style.backgroundColor = 'transparent'
     position = 0
     stopArrangement()
-    this.setState({ isPlaying: false })
+
+    this.setState({
+      activeButton: 'PLAY',
+      isPlaying: false
+    })
+
     if (this.props.incrementPlaysCount) {
       postEndSignal(this.props.trakName)
     }
   }
 
-  _stop = () => {
-    this._stopPlaybackAndSendSignal()
-    this.props.addItemToNavBar({
-      TOP_RIGHT: {
-        type: 'PLAY',
-        cb: this._play,
-        color: this.props.buttonColor
-      }
-    }, true)
-  }
-
   _play = () => {
     playArrangement()
 
-    this.setState({ isPlaying: true })
-    this.props.addItemToNavBar({
-      TOP_RIGHT: {
-        type: 'STOP',
-        cb: this._stop,
-        color: this.props.buttonColor
-      }
-    }, true)
+    this.setState({
+      activeButton: 'STOP',
+      isPlaying: true
+    })
+
     if (this.props.incrementPlaysCount) {
       postStartSignal(this.props.trakName)
     }
@@ -156,19 +159,41 @@ class InstancePlaylist extends React.Component {
     }
   }
 
+  componentDidMount () {
+    this._initializePlayer(this.props.player)
+  }
+
   componentWillUnmount () {
     if (Tone.Transport.state === 'started') {
-      this._stopPlaybackAndSendSignal()
+      this._stop()
     }
-
-    this.props.addItemToNavBar({
-      TOP_RIGHT: null
-    }, true)
   }
 
   render () {
+    const { activeButton } = this.state
+
     return (
-      <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
+      <React.Fragment>
+        <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
+        {
+          activeButton === 'PLAY' && (
+            <PlayButton
+              position={'TOP_RIGHT'}
+              cb={this._play}
+              color={this.props.buttonColor}
+            />
+          )
+        }
+        {
+          activeButton === 'STOP' && (
+            <StopButton
+              position={'TOP_RIGHT'}
+              cb={this._stop}
+              color={this.props.buttonColor}
+            />
+          )
+        }
+      </React.Fragment>
     )
   }
 }
