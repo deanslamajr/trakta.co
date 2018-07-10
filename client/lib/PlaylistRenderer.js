@@ -52,9 +52,9 @@ function loadSample (instance, loadTaskCb, fetchTrak) {
   })
 }
 
-function syncPlayerToTransport (samplePlayer, playerStartTime, transport = Tone.Transport) {
+function syncPlayerToTransport (samplePlayer, playerStartTime, transport = Tone.Transport, offset=0) { 
   transport.schedule(() => {
-    samplePlayer.start()
+    samplePlayer.start(0, offset)
   }, playerStartTime)
 }
 
@@ -75,7 +75,7 @@ function addPluginsToPlayer (samplePlayer, volume, panning) {
   samplePlayer.chain(panVol, /* limiter, */ Tone.Master)
 }
 
-function addBufferToTrak (buffer, instance, transport, times) {
+function addBufferToTrak (buffer, instance, transport, times, offset=0) {
   if (times) {
     times.forEach(time => {
       const samplePlayer = new Tone.Player(buffer)
@@ -92,7 +92,7 @@ function addBufferToTrak (buffer, instance, transport, times) {
       const playerStartTime = instance.startTime + (i * instance.loopPadding)
 
       addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
-      syncPlayerToTransport(samplePlayer, playerStartTime, transport)
+      syncPlayerToTransport(samplePlayer, playerStartTime, transport, offset)
       i++
     } while (i <= (instance.loopCount || 0))
   }
@@ -203,6 +203,8 @@ class PlaylistRenderer {
 
 
 
+
+  
   createCurrentTrakPlayer (instances, completeSpinnerTask) {
     return Promise.all(instances.map(instance => loadSample(instance, completeSpinnerTask, false)))
       .then(() => {
@@ -238,15 +240,15 @@ class PlaylistRenderer {
     const snippetDuration = endTime - startTime
 
     return Tone.Offline(OfflineTransport => {
-      OfflineTransport.position = startTime
+      OfflineTransport.position = 0
 
       addBufferToTrak(sourceBuffer, {
         loopCount: cleanupState.loopCount,
         loopPadding: cleanupState.loopPadding,
-        startTime,
+        startTime: 0,
         panning: cleanupState.panning,
         volume: cleanupState.volume
-      }, OfflineTransport)
+      }, OfflineTransport, undefined, startTime)
 
       OfflineTransport.start()
     }, snippetDuration)

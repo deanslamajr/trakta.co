@@ -99,10 +99,7 @@ class Cleanup extends React.Component {
     /** fix for slider being upside down */
     const volume = value * -1
 
-    this.setState({ volume })
-    this.props.setStagedSample({
-      volume
-    })
+    this.props.createPlayerFromCleanup({ volume })
   }
 
   _onLoopCountSliderFinish = (value) => {
@@ -229,11 +226,11 @@ class Cleanup extends React.Component {
                     orientation='vertical'
                     className={styles.volumeSlider}
                     handleClassName={styles.volumeSliderHandle}
-                    max={25}
-                    min={-25}
-                    step={1}
+                    max={20}
+                    min={-20}
+                    step={.5}
                     onAfterChange={this._onVolumeSliderFinish}
-                    defaultValue={this.state.volume * -1}
+                    defaultValue={this.props.cleanupState.volume * -1}
                   />
                 )
               }

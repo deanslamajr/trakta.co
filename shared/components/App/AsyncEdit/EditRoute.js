@@ -38,7 +38,7 @@ class EditRoute extends React.Component {
         loopCount: 0,
         loopPadding: 0,
         panning: 0,
-        volume: -6,
+        volume: 0,
 
         sourceDuration: 0
       },
@@ -120,9 +120,13 @@ class EditRoute extends React.Component {
       sourceDuration: buffer.get().duration
     }
 
-    this.setState({
-      sourceBuffer: buffer,
-      cleanupState: initialCleanupState
+    this.setState(({ cleanupState: prevCleanupState }) => {
+      const newCleanupState = Object.assign({}, prevCleanupState, initialCleanupState)
+      
+      return {
+        sourceBuffer: buffer,
+        cleanupState: newCleanupState
+      }
     })
   }
 
