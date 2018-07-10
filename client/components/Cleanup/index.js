@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
@@ -11,7 +12,6 @@ import * as selectors from '../../../shared/reducers'
 import { updateDimensionsWithAdditionalSample } from '../../../shared/actions/trak'
 import {
   setStagedSample,
-  setCleanup
 } from '../../../shared/actions/recorder'
 
 import { getSampleCreator } from '../../lib/SampleCreator'
@@ -25,6 +25,13 @@ function getMainEditUrl (url) {
 }
 
 class Cleanup extends React.Component {
+  static propTypes = {
+    cleanupState: PropTypes.object,
+    createPlayerFromCleanup: PropTypes.func,
+    history: PropTypes.object,
+    setCleanupState: PropTypes.func
+  }
+
   constructor (props) {
     super(props)
 
@@ -39,51 +46,21 @@ class Cleanup extends React.Component {
     this.state = {
       isPlaying: false,
       isFirstRender: true,
-      isObjectUrlReady: false,
       showVolumeSlider: false,
       volume: this.props.stagedSample.volume,
       showEffectsModal: false,
       loopCount: this.props.stagedSample.loopCount,
       loopPadding: this.props.stagedSample.loopPadding || null
     }
-
-    this._onLeftSliderChange = this._onLeftSliderChange.bind(this)
-    this._onLeftSliderFinish = this._onLeftSliderFinish.bind(this)
-    this._onRightSliderChange = this._onRightSliderChange.bind(this)
-    this._onRightSliderFinish = this._onRightSliderFinish.bind(this)
-    this._clickUseThisSelection = this._clickUseThisSelection.bind(this)
-    this._renderSample = this._renderSample.bind(this)
-    this._handleBackAction = this._handleBackAction.bind(this)
-    this._toggleVolumeSlider = this._toggleVolumeSlider.bind(this)
-    this._onVolumeSliderFinish = this._onVolumeSliderFinish.bind(this)
-    this._toggleEffectsModal = this._toggleEffectsModal.bind(this)
-    this._onLoopCountSliderFinish = this._onLoopCountSliderFinish.bind(this)
-    this._onLoopPaddingSliderFinish = this._onLoopPaddingSliderFinish.bind(this)
   }
 
-  _clickUseThisSelection () {
+  _clickUseThisSelection = () => {
     const mainEditUrl = getMainEditUrl(this.props.match.path)
 
     this.props.history.push(`${mainEditUrl}/staging`)
   }
 
-  _renderSample (start, stop) {
-    const objectUrl = this.sampleCreator.clipBlobAndReturnObjectUrl(start, stop)
-
-    this.sampleCreator.createBuffer(objectUrl)
-      .then(buffer => {
-        const duration = buffer.get().duration
-        this.setState({
-          duration,
-          objectUrl,
-          isObjectUrlReady: true
-        })
-
-        this.props.setStagedSample({ duration })
-      })
-  }
-
-  _drawWaveForm () {
+  _drawWaveForm = () => {
     const canvasWidth = this.canvasContext.canvas.width
     const canvasHeight = this.canvasContext.canvas.height
 
@@ -110,25 +87,15 @@ class Cleanup extends React.Component {
     this.canvasContext.closePath()
   }
 
-  _toggleVolumeSlider () {
+  _toggleVolumeSlider = () => {
     this.setState({ showVolumeSlider: !this.state.showVolumeSlider })
   }
 
-  _toggleEffectsModal () {
+  _toggleEffectsModal = () => {
     this.setState({ showEffectsModal: !this.state.showEffectsModal })
   }
 
-  _onLeftSliderChange (value) {
-    this.setState({ isObjectUrlReady: false })
-    this.props.setCleanup({ leftSliderValue: value })
-  }
-
-  _onRightSliderChange (value) {
-    this.setState({ isObjectUrlReady: false })
-    this.props.setCleanup({ rightSliderValue: value })
-  }
-
-  _onVolumeSliderFinish (value) {
+  _onVolumeSliderFinish = (value) => {
     /** fix for slider being upside down */
     const volume = value * -1
 
@@ -138,31 +105,33 @@ class Cleanup extends React.Component {
     })
   }
 
-  _onLoopCountSliderFinish (value) {
+  _onLoopCountSliderFinish = (value) => {
     this.setState({ loopCount: value })
     this.props.setStagedSample({ loopCount: value })
   }
 
-  _onLoopPaddingSliderFinish (value) {
+  _onLoopPaddingSliderFinish = (value) => {
     this.setState({ loopPadding: value })
     this.props.setStagedSample({ loopPadding: value })
   }
 
-  _onLeftSliderFinish (value) {
-    this.props.setCleanup({
-      clipStart: value,
-      leftSliderValue: value
-    })
+  _onLeftSliderChange = (value) => {
+    this.props.setCleanupState({ leftSliderValue: value })
   }
 
-  _onRightSliderFinish (value) {
-    this.props.setCleanup({
-      clipEnd: value,
-      rightSliderValue: value
-    })
+  _onLeftSliderFinish = (value) => {
+    this.props.createPlayerFromCleanup({ leftSliderValue: value })
   }
 
-  _handleBackAction () {
+  _onRightSliderChange = (value) => {
+    this.props.setCleanupState({ rightSliderValue: value })
+  }
+
+  _onRightSliderFinish = (value) => {
+    this.props.createPlayerFromCleanup({ rightSliderValue: value })
+  }
+
+  _handleBackAction = () => {
     /**
      * reset the dimensions of the trak to that without staged sample
      */
@@ -170,12 +139,6 @@ class Cleanup extends React.Component {
 
     const mainEditUrl = getMainEditUrl(this.props.match.url)
     this.props.history.push(`${mainEditUrl}/recorder`)
-  }
-
-  componentWillReceiveProps (nextProps) {
-    if (this.props.cleanup.clipStart !== nextProps.cleanup.clipStart || this.props.cleanup.clipEnd !== nextProps.cleanup.clipEnd) {
-      this._renderSample(nextProps.cleanup.clipStart, nextProps.cleanup.clipEnd)
-    }
   }
 
   componentDidMount () {
@@ -203,7 +166,7 @@ class Cleanup extends React.Component {
           this.canvasContext.canvas.height = this.state.canvasHeight
 
           this._drawWaveForm()
-          this._renderSample(this.props.cleanup.clipStart, this.props.cleanup.clipEnd)
+          this.props.createPlayerFromCleanup({})
 
           this.props.addItemToNavBar({
             TOP_LEFT: { type: 'BACK', cb: this._handleBackAction },
@@ -217,24 +180,10 @@ class Cleanup extends React.Component {
   }
 
   render () {
-    const maxClipValue = this.sampleCreator.getDataBufferLength()
-    const stepValue = Math.ceil(maxClipValue / 1000)
-
-    const top = this.state.canvasHeight * (this.props.cleanup.leftSliderValue / maxClipValue)
-    const bottom = this.state.canvasHeight - (this.state.canvasHeight * (this.props.cleanup.rightSliderValue / maxClipValue))
+    const top = this.state.canvasHeight * this.props.cleanupState.leftSliderValue
+    const bottom = this.state.canvasHeight - (this.state.canvasHeight * this.props.cleanupState.rightSliderValue)
 
     const sampleDuration = this.props.stagedSample.duration
-
-    const objectUrlInstance = {
-      startTime: 0,
-      loopCount: this.state.loopCount,
-      loopPadding: this.state.loopPadding === null
-        ? sampleDuration /** First time hitting this view, set loopPadding to the length of the sample */
-        : this.state.loopPadding,
-      volume: this.state.volume,
-      panning: 0,
-      objectUrl: this.state.objectUrl
-    }
 
     return (
       <div ref={(container) => { this.container = container }}>
@@ -248,37 +197,29 @@ class Cleanup extends React.Component {
                 ref={(canvas) => { this.canvas = canvas }}
               />
               <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
-              {
-                this.state.isObjectUrlReady &&
-                  (
-                    <InstancePlaylist
-                      objectUrlInstance={objectUrlInstance}
-                      addItemToNavBar={this.props.addItemToNavBar}
-                      saveObjectUrl
-                    />
-                  )
-              }
 
               <div>
                 <ReactSlider
                   orientation='vertical'
                   className={styles.sliderLeft}
                   handleClassName={classnames(styles.leftHandle, styles.handle)}
+                  min={0}
+                  max={1}
+                  step={0.0025}
                   onChange={this._onLeftSliderChange}
-                  max={maxClipValue}
-                  step={stepValue}
                   onAfterChange={this._onLeftSliderFinish}
-                  defaultValue={this.props.cleanup.clipStart}
+                  defaultValue={this.props.cleanupState.leftSliderValue}
                 />
                 <ReactSlider
                   orientation='vertical'
                   className={styles.sliderRight}
                   handleClassName={classnames(styles.rightHandle, styles.handle)}
+                  min={0}
+                  max={1}
+                  step={0.0025}
                   onChange={this._onRightSliderChange}
-                  max={maxClipValue}
-                  step={stepValue}
                   onAfterChange={this._onRightSliderFinish}
-                  defaultValue={this.props.cleanup.clipEnd}
+                  defaultValue={this.props.cleanupState.rightSliderValue}
                 />
               </div>
 
@@ -342,7 +283,6 @@ class Cleanup extends React.Component {
 const mapActionsToProps = {
   updateDimensionsWithAdditionalSample,
   setStagedSample,
-  setCleanup
 }
 
 function mapStateToProps (state) {

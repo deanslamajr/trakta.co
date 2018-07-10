@@ -160,7 +160,21 @@ export default class SampleCreator {
     return mp3Encoder.encode(summedBuffer)
       .then(buffer => {
         dataBuffer = buffer
-        return mp3Encoder.createBlob(dataBuffer)
+        const blob = mp3Encoder.createBlob(dataBuffer)
+        const objectUrl = mp3Encoder.createBlobObjectUrl(blob)
+
+        return new Promise((resolve, reject) => {
+          new Tone.Buffer(objectUrl, // eslint-disable-line 
+            // success
+            resolve,
+            // error
+            // @todo log, set error view state (w/ try again functionality)
+            error => {
+              console.error(error)
+              reject(error)
+            }
+          )
+        })
       })
   }
 

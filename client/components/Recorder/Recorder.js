@@ -38,9 +38,7 @@ class Recorder extends React.Component {
   static propTypes = {
     history: PropTypes.object,
     fetchInstances: PropTypes.func,
-    resetStagedSample: PropTypes.func,
-    setCleanupState: PropTypes.func,
-    setSourceBlob: PropTypes.func,
+    setSourceBuffer: PropTypes.func,
     shouldFetchInstances: PropTypes.bool
   }
 
@@ -230,18 +228,8 @@ class Recorder extends React.Component {
     clearCanvas(this.canvasContext)
 
     this.sampleCreator.stopAndFinishRecording()
-      .then(blob => {
-        this.props.resetStagedSample()
-        this.props.setSourceBlob(blob)
-    
-        const initialStartValue = Math.ceil(0.2 * (this.sampleCreator.getDataBufferLength()))
-        const initialEndValue = Math.ceil(0.8 * (this.sampleCreator.getDataBufferLength()))
-        this.props.setCleanupState({
-          leftSliderValue: initialStartValue,
-          rightSliderValue: initialEndValue,
-          clipStart: initialStartValue,
-          clipEnd: initialEndValue
-        })
+      .then(buffer => {
+        this.props.setSourceBuffer(buffer)
     
         this._navigateToCleanup()
       })

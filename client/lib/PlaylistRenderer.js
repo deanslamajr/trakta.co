@@ -232,6 +232,30 @@ class PlaylistRenderer {
       })
   }
 
+  createPlayerFromCleanup (sourceBuffer, cleanupState, loadTaskCb) {
+    const startTime = cleanupState.sourceDuration * cleanupState.leftSliderValue
+    const endTime = cleanupState.sourceDuration * cleanupState.rightSliderValue
+    const snippetDuration = endTime - startTime
+
+    return Tone.Offline(OfflineTransport => {
+      OfflineTransport.position = startTime
+
+      addBufferToTrak(sourceBuffer, {
+        loopCount: cleanupState.loopCount,
+        loopPadding: cleanupState.loopPadding,
+        startTime,
+        panning: cleanupState.panning,
+        volume: cleanupState.volume
+      }, OfflineTransport)
+
+      OfflineTransport.start()
+    }, snippetDuration)
+    .then(cleanupBuffer => {
+      loadTaskCb()
+      return new Tone.Player(cleanupBuffer).toMaster()
+    })
+  }
+
 
 
 

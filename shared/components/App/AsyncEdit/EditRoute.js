@@ -21,34 +21,40 @@ import * as selectors from '../../../reducers'
 
 import styles from './styles.css'
 
-const defaultStagedSample = {
-  startTime: 0,
-  volume: 0,
-  panning: 0,
-  duration: 0,
-  loopCount: 0,
-  loopPadding: 0
-}
+const initialLeftSliderValue = 0.2
+const initialRightSliderValue = 0.8
 
 class EditRoute extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      incrementPlaysCount: true,
+      activePlayer: null,
+
+      cleanupState: {
+        leftSliderValue: 0,
+        rightSliderValue: 1,
+
+        loopCount: 0,
+        loopPadding: 0,
+        panning: 0,
+        volume: -6,
+
+        sourceDuration: 0
+      },
+
+      currentTrakPlayer: null,
+      cleanupPlayer: null,
+
       trakName: this.props.match.url.split('/')[2],
       shouldFetchInstances: true,
+      shouldPlayerIncrementPlaysCount: true,
       spinnerTasks: {
         count: 0,
         completedCount: 0
       },
-      sourceBlob: null,
-      stagedSample: defaultStagedSample
+      sourceBuffer: null
     }
-  }
-
-  _resetStagedSample = () => {
-    this.setState({ stagedSample: defaultStagedSample })
   }
 
   _fetchInstances = () => {
@@ -68,7 +74,8 @@ class EditRoute extends React.Component {
         this.setState({
           currentTrakPlayer,
           activePlayer: currentTrakPlayer,
-          shouldFetchInstances: false
+          shouldFetchInstances: false,
+          shouldPlayerIncrementPlaysCount: true
         })
       })
   }
@@ -105,14 +112,42 @@ class EditRoute extends React.Component {
     this.setState({ shouldFetchInstances })
   }
 
-  _setSourceBlob = (blob) => {
-    this.setState({ sourceBlob: blob })
+  _setSourceBuffer = (buffer) => {
+    const initialCleanupState = {
+      leftSliderValue: initialLeftSliderValue,
+      rightSliderValue: initialRightSliderValue,
+      loopPadding: buffer.get().duration,
+      sourceDuration: buffer.get().duration
+    }
+
+    this.setState({
+      sourceBuffer: buffer,
+      cleanupState: initialCleanupState
+    })
   }
 
   _setCleanupState = (cleanupState) => {
     this.setState(({ cleanupState: prevCleanupState }) => {
       const newCleanupState = Object.assign({}, prevCleanupState, cleanupState)
       return { cleanupState: newCleanupState }
+    })
+  }
+
+  _createPlayerFromCleanup = (change) => {
+    this._addSpinnerTask()
+    this.setState(({ cleanupState: prevCleanupState }) => {
+      const newCleanupState = Object.assign({}, prevCleanupState, change)
+      return { cleanupState: newCleanupState }
+    }, () => {
+      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
+      const PlaylistRenderer = getPlaylistRenderer()
+
+      PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask)
+        .then(cleanupPlayer => this.setState({
+          activePlayer: cleanupPlayer,
+          cleanupPlayer,
+          shouldPlayerIncrementPlaysCount: false
+        }))
     })
   }
 
@@ -139,7 +174,6 @@ class EditRoute extends React.Component {
               <Slices
                 {...props}
                 fetchInstances={this._fetchInstances}
-                resetStagedSample={this._resetStagedSample}
                 shouldFetchInstances={this.state.shouldFetchInstances}
                 trakName={this.state.trakName}
               />
@@ -154,21 +188,26 @@ class EditRoute extends React.Component {
               <Recorder
                 {...props}
                 fetchInstances={this._fetchInstances}
-                resetStagedSample={this._resetStagedSample}
                 setCleanupState={this._setCleanupState}
-                setSourceBlob={this._setSourceBlob}
+                setSourceBuffer={this._setSourceBuffer}
                 shouldFetchInstances={this.state.shouldFetchInstances}
               />
             </React.Fragment>
           )} />
           {
-            this.props.objectUrl && ([
+            this.state.cleanupState.sourceDuration && ([
               <Route key={0} path={`${this.props.match.url}/cleanup`} render={props => (
                 <React.Fragment>
                   <Helmet>
                     <title>{`${this.state.trakName} - cleanup - ${config('appTitle')}`}</title>
                   </Helmet>
-                  <Cleanup {...props} addItemToNavBar={this.props.addItemToNavBar} />
+                  <Cleanup
+                    {...props}
+                    addItemToNavBar={this.props.addItemToNavBar}
+                    cleanupState={this.state.cleanupState}
+                    createPlayerFromCleanup={this._createPlayerFromCleanup}
+                    setCleanupState={this._setCleanupState}
+                  />
                 </React.Fragment>
               )} />,
               <Route key={1} path={`${this.props.match.url}/staging`} render={props => (
@@ -187,7 +226,7 @@ class EditRoute extends React.Component {
         {
           this.state.activePlayer && (
             <InstancePlaylist
-              incrementPlaysCount={this.state.incrementPlaysCount}
+              incrementPlaysCount={this.state.shouldPlayerIncrementPlaysCount}
               player={this.state.activePlayer}
               trakName={this.state.trakName}
             />

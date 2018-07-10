@@ -51,8 +51,6 @@ class SlicesRoute extends React.Component {
       return this.props.history.push('/new')
     }
 
-    this.props.resetStagedSample()
-
     if (this.props.shouldFetchInstances) {
       this.props.fetchInstances()
     }
