@@ -52,9 +52,13 @@ function loadSample (instance, loadTaskCb, fetchTrak) {
   })
 }
 
-function syncPlayerToTransport (samplePlayer, playerStartTime, transport = Tone.Transport, offset=0) { 
+function syncPlayerToTransport (samplePlayer, playerStartTime, transport = Tone.Transport, offset=0) {
   transport.schedule(() => {
-    samplePlayer.start(0, offset)
+    /**
+     * undefined will set the startTime of the player to "now"
+     * have to do it this way bc we need to use the second method parameter "offset"
+     **/
+    samplePlayer.start(undefined, offset)
   }, playerStartTime)
 }
 
@@ -204,7 +208,7 @@ class PlaylistRenderer {
 
 
 
-  
+
   createCurrentTrakPlayer (instances, completeSpinnerTask) {
     return Promise.all(instances.map(instance => loadSample(instance, completeSpinnerTask, false)))
       .then(() => {
@@ -239,6 +243,10 @@ class PlaylistRenderer {
     const endTime = cleanupState.sourceDuration * cleanupState.rightSliderValue
     const snippetDuration = endTime - startTime
 
+    const playerDuration = cleanupState.loopCount === 0
+      ? snippetDuration
+      : (cleanupState.loopCount * cleanupState.loopPadding) + snippetDuration
+
     return Tone.Offline(OfflineTransport => {
       OfflineTransport.position = 0
 
@@ -251,7 +259,7 @@ class PlaylistRenderer {
       }, OfflineTransport, undefined, startTime)
 
       OfflineTransport.start()
-    }, snippetDuration)
+    }, playerDuration)
     .then(cleanupBuffer => {
       loadTaskCb()
       return new Tone.Player(cleanupBuffer).toMaster()

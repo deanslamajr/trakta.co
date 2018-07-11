@@ -44,13 +44,8 @@ class Cleanup extends React.Component {
     }
 
     this.state = {
-      isPlaying: false,
-      isFirstRender: true,
       showVolumeSlider: false,
-      volume: this.props.stagedSample.volume,
-      showEffectsModal: false,
-      loopCount: this.props.stagedSample.loopCount,
-      loopPadding: this.props.stagedSample.loopPadding || null
+      showEffectsModal: false
     }
   }
 
@@ -103,13 +98,11 @@ class Cleanup extends React.Component {
   }
 
   _onLoopCountSliderFinish = (value) => {
-    this.setState({ loopCount: value })
-    this.props.setStagedSample({ loopCount: value })
+    this.props.createPlayerFromCleanup({ loopCount: value })
   }
 
   _onLoopPaddingSliderFinish = (value) => {
-    this.setState({ loopPadding: value })
-    this.props.setStagedSample({ loopPadding: value })
+    this.props.createPlayerFromCleanup({ loopPadding: value })
   }
 
   _onLeftSliderChange = (value) => {
@@ -180,8 +173,6 @@ class Cleanup extends React.Component {
     const top = this.state.canvasHeight * this.props.cleanupState.leftSliderValue
     const bottom = this.state.canvasHeight - (this.state.canvasHeight * this.props.cleanupState.rightSliderValue)
 
-    const sampleDuration = this.props.stagedSample.duration
-
     return (
       <div ref={(container) => { this.container = container }}>
         <div className={styles.label}>
@@ -236,7 +227,7 @@ class Cleanup extends React.Component {
               }
 
               {
-                this.state.showEffectsModal && sampleDuration && (
+                this.state.showEffectsModal && (
                   <div className={styles.container}>
                     <React.Fragment>
                       <div>
@@ -250,7 +241,7 @@ class Cleanup extends React.Component {
                         min={0}
                         step={1}
                         onAfterChange={this._onLoopCountSliderFinish}
-                        defaultValue={this.props.stagedSample.loopCount || 0}
+                        defaultValue={this.props.cleanupState.loopCount}
                       />
                       <div>
                       Space between loops
@@ -259,11 +250,11 @@ class Cleanup extends React.Component {
                         orientation='horizontal'
                         className={styles.loopsSlider}
                         handleClassName={styles.loopsSliderHandle}
-                        max={sampleDuration}
+                        max={this.props.cleanupState.clipDuration}
                         min={0}
-                        step={sampleDuration / 500}
+                        step={this.props.cleanupState.clipDuration / 500}
                         onAfterChange={this._onLoopPaddingSliderFinish}
-                        defaultValue={this.props.stagedSample.loopPadding || sampleDuration}
+                        defaultValue={this.props.cleanupState.loopPadding}
                       />
                     </React.Fragment>
                   </div>

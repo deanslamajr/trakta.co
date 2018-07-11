@@ -40,6 +40,7 @@ class EditRoute extends React.Component {
         panning: 0,
         volume: 0,
 
+        clipDuration: 0,
         sourceDuration: 0
       },
 
@@ -113,11 +114,18 @@ class EditRoute extends React.Component {
   }
 
   _setSourceBuffer = (buffer) => {
+    const sourceDuration = buffer.get().duration
+
+    const startTime = sourceDuration * initialLeftSliderValue
+    const endTime = sourceDuration * initialRightSliderValue
+    const clipDuration = endTime - startTime
+
     const initialCleanupState = {
       leftSliderValue: initialLeftSliderValue,
       rightSliderValue: initialRightSliderValue,
-      loopPadding: buffer.get().duration,
-      sourceDuration: buffer.get().duration
+      loopPadding: clipDuration,
+      clipDuration,
+      sourceDuration,
     }
 
     this.setState(({ cleanupState: prevCleanupState }) => {
@@ -147,10 +155,19 @@ class EditRoute extends React.Component {
       const PlaylistRenderer = getPlaylistRenderer()
 
       PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask)
-        .then(cleanupPlayer => this.setState({
-          activePlayer: cleanupPlayer,
-          cleanupPlayer,
-          shouldPlayerIncrementPlaysCount: false
+        .then(cleanupPlayer => this.setState(({ cleanupState: prevCleanupState }) => {
+          const startTime = prevCleanupState.sourceDuration * prevCleanupState.leftSliderValue
+          const endTime = prevCleanupState.sourceDuration * prevCleanupState.rightSliderValue
+          const clipDuration = endTime - startTime
+
+          const newCleanupState = Object.assign({}, prevCleanupState, { clipDuration })
+          
+          return {
+            activePlayer: cleanupPlayer,
+            cleanupPlayer,
+            shouldPlayerIncrementPlaysCount: false,
+            cleanupState: newCleanupState
+          }
         }))
     })
   }
