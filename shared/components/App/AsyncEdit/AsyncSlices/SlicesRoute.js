@@ -1,10 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
+import Helmet from 'react-helmet'
 
 import SampleInstances from '../../../../../client/components/SampleInstances'
 
-import { renderButton } from '../../AsyncNavBar/AsyncNavBar'
+import { NavButton } from '../../AsyncNavBar/AsyncNavBar'
+
+import config from '../../../../../config'
 
 import styles from './styles.css'
 
@@ -29,22 +32,6 @@ class SlicesRoute extends React.Component {
     this.props.history.push(`${urlWithoutTrailingSlash}/recorder`)
   }
 
-  _renderBackButton = () => {
-    const config = {
-      cb: this._navigateToList,
-      type: 'BACK',
-    }
-    return renderButton('TOP_LEFT', config)
-  }
-  
-  _renderContributeButton = () => {
-    const config = {
-      cb: this._navigateToContribute,
-      type: 'ADD',
-    }
-    return renderButton('BOTTOM_RIGHT', config)
-  }
-
   componentDidMount () {
     /** @case - url navigation without trakName in path */
     if (!this.props.trakName) {
@@ -59,9 +46,20 @@ class SlicesRoute extends React.Component {
   render () {
     return (
       <div className={styles.container}>
+        <Helmet>
+          <title>{`${this.props.trakName} - ${config('appTitle')}`}</title>
+        </Helmet>
         <SampleInstances />
-        { this._renderBackButton() }
-        { this._renderContributeButton() }
+        <NavButton
+          type={'BACK'}
+          cb={this._navigateToList}
+          position={'TOP_LEFT'}
+        />
+        <NavButton
+          type={'ADD'}
+          cb={this._navigateToContribute}
+          position={'BOTTOM_RIGHT'}
+        />
       </div>
     )
   }

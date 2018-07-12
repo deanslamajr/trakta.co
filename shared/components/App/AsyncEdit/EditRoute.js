@@ -161,7 +161,7 @@ class EditRoute extends React.Component {
           const clipDuration = endTime - startTime
 
           const newCleanupState = Object.assign({}, prevCleanupState, { clipDuration })
-          
+
           return {
             activePlayer: cleanupPlayer,
             cleanupPlayer,
@@ -169,6 +169,13 @@ class EditRoute extends React.Component {
             cleanupState: newCleanupState
           }
         }))
+    })
+  }
+
+  _clearActivePlayer = () => {
+    this.setState({
+      activePlayer: null,
+      cleanupPlayer: null
     })
   }
 
@@ -187,49 +194,34 @@ class EditRoute extends React.Component {
         <Switch>
           <Redirect exact from='/e/new' to='/e/new/recorder' />
           <Route exact path={this.props.match.url} render={props => (
-            <React.Fragment>
-              <Helmet>
-                <title>{`${this.state.trakName} - ${config('appTitle')}`}</title>
-              </Helmet>
-
-              <Slices
-                {...props}
-                fetchInstances={this._fetchInstances}
-                shouldFetchInstances={this.state.shouldFetchInstances}
-                trakName={this.state.trakName}
-              />
-            </React.Fragment>
+            <Slices
+              {...props}
+              fetchInstances={this._fetchInstances}
+              shouldFetchInstances={this.state.shouldFetchInstances}
+              trakName={this.state.trakName}
+            />
           )} />
           <Route path={`${this.props.match.url}/recorder`} render={props => (
-            <React.Fragment>
-              <Helmet>
-                <title>{`${this.state.trakName} - recorder - ${config('appTitle')}`}</title>
-              </Helmet>
-
-              <Recorder
-                {...props}
-                fetchInstances={this._fetchInstances}
-                setCleanupState={this._setCleanupState}
-                setSourceBuffer={this._setSourceBuffer}
-                shouldFetchInstances={this.state.shouldFetchInstances}
-              />
-            </React.Fragment>
+            <Recorder
+              {...props}
+              fetchInstances={this._fetchInstances}
+              setCleanupState={this._setCleanupState}
+              setSourceBuffer={this._setSourceBuffer}
+              shouldFetchInstances={this.state.shouldFetchInstances}
+              trakName={this.state.trakName}
+            />
           )} />
           {
             this.state.cleanupState.sourceDuration && ([
               <Route key={0} path={`${this.props.match.url}/cleanup`} render={props => (
-                <React.Fragment>
-                  <Helmet>
-                    <title>{`${this.state.trakName} - cleanup - ${config('appTitle')}`}</title>
-                  </Helmet>
-                  <Cleanup
-                    {...props}
-                    addItemToNavBar={this.props.addItemToNavBar}
-                    cleanupState={this.state.cleanupState}
-                    createPlayerFromCleanup={this._createPlayerFromCleanup}
-                    setCleanupState={this._setCleanupState}
-                  />
-                </React.Fragment>
+                <Cleanup
+                  {...props}
+                  cleanupState={this.state.cleanupState}
+                  clearActivePlayer={this._clearActivePlayer}
+                  createPlayerFromCleanup={this._createPlayerFromCleanup}
+                  setCleanupState={this._setCleanupState}
+                  trakName={this.state.trakName}
+                />
               )} />,
               <Route key={1} path={`${this.props.match.url}/staging`} render={props => (
                 <React.Fragment>

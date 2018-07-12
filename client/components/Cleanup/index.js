@@ -1,20 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { compose } from 'redux'
-import { connect } from 'react-redux'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import ReactSlider from 'react-slider'
 import classnames from 'classnames'
+import Helmet from 'react-helmet'
 
-import InstancePlaylist from '../InstancePlaylist'
-
-import * as selectors from '../../../shared/reducers'
-import { updateDimensionsWithAdditionalSample } from '../../../shared/actions/trak'
-import {
-  setStagedSample,
-} from '../../../shared/actions/recorder'
+import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
 
 import { getSampleCreator } from '../../lib/SampleCreator'
+
+import config from '../../../config'
 
 import styles from './cleanup.css'
 
@@ -27,9 +22,11 @@ function getMainEditUrl (url) {
 class Cleanup extends React.Component {
   static propTypes = {
     cleanupState: PropTypes.object,
+    clearActivePlayer: PropTypes.func,
     createPlayerFromCleanup: PropTypes.func,
     history: PropTypes.object,
-    setCleanupState: PropTypes.func
+    setCleanupState: PropTypes.func,
+    trakName: PropTypes.string
   }
 
   constructor (props) {
@@ -125,9 +122,10 @@ class Cleanup extends React.Component {
     /**
      * reset the dimensions of the trak to that without staged sample
      */
-    this.props.updateDimensionsWithAdditionalSample({})
+    //this.props.updateDimensionsWithAdditionalSample({})
 
     const mainEditUrl = getMainEditUrl(this.props.match.url)
+    this.props.clearActivePlayer()
     this.props.history.push(`${mainEditUrl}/recorder`)
   }
 
@@ -157,13 +155,6 @@ class Cleanup extends React.Component {
 
           this._drawWaveForm()
           this.props.createPlayerFromCleanup({})
-
-          this.props.addItemToNavBar({
-            TOP_LEFT: { type: 'BACK', cb: this._handleBackAction },
-            BOTTOM_RIGHT: { type: 'CHECK', cb: this._clickUseThisSelection },
-            BOTTOM_LEFT: { type: 'VOLUME', cb: this._toggleVolumeSlider },
-            BOTTOM_CENTER: { type: 'MENU', cb: this._toggleEffectsModal }
-          })
         }
       })
     }
@@ -175,6 +166,9 @@ class Cleanup extends React.Component {
 
     return (
       <div ref={(container) => { this.container = container }}>
+        <Helmet>
+          <title>{`${this.props.trakName} - cleanup - ${config('appTitle')}`}</title>
+        </Helmet>
         <div className={styles.label}>
           {
             <div>
@@ -263,25 +257,30 @@ class Cleanup extends React.Component {
             </div>
           }
         </div>
+
+        <NavButton
+          type={'BACK'}
+          cb={this._handleBackAction}
+          position={'TOP_LEFT'}
+        />
+        <NavButton
+          type={'CHECK'}
+          cb={this._clickUseThisSelection}
+          position={'BOTTOM_RIGHT'}
+        />
+        <NavButton
+          type={'VOLUME'}
+          cb={this._toggleVolumeSlider}
+          position={'BOTTOM_LEFT'}
+        />
+        <NavButton
+          type={'MENU'}
+          cb={this._toggleEffectsModal}
+          position={'BOTTOM_CENTER'}
+        />
       </div>
     )
   }
 }
 
-const mapActionsToProps = {
-  updateDimensionsWithAdditionalSample,
-  setStagedSample,
-}
-
-function mapStateToProps (state) {
-  return {
-    stagedSample: selectors.getStagedSample(state),
-    objectUrl: selectors.getStagedObjectUrl(state),
-    cleanup: selectors.getCleanup(state)
-  }
-}
-
-export default compose(
-  withStyles(styles),
-  connect(mapStateToProps, mapActionsToProps)
-)(Cleanup)
+export default withStyles(styles)(Cleanup)

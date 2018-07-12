@@ -6,7 +6,7 @@ import axios from 'axios'
 import randToken from 'rand-token'
 import viewportDimensions from 'viewport-dimensions'
 
-import { renderButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
+import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
 
 import styles from './InstancePlaylist.css'
 
@@ -35,24 +35,6 @@ function playArrangement () {
 }
 function stopArrangement () {
   Tone.Transport.stop()
-}
-
-function PlayButton ({ cb, color, position }) {
-  const config = {
-    cb,
-    color,
-    type: 'PLAY',
-  }
-  return renderButton(position, config)
-}
-
-function StopButton ({ cb, color, position }) {
-  const config = {
-    cb,
-    color,
-    type: 'STOP',
-  }
-  return renderButton(position, config)
 }
 
 class InstancePlaylist extends React.Component {
@@ -177,19 +159,21 @@ class InstancePlaylist extends React.Component {
         <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
         {
           activeButton === 'PLAY' && (
-            <PlayButton
-              position={'TOP_RIGHT'}
+            <NavButton
+              type={'PLAY'}
               cb={this._play}
               color={this.props.buttonColor}
+              position={'TOP_RIGHT'}
             />
           )
         }
         {
           activeButton === 'STOP' && (
-            <StopButton
-              position={'TOP_RIGHT'}
+            <NavButton
+              type={'STOP'}
               cb={this._stop}
               color={this.props.buttonColor}
+              position={'TOP_RIGHT'}
             />
           )
         }

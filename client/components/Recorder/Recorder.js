@@ -2,10 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import WaveformData from 'waveform-data'
+import Helmet from 'react-helmet'
 
-import { renderButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
+import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
 
 import { getSampleCreator } from '../../lib/SampleCreator'
+
+import config from '../../../config'
 
 import styles from './Recorder.css'
 
@@ -39,7 +42,8 @@ class Recorder extends React.Component {
     history: PropTypes.object,
     fetchInstances: PropTypes.func,
     setSourceBuffer: PropTypes.func,
-    shouldFetchInstances: PropTypes.bool
+    shouldFetchInstances: PropTypes.bool,
+    trakName: PropTypes.string
   }
 
   constructor (props) {
@@ -57,7 +61,7 @@ class Recorder extends React.Component {
       disableRecording: true,
       drawWave: false,
       duration: undefined,
-      renderRecordingButton: null
+      renderActionButton: null
     }
 
     try {
@@ -174,29 +178,35 @@ class Recorder extends React.Component {
   }
 
   _renderStartRecordingButton = () => {
-    const config = {
-      cb: this._startRecording,
-      type: 'RECORD',
-    }
-    return renderButton('BOTTOM_RIGHT', config)
+    return (
+      <NavButton
+        type={'RECORD'}
+        cb={this._startRecording}
+        position={'BOTTOM_RIGHT'}
+      />
+    )
   }
   
   _renderStopRecordingButton = () => {
-    const config = {
-      cb: this._stopRecording,
-      type: 'CHECK',
-    }
-    return renderButton('BOTTOM_RIGHT', config)
+    return (
+      <NavButton
+        type={'CHECK'}
+        cb={this._stopRecording}
+        position={'BOTTOM_RIGHT'}
+      />
+    )
   }
 
   _renderBackButton = () => {
     const mainEditUrl = getMainEditUrl(this.props.match.url, true)
 
-    const config = {
-      cb: () => this.props.history.push(mainEditUrl),
-      type: 'BACK',
-    }
-    return renderButton('TOP_LEFT', config)
+    return (
+      <NavButton
+        type={'BACK'}
+        cb={() => this.props.history.push(mainEditUrl)}
+        position={'TOP_LEFT'}
+      />
+    )
   }
 
   _startRecording = () => {
@@ -206,7 +216,7 @@ class Recorder extends React.Component {
       recordingStartTime: Date.now(),
       isRecording: true,
       currentPrompt: this.prompts.STOP,
-      renderRecordingButton: this._renderStopRecordingButton
+      renderActionButton: this._renderStopRecordingButton
     })
   }
 
@@ -267,7 +277,7 @@ class Recorder extends React.Component {
             if (this.canvas) {              
               this.setState({
                 disableRecording: false, // overlay 'start recording' mask
-                renderRecordingButton: this._renderStartRecordingButton
+                renderActionButton: this._renderStartRecordingButton
               })
               this._beginDrawingWaves()
             }
@@ -286,11 +296,14 @@ class Recorder extends React.Component {
       canvasWidth,
       canvasHeight,
       currentPrompt,
-      renderRecordingButton
+      renderActionButton
     } = this.state
 
     return (
       <div ref={(container) => { this.container = container }}>
+        <Helmet>
+          <title>{`${this.props.trakName} - recorder - ${config('appTitle')}`}</title>
+        </Helmet>
         {
           this.sampleCreator
             ? (
@@ -310,7 +323,7 @@ class Recorder extends React.Component {
         }
 
         {this._renderBackButton()}
-        {renderRecordingButton && renderRecordingButton()}
+        {renderActionButton && renderActionButton()}
 
         <canvas
           className={styles.container}

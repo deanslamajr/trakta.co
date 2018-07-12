@@ -59,25 +59,24 @@ function renderMenuButton () {
   return (<MdEqualizer className={styles.button} color={styles.white} />)
 }
 
-/**
- * render a button
- * @param {oneOf[buttonMappings]} type the content definition enum
- * @param {oneOf['left', 'center', 'right']} position where to position the button on the navbar
- * @param {function} cb function to invoke on a click action
- */
-function renderButton (position, { type, cb, color }) {
-  const buttonMapping = buttonMappings[type]
-  const positionClass = positionMappings[position]
 
-  const colorClass = color
-    ? styles[`${color}Button`]
-    : buttonMapping.styles
+class Button extends React.Component {
+  render () {
+    const { position, type, cb, color } = this.props
+    
+    const buttonMapping = buttonMappings[type]
+    const positionClass = positionMappings[position]
 
-  return (
-    <div key={position} className={classnames(styles.buttonContainer, styles[positionClass], colorClass)} onClick={cb}>
-      <buttonMapping.Icon colorOveride={color} />
-    </div>
-  )
+    const colorClass = color
+      ? styles[`${color}Button`]
+      : buttonMapping.styles
+
+    return (
+      <div key={position} className={classnames(styles.buttonContainer, styles[positionClass], colorClass)} onClick={cb}>
+        <buttonMapping.Icon colorOveride={color} />
+      </div>
+    )
+  }
 }
 
 const buttonMappings = {
@@ -196,9 +195,11 @@ class NavBar extends React.Component {
   }
 }
 
+const NavButton = withStyles(styles)(Button)
+
 export {
   NavBar,
-  renderButton
+  NavButton
 }
 
 export default withStyles(styles)(NavBar)

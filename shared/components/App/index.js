@@ -9,7 +9,6 @@ import Helmet from 'react-helmet'
 
 import config from '../../../config'
 
-import AsyncNavBar from './AsyncNavBar'
 import AsyncList from './AsyncList'
 import AsyncEdit from './AsyncEdit'
 import AsyncPlayer from './AsyncPlayer'
@@ -103,24 +102,19 @@ class App extends React.Component {
           <meta name='msapplication-square310x310logo' content='/favicons/mstile-310x310.png' />
           <link rel='manifest' href='/manifest.json' />
         </Helmet>
-        <div>
-          <AsyncNavBar render={addItemToNavBar => (
-            <Switch>
 
-              <Route exact path='/' render={props => (
-                <AsyncList {...props} addItemToNavBar={addItemToNavBar} />
-              )} />
-              <Route path='/e/:trakName' render={props => (
-                <AsyncEdit {...props} addItemToNavBar={addItemToNavBar} />
-              )} />
-              <Route path='/p/:trakName' render={props => (
-                <AsyncPlayer {...props} addItemToNavBar={addItemToNavBar} />
-              )} />
-              <Route component={Error404} />
-
-            </Switch>
+        <Switch>
+          <Route exact path='/' render={props => (
+            <AsyncList {...props} />
           )} />
-        </div>
+          <Route path='/e/:trakName' render={props => (
+            <AsyncEdit {...props} />
+          )} />
+          <Route path='/p/:trakName' render={props => (
+            <AsyncPlayer {...props} />
+          )} />
+          <Route component={Error404} />
+        </Switch>
       </div>
     )
   }
