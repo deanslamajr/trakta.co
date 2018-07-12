@@ -46,7 +46,8 @@ class InstancePlaylist extends React.Component {
   }
 
   state = {
-    activeButton: null
+    activeButton: null,
+    isPlaying: false
   }
 
   _drawPosition = (displacementPerFrame, endPosition) => {
@@ -92,7 +93,13 @@ class InstancePlaylist extends React.Component {
 
   _finishPlayerInit = (player) => {
     player.sync().start()
-    this.setState({ activeButton: 'PLAY' })
+    /**
+     * Show the play button
+     * If old player had been playing when new player arrived, don't change the activeButton
+     */
+    if (!this.state.isPlaying) {
+      this.setState({ activeButton: 'PLAY' })
+    }
   }
 
   _stop = () => {
