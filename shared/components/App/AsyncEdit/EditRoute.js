@@ -31,6 +31,8 @@ class EditRoute extends React.Component {
     this.state = {
       activePlayer: null,
 
+      instances: [],
+
       cleanupState: {
         leftSliderValue: 0,
         rightSliderValue: 1,
@@ -54,7 +56,10 @@ class EditRoute extends React.Component {
         count: 0,
         completedCount: 0
       },
-      sourceBuffer: null
+      sourceBuffer: null,
+
+      selectedSequencerItems: {},
+      sequencerPlayer: null
     }
   }
 
@@ -172,6 +177,33 @@ class EditRoute extends React.Component {
     })
   }
 
+  _createPlayerFromSequencer = () => {
+    this._addSpinnerTask()
+    const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
+    const PlaylistRenderer = getPlaylistRenderer()
+    
+    PlaylistRenderer.createPlayerFromSequencer(
+      this.state.selectedSequencerItems,
+      this.state.cleanupPlayer.buffer,
+      this.state.cleanupState,
+      this.state.instances,
+      this._completeSpinnerTask
+    )
+    .then(sequencerPlayer => this.setState({
+      activePlayer: sequencerPlayer,
+      sequencerPlayer,
+      shouldPlayerIncrementPlaysCount: false
+    }))
+  }
+
+  _createPlayerFromSequencerItemSelect = (selectedItem) => {   
+    this.setState(({ selectedSequencerItems: prevSelectedSequencerItems }) => {
+      const currentSelectedState = Object.assign({}, prevSelectedSequencerItems)
+      currentSelectedState[selectedItem] = Boolean(!currentSelectedState[selectedItem])
+      return { selectedSequencerItems: currentSelectedState }
+    }, this._createPlayerFromSequencer)
+  }
+
   _clearActivePlayer = () => {
     this.setState({
       activePlayer: null,
@@ -224,12 +256,13 @@ class EditRoute extends React.Component {
                 />
               )} />,
               <Route key={1} path={`${this.props.match.url}/staging`} render={props => (
-                <React.Fragment>
-                  <Helmet>
-                    <title>{`${this.state.trakName} - staging - ${config('appTitle')}`}</title>
-                  </Helmet>
-                  <Staging {...props} addItemToNavBar={this.props.addItemToNavBar} />
-                </React.Fragment>
+                <Staging
+                  {...props}
+                  createPlayerFromSequencer={this._createPlayerFromSequencer}
+                  createPlayerFromSequencerItemSelect={this._createPlayerFromSequencerItemSelect}
+                  selectedSequencerItems={this.state.selectedSequencerItems}
+                  trakName={this.state.trakName}
+                />
               )} />
             ])
           }

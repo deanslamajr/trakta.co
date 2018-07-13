@@ -182,6 +182,15 @@ function getOfflineTransportduration (instances, sequencerInstance) {
   }
 }
 
+function addSequencerToTrak(times, buffer, transport) {
+  times.forEach(time => {
+    const samplePlayer = new Tone.Player(buffer)
+
+    addPluginsToPlayer(samplePlayer, 0, 0)
+    addPlayerToTransport(samplePlayer, time, transport)
+  })
+}
+
 /**
  * PUBLIC
  */
@@ -266,7 +275,49 @@ class PlaylistRenderer {
     })
   }
 
+  createPlayerFromSequencer (selectedSequencerItems, cleanupPlayerBuffer, cleanupState, instances, loadTaskCb) {
+    const loadSamplesTask = didInstancesCacheMiss(instances)
+      ? Promise.all(instances.map(instance => loadSample(instance, loadTaskCb, fetchTrak)))
+      : Promise.resolve()
 
+    return loadSamplesTask.then(() => {
+      loadTaskCb()
+
+      const offlineTransportDuration = getOfflineTransportduration(instances, { times: selectedSequencerItems, buffer: cleanupPlayerBuffer})
+
+      // render audio
+      return Tone.Offline(OfflineTransport => {
+        OfflineTransport.position = 0
+
+        const times = Object.keys(selectedSequencerItems).filter(time => selectedSequencerItems[time])
+
+        addSequencerToTrak(times, cleanupPlayerBuffer, OfflineTransport)
+
+        instances.forEach(instance => {
+          const times = instance.sequencer_csv.split(',')
+
+          addBufferToTrak(bufferCache[instance.sample.id],
+            instance,
+            OfflineTransport,
+            times
+          )
+        })
+
+        loadTaskCb()
+
+        OfflineTransport.start()
+      }, offlineTransportDuration)
+    })
+    .then(buffer => {
+      loadTaskCb()
+      playlistBuffer = buffer
+      // this buffer will be saved to s3 on /staging save action
+      trakRenderer.setBuffer(buffer.get())
+
+      player = new Tone.Player(buffer).toMaster()
+      return player
+    })
+  }
 
 
 
