@@ -48,7 +48,7 @@ function haltUntilTransportIsReady () {
 
       Tone.Transport.stop()
       Tone.Transport.cancel()
-      console.log('resolving now')
+
       resolve()
     }, 0)
 

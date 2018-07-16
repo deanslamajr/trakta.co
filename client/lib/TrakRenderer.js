@@ -34,12 +34,12 @@ export default class TrakRenderer {
     buffer = audioBuffer
   }
 
-  getBlobFromBuffer () {
-    if (!buffer) {
+  getBlobFromBuffer (bufferToBlobify = buffer) {
+    if (!bufferToBlobify) {
       throw new Error('buffer must be set via TrakRenderer#setBuffer before using TrakRenderer#getBlobUrlFromBuffer')
     }
-    const mp3Encoder = new Encoder(buffer.sampleRate)
-    return createBlobFromBuffer(buffer, mp3Encoder)
+    const mp3Encoder = new Encoder(bufferToBlobify.sampleRate)
+    return createBlobFromBuffer(bufferToBlobify, mp3Encoder)
   }
 
   createObjectUrlFromBuffer (buf) {

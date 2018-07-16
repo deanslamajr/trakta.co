@@ -59,7 +59,9 @@ class EditRoute extends React.Component {
       sourceBuffer: null,
 
       selectedSequencerItems: {},
-      sequencerPlayer: null
+      sequencerPlayer: null,
+
+      showNavbarItems: true
     }
   }
 
@@ -94,10 +96,15 @@ class EditRoute extends React.Component {
     )
   }
 
-  _addSpinnerTask = (count = 1) => {
+  _addSpinnerTask = (count = 1, reset = false) => {
     this.setState(({ spinnerTasks: previousSpinnerTasks }) => {
       const updatedSpinnerTasks = Object.assign({}, previousSpinnerTasks, {
-        count: previousSpinnerTasks.count + count
+        count: reset
+          ? count
+          : previousSpinnerTasks.count + count,
+        completedCount: reset
+          ? 0
+          : previousSpinnerTasks.completedCount
       })
       
       return { spinnerTasks: updatedSpinnerTasks }
@@ -151,7 +158,7 @@ class EditRoute extends React.Component {
   }
 
   _createPlayerFromCleanup = (change) => {
-    this._addSpinnerTask()
+    this._addSpinnerTask(1, true)
     this.setState(({ cleanupState: prevCleanupState }) => {
       const newCleanupState = Object.assign({}, prevCleanupState, change)
       return { cleanupState: newCleanupState }
@@ -160,25 +167,29 @@ class EditRoute extends React.Component {
       const PlaylistRenderer = getPlaylistRenderer()
 
       PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask)
-        .then(cleanupPlayer => this.setState(({ cleanupState: prevCleanupState }) => {
-          const startTime = prevCleanupState.sourceDuration * prevCleanupState.leftSliderValue
-          const endTime = prevCleanupState.sourceDuration * prevCleanupState.rightSliderValue
-          const clipDuration = endTime - startTime
+        .then(cleanupPlayer => {
+          this._completeSpinnerTask()
+          
+          this.setState(({ cleanupState: prevCleanupState }) => {
+            const startTime = prevCleanupState.sourceDuration * prevCleanupState.leftSliderValue
+            const endTime = prevCleanupState.sourceDuration * prevCleanupState.rightSliderValue
+            const clipDuration = endTime - startTime
 
-          const newCleanupState = Object.assign({}, prevCleanupState, { clipDuration })
+            const newCleanupState = Object.assign({}, prevCleanupState, { clipDuration })
 
-          return {
-            activePlayer: cleanupPlayer,
-            cleanupPlayer,
-            shouldPlayerIncrementPlaysCount: false,
-            cleanupState: newCleanupState
-          }
-        }))
+            return {
+              activePlayer: cleanupPlayer,
+              cleanupPlayer,
+              shouldPlayerIncrementPlaysCount: false,
+              cleanupState: newCleanupState
+            }
+          })
+        })
     })
   }
 
   _createPlayerFromSequencer = () => {
-    this._addSpinnerTask()
+    this._addSpinnerTask(1, true)
     const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
     const PlaylistRenderer = getPlaylistRenderer()
     
@@ -189,11 +200,14 @@ class EditRoute extends React.Component {
       this.state.instances,
       this._completeSpinnerTask
     )
-    .then(sequencerPlayer => this.setState({
-      activePlayer: sequencerPlayer,
-      sequencerPlayer,
-      shouldPlayerIncrementPlaysCount: false
-    }))
+    .then(sequencerPlayer => {
+      this._completeSpinnerTask()
+      this.setState({
+        activePlayer: sequencerPlayer,
+        sequencerPlayer,
+        shouldPlayerIncrementPlaysCount: false
+      })
+    })
   }
 
   _createPlayerFromSequencerItemSelect = (selectedItem) => {   
@@ -208,6 +222,74 @@ class EditRoute extends React.Component {
     this.setState({
       activePlayer: null,
       cleanupPlayer: null
+    })
+  }
+
+  _getBlobFromBuffer = (buffer) => {
+    const { getTrakRenderer } = require('../../../../client/lib/TrakRenderer')
+    const TrakRenderer = getTrakRenderer()
+    return TrakRenderer.getBlobFromBuffer(buffer)
+  }
+
+  _setTrakName = (trakName) => {
+    this.setState({ trakName })
+  }
+
+  _saveRecording = (event) => {
+    // prevent page refresh
+    event.preventDefault()
+
+    /** Disable NavBar Items and all other user interactivity */
+    this.setState({
+      activePlayer: null,
+      showNavbarItems: false
+    }, () => {
+      this._addSpinnerTask(4, true)
+      this._getBlobFromBuffer(this.state.cleanupPlayer.buffer.get())
+        .then(blob => {
+          this._completeSpinnerTask()
+
+          const sampleDuration = this.state.cleanupPlayer.buffer.get().duration
+          const trakDuration = this.state.sequencerPlayer.buffer.get().duration
+          const sequencerCsv = Object.keys(this.state.selectedSequencerItems)
+            .filter(item => this.state.selectedSequencerItems[item])
+            .join(',')
+          const queryString = `?trakName=${this.state.trakName}&sampleDuration=${sampleDuration}&sequencerCsv=${sequencerCsv}&trakDuration=${trakDuration}`
+
+          return axios.post(`/api/sample${queryString}`, blob)
+        })
+        .then(({ data }) => {
+          const {
+            trakName,
+            versionId
+          } = data
+
+          this._completeSpinnerTask()
+          
+          this._setShouldFetchInstances(true)
+
+          const isANewTrak = trakName !== this.state.trakName
+          if (trakName && isANewTrak) {
+            this._setTrakName(trakName)
+          }
+
+          // get new trak blob
+          return this._getBlobFromBuffer(this.state.sequencerPlayer.buffer.get())
+            .then(blob => {
+              this._completeSpinnerTask()
+              return axios.post(`/api/version/${versionId}`, blob)
+            })
+        })
+        .then(() => {
+          this._completeSpinnerTask()
+          this.props.history.push(`/e/${this.state.trakName}`)
+        })
+        .catch((err) => {
+          // @todo log error
+          // @todo handle this gracefully
+          console.error(err)
+          // this.props.failureCB
+        })
     })
   }
 
@@ -260,7 +342,9 @@ class EditRoute extends React.Component {
                   {...props}
                   createPlayerFromSequencer={this._createPlayerFromSequencer}
                   createPlayerFromSequencerItemSelect={this._createPlayerFromSequencerItemSelect}
+                  saveRecording={this._saveRecording}
                   selectedSequencerItems={this.state.selectedSequencerItems}
+                  showNavbarItems={this.state.showNavbarItems}
                   trakName={this.state.trakName}
                 />
               )} />

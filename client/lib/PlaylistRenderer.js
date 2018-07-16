@@ -206,11 +206,11 @@ class PlaylistRenderer {
     player = null
   }
 
-  getDuration () {
-    return playlistBuffer
-      ? playlistBuffer.get().duration
-      : null
-  }
+  // getDuration () {
+  //   return playlistBuffer
+  //     ? playlistBuffer.get().duration
+  //     : null
+  // }
 
 
 
