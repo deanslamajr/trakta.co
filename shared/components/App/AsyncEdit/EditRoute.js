@@ -3,9 +3,6 @@ import Switch from 'react-router-dom/Switch'
 import Route from 'react-router-dom/Route'
 import Redirect from 'react-router/Redirect'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
-import { compose } from 'redux'
-import { connect } from 'react-redux'
-import Helmet from 'react-helmet'
 import axios from 'axios'
 
 import Staging from './AsyncStaging'
@@ -14,10 +11,6 @@ import Recorder from './AsyncRecorder'
 import Slices from './AsyncSlices'
 import ProgressRing from '../AsyncProgressRing'
 import InstancePlaylist from '../../../../client/components/InstancePlaylist'
-
-import config from '../../../../config'
-
-import * as selectors from '../../../reducers'
 
 import styles from './styles.css'
 
@@ -282,6 +275,7 @@ class EditRoute extends React.Component {
         })
         .then(() => {
           this._completeSpinnerTask()
+          this.setState({ showNavbarItems: true })
           this.props.history.push(`/e/${this.state.trakName}`)
         })
         .catch((err) => {
@@ -370,15 +364,6 @@ class EditRoute extends React.Component {
   }
 }
 
-function mapStateToProps (state) {
-  return {
-    objectUrl: selectors.getStagedObjectUrl(state)
-  }
-}
-
 export { EditRoute }
 
-export default compose(
-  withStyles(styles),
-  connect(mapStateToProps)
-)(EditRoute)
+export default withStyles(styles)(EditRoute)

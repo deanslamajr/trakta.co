@@ -52,7 +52,7 @@ function loadSample (instance, loadTaskCb, fetchTrak) {
   })
 }
 
-function syncPlayerToTransport (samplePlayer, playerStartTime, transport = Tone.Transport, offset=0) {
+function syncPlayerToTransport (samplePlayer, playerStartTime, transport = Tone.Transport, offset = 0) {
   transport.schedule(() => {
     /**
      * undefined will set the startTime of the player to "now"
@@ -79,7 +79,7 @@ function addPluginsToPlayer (samplePlayer, volume, panning) {
   samplePlayer.chain(panVol, /* limiter, */ Tone.Master)
 }
 
-function addBufferToTrak (buffer, instance, transport, times, offset=0) {
+function addBufferToTrak (buffer, instance, transport, times, offset = 0) {
   if (times) {
     times.forEach(time => {
       const samplePlayer = new Tone.Player(buffer)
@@ -182,7 +182,7 @@ function getOfflineTransportduration (instances, sequencerInstance) {
   }
 }
 
-function addSequencerToTrak(times, buffer, transport) {
+function addSequencerToTrak (times, buffer, transport) {
   times.forEach(time => {
     const samplePlayer = new Tone.Player(buffer)
 
@@ -205,18 +205,6 @@ class PlaylistRenderer {
   clearPlayer () {
     player = null
   }
-
-  // getDuration () {
-  //   return playlistBuffer
-  //     ? playlistBuffer.get().duration
-  //     : null
-  // }
-
-
-
-
-
-
 
   createCurrentTrakPlayer (instances, completeSpinnerTask) {
     return Promise.all(instances.map(instance => loadSample(instance, completeSpinnerTask, false)))
@@ -318,13 +306,6 @@ class PlaylistRenderer {
       return player
     })
   }
-
-
-
-
-
-
-
 
   getPlayer ({ objectUrlInstance, instances, sequencerInstance, stagedSample, loadTaskCb, fetchTrak }) {
     /**

@@ -59,11 +59,10 @@ function renderMenuButton () {
   return (<MdEqualizer className={styles.button} color={styles.white} />)
 }
 
-
 class Button extends React.Component {
   render () {
     const { position, type, cb, color } = this.props
-    
+
     const buttonMapping = buttonMappings[type]
     const positionClass = positionMappings[position]
 
