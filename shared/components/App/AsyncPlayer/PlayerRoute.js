@@ -4,6 +4,8 @@ import { connect } from 'react-redux'
 import Helmet from 'react-helmet'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
+import { NavButton } from '../AsyncNavBar/AsyncNavBar'
+
 import { getTrakFilename } from '../../../reducers'
 
 import config from '../../../../config'
@@ -11,12 +13,6 @@ import config from '../../../../config'
 import styles from './styles.css'
 
 class PlayerRoute extends React.Component {
-  componentDidMount () {
-    this.props.addItemToNavBar({
-      TOP_LEFT: { type: 'BACK', cb: () => this.props.history.push('/') }
-    })
-  }
-
   render () {
     const url = `${config('s3TrakBucket')}/${this.props.trakFilename}`
 
@@ -26,6 +22,12 @@ class PlayerRoute extends React.Component {
           <title>{`Player`}</title>
         </Helmet>
 
+        <NavButton
+          type={'BACK'}
+          cb={() => this.props.history.push('/')}
+          position={'TOP_LEFT'}
+        />
+
         <audio className={styles.player} src={url} controls loop />
       </div>
     )
@@ -34,15 +36,14 @@ class PlayerRoute extends React.Component {
 
 function mapStateToProps (state, ownProps) {
   return {
+    /** Fetched during server-side rendering */
     trakFilename: getTrakFilename(state)
   }
 };
 
-const mapActionsToProps = {}
-
 export default compose(
   withStyles(styles),
-  connect(mapStateToProps, mapActionsToProps)
+  connect(mapStateToProps)
 )(PlayerRoute)
 
 export { PlayerRoute }
