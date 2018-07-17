@@ -10,148 +10,90 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
 import ListItem from './ListItem'
 import InstancePlaylist from '../../../../client/components/InstancePlaylist'
+import { NavButton } from '../AsyncNavBar/AsyncNavBar'
 
 import getColorFromString from './getColorFromString'
 
 import config from '../../../../config'
 
-import {
-  setName as setTrakName,
-  setShouldFetchInstances,
-  fetched as setTrakInstanceArray,
-  reset as resetTrak
-} from '../../../actions/trak'
 import { fetchAll as fetchTraks } from '../../../actions/traklist'
-import { reset as resetSampleLoaderState } from '../../../actions/samples'
 
 import * as selectors from '../../../reducers'
 
 import styles from './listRoute.css'
 
 class ListRoute extends React.Component {
-  constructor (props) {
-    super(props)
-    this._handleTrakSelect = this._handleTrakSelect.bind(this)
-    this._fetchTraks = this._fetchTraks.bind(this)
-    this._resetTrak = this._resetTrak.bind(this)
-    this._navigateToEdit = this._navigateToEdit.bind(this)
-    this._navigateToNew = this._navigateToNew.bind(this)
+  constructor () {
+    super()
 
     this.itemRefs = []
 
     this.state = {
+      activePlayer: null,
+      loading: false,
       selectedTrakId: null,
       viewedTraks: []
     }
   }
 
-  _navigateToEdit (trakName) {
-    this._resetTrak()
+  _navigateToEdit = (trakName) => {
     this.props.history.push(`/e/${trakName}`)
   }
 
-  _navigateToNew () {
-    this._resetTrak()
+  _navigateToNew = () => {
     this.props.history.push(`/e/new/recorder`)
   }
 
-  _handleTrakSelect (trak) {
+  _handleTrakSelect = (trak) => {
     const trakColor = getColorFromString(trak.name)
-
-    this.props.addItemToNavBar({
-      TOP_RIGHT: {
-        type: 'LOADING',
-        color: trakColor
-      },
-      TOP_LEFT: {
-        type: 'EDIT',
-        cb: () => this._navigateToEdit(trak.name),
-        color: trakColor
-      }
-    }, true)
 
     const updatedViewedTraks = Array.from(this.state.viewedTraks)
     updatedViewedTraks.push(trak.id)
 
     this.setState({
+      loading: true,
       selectedTrakId: trak.id,
+      selectedTrakName: trak.name,
       viewedTraks: updatedViewedTraks,
       trakColor
     }, () => {
       const itemRef = ReactDOM.findDOMNode(this.itemRefs[trak.id])
       itemRef.scrollIntoView()
     })
-    this.props.setTrakName(trak.name)
 
     axios.get(`/api/trak/${trak.name}`)
       .then(({ data }) => {
         const { filename, duration } = data
 
-        const trakInstanceInAnArray = [
-          {
-            sample: {
-              url: filename,
-              /**
-               * @todo investigate using a slidingArray to leverage the PlaylistRenderer cache for the last 5? traks selected
-               */
-              id: trak.id,
-              duration
-            },
-            sequencer_csv: '1'
-          }
-        ]
+        const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
+        const PlaylistRenderer = getPlaylistRenderer()
 
-        this.props.setTrakInstanceArray(trakInstanceInAnArray)
+        PlaylistRenderer.createFullTrakPlayer(filename, trak.id, duration)
+          .then(player => this.setState({
+            activePlayer: player,
+            loading: false
+          }))
       })
   }
 
-  _fetchTraks () {
-    this.props.fetchTraks()
-  }
-  _setRef (trakId, ref) {
+  _setRef = (trakId, ref) => {
     this.itemRefs[trakId] = ref
-  }
-
-  _resetTrak () {
-    this.props.addItemToNavBar(null)
-    this.props.resetTrak()
-    this.props.setShouldFetchInstances(true)
-
-    if (window) {
-      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
-      const playlistRenderer = getPlaylistRenderer()
-      playlistRenderer.clearCache()
-      playlistRenderer.clearPlayer()
-    }
   }
 
   componentDidMount () {
     if (!this.props.hasFetched) {
-      this._fetchTraks()
+      this.props.fetchTraks()
     }
-
-    this.props.resetSampleLoaderState()
-    this.props.addItemToNavBar({
-      BOTTOM_LEFT: {
-        type: 'REFRESH',
-        cb: this._fetchTraks
-      },
-      BOTTOM_RIGHT: {
-        type: 'ADD',
-        cb: this._navigateToNew
-      }
-    })
   }
 
   render () {
-    const { traks } = this.props
     const {
       selectedTrakId,
       viewedTraks,
       trakColor
     } = this.state
 
-    const sortedTraks = traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
+    const sortedTraks = this.props.traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
       ? 1
       : -1
     )
@@ -161,6 +103,17 @@ class ListRoute extends React.Component {
         <Helmet>
           <title>{config('appTitle')}</title>
         </Helmet>
+
+        {
+          this.state.activePlayer && (
+            <InstancePlaylist
+              incrementPlaysCount={this.state.shouldPlayerIncrementPlaysCount}
+              player={this.state.activePlayer}
+              trakName={this.state.trakName}
+              buttonColor={this.state.trakColor}
+            />
+          )
+        }
 
         <div className={styles.label}>
           {sortedTraks.map(trak => (
@@ -175,36 +128,50 @@ class ListRoute extends React.Component {
           ))}
         </div>
 
-        {this.props.instances && this.props.instances.length && (
-          <InstancePlaylist
-            instances={this.props.instances}
-            trackDimensions={this.props.trackDimensions}
-            addItemToNavBar={this.props.addItemToNavBar}
-            buttonColor={trakColor}
-            incrementPlaysCount
-            fetchTrak
-          />
-        )}
+        <NavButton
+          type={'REFRESH'}
+          cb={this.props.fetchTraks}
+          position={'BOTTOM_LEFT'}
+        />
+        <NavButton
+          type={'ADD'}
+          cb={this._navigateToNew}
+          position={'BOTTOM_RIGHT'}
+        />
+        {
+          this.state.selectedTrakName && (
+            <React.Fragment>
+              {
+                this.state.loading && (
+                  <NavButton
+                    type={'LOADING'}
+                    color={this.state.trakColor}
+                    position={'TOP_RIGHT'}
+                  />
+                )
+              }
+              <NavButton
+                type={'EDIT'}
+                cb={() => this._navigateToEdit(this.state.selectedTrakName)}
+                color={this.state.trakColor}
+                position={'TOP_LEFT'}
+              />
+            </React.Fragment>
+          )
+        }
       </div>
     )
   }
 }
 
 const mapActionsToProps = {
-  fetchTraks,
-  setShouldFetchInstances,
-  setTrakInstanceArray,
-  resetSampleLoaderState,
-  resetTrak,
-  setTrakName
+  fetchTraks
 }
 
 function mapStateToProps (state) {
   return {
-    traks: selectors.getTraks(state),
     hasFetched: selectors.hasFetched(state),
-    instances: selectors.getInstances(state),
-    trackDimensions: selectors.getTrackDimensions(state)
+    traks: selectors.getTraks(state)
   }
 }
 

@@ -307,6 +307,43 @@ class PlaylistRenderer {
     })
   }
 
+  createFullTrakPlayer (filename, trakId, duration, completeSpinnerTask = () => {}) {
+    const instance = {
+      sample: {
+        url: filename,
+        /**
+         * @todo investigate using a slidingArray to leverage the PlaylistRenderer cache for the last 5? traks selected
+         */
+        id: trakId,
+        duration
+      },
+      sequencer_csv: '1'
+    }
+
+    return loadSample(instance, completeSpinnerTask, true)
+      .then(() => {
+        // render audio
+        return Tone.Offline(OfflineTransport => {
+          OfflineTransport.position = 0
+
+          const times = instance.sequencer_csv.split(',')
+
+          addBufferToTrak(bufferCache[instance.sample.id],
+            instance,
+            OfflineTransport,
+            times
+          )
+
+          OfflineTransport.start()
+        }, duration)
+      })
+      .then(buffer => {
+        completeSpinnerTask()
+        player = new Tone.Player(buffer).toMaster()
+        return player
+      })
+  }
+
   getPlayer ({ objectUrlInstance, instances, sequencerInstance, stagedSample, loadTaskCb, fetchTrak }) {
     /**
      * @todo allow for both objectUrl and instances to be on the same player

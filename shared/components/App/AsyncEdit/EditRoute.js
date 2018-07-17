@@ -275,7 +275,10 @@ class EditRoute extends React.Component {
         })
         .then(() => {
           this._completeSpinnerTask()
-          this.setState({ showNavbarItems: true })
+          this.setState({
+            showNavbarItems: true,
+            selectedSequencerItems: {}
+          })
           this.props.history.push(`/e/${this.state.trakName}`)
         })
         .catch((err) => {
