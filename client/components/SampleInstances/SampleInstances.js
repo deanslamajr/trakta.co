@@ -38,7 +38,7 @@ function drawRectangles (rowsOfRectangles, viewportWidth, viewportHeight) {
   )
 }
 
-const SampleInstances = ({ instances, trackDimensions, stagedSample }) => {
+const SampleInstances = ({ instances = [], trackDimensions = {}, stagedSample = {} }) => {
   if (instances.length === 0) {
     return null
   }
@@ -87,9 +87,9 @@ const SampleInstances = ({ instances, trackDimensions, stagedSample }) => {
 
 function mapStateToProps (state) {
   return {
-    instances: selectors.getInstances(state),
-    trackDimensions: selectors.getTrackDimensions(state),
-    stagedSample: selectors.getStagedSample(state)
+    //instances: selectors.getInstances(state),
+    //trackDimensions: selectors.getTrackDimensions(state),
+    //stagedSample: selectors.getStagedSample(state)
   }
 }
 
