@@ -134,71 +134,8 @@ const positionMappings = {
   BOTTOM_RIGHT: 'bottom-right'
 }
 
-class NavBar extends React.Component {
-  constructor () {
-    super()
-
-    this.state = {
-      positions: {}
-    }
-
-    this.addItemToNavBar = this.addItemToNavBar.bind(this)
-  }
-
-  addItemToNavBar (updatedPositionConfigs, retainAllOtherItems) {
-    if (updatedPositionConfigs === null) {
-      this.setState({ positions: {} })
-    } else {
-      const validPositionsToChange = Object.keys(updatedPositionConfigs).filter(position => positionMappings[position])
-
-      const basePositions = retainAllOtherItems
-        ? Object.assign({}, this.state.positions)
-        : {}
-
-      validPositionsToChange.forEach(position => {
-        if (updatedPositionConfigs[position] === null) {
-          delete basePositions[position]
-        } else {
-          basePositions[position] = updatedPositionConfigs[position]
-        }
-      })
-
-      this.setState({ positions: basePositions })
-    }
-  }
-
-  render () {
-    const { positions } = this.state
-    const occupiedPositions = Object.keys(positions)
-
-    return (
-      <div>
-        {
-          this.props.render(this.addItemToNavBar)
-        }
-
-        <div className={styles.container} >
-          {
-            occupiedPositions.map(position => {
-              if (position === null) {
-                return
-              }
-
-              const config = positions[position]
-              return renderButton(position, config)
-            })
-          }
-        </div>
-      </div>
-    )
-  }
-}
-
 const NavButton = withStyles(styles)(Button)
 
 export {
-  NavBar,
   NavButton
 }
-
-export default withStyles(styles)(NavBar)
