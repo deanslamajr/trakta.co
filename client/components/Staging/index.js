@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
-import classnames from 'classnames'
 import Helmet from 'react-helmet'
 
 import Sequencer from './Sequencer'

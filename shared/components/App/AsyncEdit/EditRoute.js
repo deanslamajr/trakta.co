@@ -68,7 +68,7 @@ class EditRoute extends React.Component {
 
         const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
         const PlaylistRenderer = getPlaylistRenderer()
-        
+
         return PlaylistRenderer.createCurrentTrakPlayer(instances, this._completeSpinnerTask)
       })
       .then(currentTrakPlayer => {
@@ -99,7 +99,7 @@ class EditRoute extends React.Component {
           ? 0
           : previousSpinnerTasks.completedCount
       })
-      
+
       return { spinnerTasks: updatedSpinnerTasks }
     })
   }
@@ -109,7 +109,7 @@ class EditRoute extends React.Component {
       const updatedSpinnerTasks = Object.assign({}, previousSpinnerTasks, {
         completedCount: previousSpinnerTasks.completedCount + count
       })
-      
+
       return { spinnerTasks: updatedSpinnerTasks }
     })
   }
@@ -130,12 +130,12 @@ class EditRoute extends React.Component {
       rightSliderValue: initialRightSliderValue,
       loopPadding: clipDuration,
       clipDuration,
-      sourceDuration,
+      sourceDuration
     }
 
     this.setState(({ cleanupState: prevCleanupState }) => {
       const newCleanupState = Object.assign({}, prevCleanupState, initialCleanupState)
-      
+
       return {
         sourceBuffer: buffer,
         cleanupState: newCleanupState
@@ -151,7 +151,7 @@ class EditRoute extends React.Component {
   }
 
   _createPlayerFromCleanup = (change) => {
-    this._addSpinnerTask(1, true)
+    this._addSpinnerTask(2, true)
     this.setState(({ cleanupState: prevCleanupState }) => {
       const newCleanupState = Object.assign({}, prevCleanupState, change)
       return { cleanupState: newCleanupState }
@@ -162,7 +162,7 @@ class EditRoute extends React.Component {
       PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask)
         .then(cleanupPlayer => {
           this._completeSpinnerTask()
-          
+
           this.setState(({ cleanupState: prevCleanupState }) => {
             const startTime = prevCleanupState.sourceDuration * prevCleanupState.leftSliderValue
             const endTime = prevCleanupState.sourceDuration * prevCleanupState.rightSliderValue
@@ -182,10 +182,11 @@ class EditRoute extends React.Component {
   }
 
   _createPlayerFromSequencer = () => {
-    this._addSpinnerTask(1, true)
+    const spinnerTasksCount = 2 + this.state.instances.length
+    this._addSpinnerTask(spinnerTasksCount, true)
     const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
     const PlaylistRenderer = getPlaylistRenderer()
-    
+
     PlaylistRenderer.createPlayerFromSequencer(
       this.state.selectedSequencerItems,
       this.state.cleanupPlayer.buffer,
@@ -203,7 +204,7 @@ class EditRoute extends React.Component {
     })
   }
 
-  _createPlayerFromSequencerItemSelect = (selectedItem) => {   
+  _createPlayerFromSequencerItemSelect = (selectedItem) => {
     this.setState(({ selectedSequencerItems: prevSelectedSequencerItems }) => {
       const currentSelectedState = Object.assign({}, prevSelectedSequencerItems)
       currentSelectedState[selectedItem] = Boolean(!currentSelectedState[selectedItem])
@@ -258,7 +259,7 @@ class EditRoute extends React.Component {
           } = data
 
           this._completeSpinnerTask()
-          
+
           this._setShouldFetchInstances(true)
 
           const isANewTrak = trakName !== this.state.trakName
@@ -298,7 +299,7 @@ class EditRoute extends React.Component {
     const loadingProgress = spinnerTasks.count
       ? spinnerTasks.completedCount / spinnerTasks.count
       : 0
-    const showLoadSpinner = 0 < loadingProgress && loadingProgress < 1
+    const showLoadSpinner = loadingProgress > 0 && loadingProgress < 1
 
     return (
       <div className={styles.container}>

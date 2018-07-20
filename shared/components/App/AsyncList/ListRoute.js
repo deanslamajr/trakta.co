@@ -88,9 +88,14 @@ class ListRoute extends React.Component {
 
   render () {
     const {
+      activePlayer,
+      loading,
       selectedTrakId,
-      viewedTraks,
-      trakColor
+      selectedTrakName,
+      shouldPlayerIncrementPlaysCount,
+      trakColor,
+      trakName,
+      viewedTraks
     } = this.state
 
     const sortedTraks = this.props.traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
@@ -105,12 +110,12 @@ class ListRoute extends React.Component {
         </Helmet>
 
         {
-          this.state.activePlayer && (
+          activePlayer && (
             <InstancePlaylist
-              incrementPlaysCount={this.state.shouldPlayerIncrementPlaysCount}
-              player={this.state.activePlayer}
-              trakName={this.state.trakName}
-              buttonColor={this.state.trakColor}
+              incrementPlaysCount={shouldPlayerIncrementPlaysCount}
+              player={activePlayer}
+              trakName={trakName}
+              buttonColor={trakColor}
             />
           )
         }
@@ -139,21 +144,21 @@ class ListRoute extends React.Component {
           position={'BOTTOM_RIGHT'}
         />
         {
-          this.state.selectedTrakName && (
+          selectedTrakName && (
             <React.Fragment>
               {
-                this.state.loading && (
+                loading && (
                   <NavButton
                     type={'LOADING'}
-                    color={this.state.trakColor}
+                    color={trakColor}
                     position={'TOP_RIGHT'}
                   />
                 )
               }
               <NavButton
                 type={'EDIT'}
-                cb={() => this._navigateToEdit(this.state.selectedTrakName)}
-                color={this.state.trakColor}
+                cb={() => this._navigateToEdit(selectedTrakName)}
+                color={trakColor}
                 position={'TOP_LEFT'}
               />
             </React.Fragment>

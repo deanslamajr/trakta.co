@@ -16,7 +16,7 @@ class SlicesRoute extends React.Component {
     fetchInstances: PropTypes.func,
     history: PropTypes.object,
     shouldFetchInstances: PropTypes.bool,
-    trakName: PropTypes.string,
+    trakName: PropTypes.string
   }
 
   _navigateToList = () => {

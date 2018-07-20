@@ -186,7 +186,7 @@ class Recorder extends React.Component {
       />
     )
   }
-  
+
   _renderStopRecordingButton = () => {
     return (
       <NavButton
@@ -240,7 +240,7 @@ class Recorder extends React.Component {
     this.sampleCreator.stopAndFinishRecording()
       .then(buffer => {
         this.props.setSourceBuffer(buffer)
-    
+
         this._navigateToCleanup()
       })
   }
@@ -274,7 +274,7 @@ class Recorder extends React.Component {
           .then(() => {
             // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
             // don't do this stuff
-            if (this.canvas) {              
+            if (this.canvas) {
               this.setState({
                 disableRecording: false, // overlay 'start recording' mask
                 renderActionButton: this._renderStartRecordingButton

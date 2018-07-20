@@ -4,7 +4,6 @@ import Encoder from './encoder'
  * Private
  */
 let trakRenderer
-let buffer
 
 function createTrakRenderer () {
   trakRenderer = new TrakRenderer()
@@ -30,23 +29,8 @@ export function getTrakRenderer () {
 }
 
 export default class TrakRenderer {
-  setBuffer (audioBuffer) {
-    buffer = audioBuffer
-  }
-
-  getBlobFromBuffer (bufferToBlobify = buffer) {
-    if (!bufferToBlobify) {
-      throw new Error('buffer must be set via TrakRenderer#setBuffer before using TrakRenderer#getBlobUrlFromBuffer')
-    }
+  getBlobFromBuffer (bufferToBlobify) {
     const mp3Encoder = new Encoder(bufferToBlobify.sampleRate)
     return createBlobFromBuffer(bufferToBlobify, mp3Encoder)
-  }
-
-  createObjectUrlFromBuffer (buf) {
-    const mp3Encoder = new Encoder(buf.sampleRate)
-    return createBlobFromBuffer(buf, mp3Encoder)
-      .then(blob => {
-        return mp3Encoder.createBlobObjectUrl(blob)
-      })
   }
 }

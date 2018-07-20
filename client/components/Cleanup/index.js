@@ -122,7 +122,7 @@ class Cleanup extends React.Component {
     /**
      * reset the dimensions of the trak to that without staged sample
      */
-    //this.props.updateDimensionsWithAdditionalSample({})
+    // this.props.updateDimensionsWithAdditionalSample({})
 
     const mainEditUrl = getMainEditUrl(this.props.match.url)
     this.props.clearActivePlayer()
@@ -213,7 +213,7 @@ class Cleanup extends React.Component {
                     handleClassName={styles.volumeSliderHandle}
                     max={20}
                     min={-20}
-                    step={.5}
+                    step={0.5}
                     onAfterChange={this._onVolumeSliderFinish}
                     defaultValue={this.props.cleanupState.volume * -1}
                   />

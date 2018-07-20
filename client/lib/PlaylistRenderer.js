@@ -1,18 +1,12 @@
 import Tone from 'tone'
-import isEqual from 'lodash.isequal'
 
 import config from '../../config'
-import { getTrakRenderer } from './TrakRenderer'
 
-const trakRenderer = getTrakRenderer()
 const baseSampleUrl = config('s3SampleBucket')
 const baseTrakUrl = config('s3TrakBucket')
-let bufferCache = {}
-let playlistBuffer
+
+const bufferCache = {}
 let playlistRenderer
-let player = null
-let cachedStagedBuffer
-let cachedStagedSample
 
 function loadSample (instance, loadTaskCb, fetchTrak) {
   return new Promise((resolve, reject) => {
@@ -79,59 +73,26 @@ function addPluginsToPlayer (samplePlayer, volume, panning) {
   samplePlayer.chain(panVol, /* limiter, */ Tone.Master)
 }
 
-function addBufferToTrak (buffer, instance, transport, times, offset = 0) {
-  if (times) {
-    times.forEach(time => {
-      const samplePlayer = new Tone.Player(buffer)
+function addSequencerBufferToTrak (buffer, instance, transport, times) {
+  times.forEach(time => {
+    const samplePlayer = new Tone.Player(buffer)
 
-      addPluginsToPlayer(samplePlayer, 0, 0)
-        // syncPlayerToTransport(samplePlayer, time, transport)
-      addPlayerToTransport(samplePlayer, time, transport)
-    })
-  } else { /** @todo deprecate the logic in this else block */
-    let i = 0
-
-    do {
-      const samplePlayer = new Tone.Player(buffer)
-      const playerStartTime = instance.startTime + (i * instance.loopPadding)
-
-      addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
-      syncPlayerToTransport(samplePlayer, playerStartTime, transport, offset)
-      i++
-    } while (i <= (instance.loopCount || 0))
-  }
+    addPluginsToPlayer(samplePlayer, 0, 0)
+    addPlayerToTransport(samplePlayer, time, transport)
+  })
 }
 
-function didInstancesCacheMiss (instances) {
-  const cachedIds = Object.keys(bufferCache)
-  return instances.some(instance => !cachedIds.includes(instance.sample.id))
-}
+function addCleanupBufferToTrak (buffer, instance, transport, offset = 0) {
+  let i = 0
 
-function isBufferCached (buffer) {
-  // if buffer doesn't exist, report cached (we don't want to bust cache if buffer doesn't exist bc some views don't use buffer)
-  if (!buffer && !cachedStagedBuffer) {
-    return true
-  }
+  do {
+    const samplePlayer = new Tone.Player(buffer)
+    const playerStartTime = instance.startTime + (i * instance.loopPadding)
 
-  return buffer === cachedStagedBuffer
-}
-
-function hasStagedSampleChanged (stagedSample) {
-  if (!stagedSample) {
-    return false
-  }
-
-  if (!cachedStagedSample) {
-    cachedStagedSample = stagedSample
-    return true
-  }
-
-  return !isEqual(cachedStagedSample, stagedSample)
-}
-
-function isBufferCacheMiss (buffer, stagedSample) {
-  const isCacheMiss = !isBufferCached(buffer)
-  return isCacheMiss || hasStagedSampleChanged(stagedSample)
+    addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
+    syncPlayerToTransport(samplePlayer, playerStartTime, transport, offset)
+    i++
+  } while (i <= (instance.loopCount || 0))
 }
 
 function getSequencerDuration (sequencerInstance) {
@@ -196,18 +157,11 @@ function addSequencerToTrak (times, buffer, transport) {
  */
 
 class PlaylistRenderer {
-  clearCache () {
-    bufferCache = {}
-    cachedStagedBuffer = undefined
-    cachedStagedSample = undefined
-  }
-
-  clearPlayer () {
-    player = null
-  }
-
   createCurrentTrakPlayer (instances, completeSpinnerTask) {
-    return Promise.all(instances.map(instance => loadSample(instance, completeSpinnerTask, false)))
+    return Promise.all(instances.map(instance => bufferCache[instance.sample.id]
+        ? Promise.resolve(completeSpinnerTask())
+        : loadSample(instance, completeSpinnerTask, false))
+      )
       .then(() => {
         const offlineTransportDuration = getOfflineTransportduration(instances, false)
 
@@ -218,7 +172,7 @@ class PlaylistRenderer {
           instances.forEach(instance => {
             const times = instance.sequencer_csv.split(',')
 
-            addBufferToTrak(bufferCache[instance.sample.id],
+            addSequencerBufferToTrak(bufferCache[instance.sample.id],
               instance,
               OfflineTransport,
               times
@@ -230,12 +184,11 @@ class PlaylistRenderer {
       })
       .then(buffer => {
         completeSpinnerTask(instances.length)
-        player = new Tone.Player(buffer).toMaster()
-        return player
+        return new Tone.Player(buffer).toMaster()
       })
   }
 
-  createPlayerFromCleanup (sourceBuffer, cleanupState, loadTaskCb) {
+  createPlayerFromCleanup (sourceBuffer, cleanupState, completeSpinnerTask) {
     const startTime = cleanupState.sourceDuration * cleanupState.leftSliderValue
     const endTime = cleanupState.sourceDuration * cleanupState.rightSliderValue
     const snippetDuration = endTime - startTime
@@ -247,64 +200,60 @@ class PlaylistRenderer {
     return Tone.Offline(OfflineTransport => {
       OfflineTransport.position = 0
 
-      addBufferToTrak(sourceBuffer, {
+      addCleanupBufferToTrak(sourceBuffer, {
         loopCount: cleanupState.loopCount,
         loopPadding: cleanupState.loopPadding,
         startTime: 0,
         panning: cleanupState.panning,
         volume: cleanupState.volume
-      }, OfflineTransport, undefined, startTime)
+      }, OfflineTransport, startTime)
+      completeSpinnerTask()
 
       OfflineTransport.start()
     }, playerDuration)
     .then(cleanupBuffer => {
-      loadTaskCb()
+      completeSpinnerTask()
       return new Tone.Player(cleanupBuffer).toMaster()
     })
   }
 
-  createPlayerFromSequencer (selectedSequencerItems, cleanupPlayerBuffer, cleanupState, instances, loadTaskCb) {
-    const loadSamplesTask = didInstancesCacheMiss(instances)
-      ? Promise.all(instances.map(instance => loadSample(instance, loadTaskCb, fetchTrak)))
-      : Promise.resolve()
+  createPlayerFromSequencer (selectedSequencerItems, cleanupPlayerBuffer, cleanupState, instances, completeSpinnerTask) {
+    return Promise.all(instances.map(instance => bufferCache[instance.sample.id]
+      ? Promise.resolve(completeSpinnerTask())
+      : loadSample(instance, completeSpinnerTask, false))
+    )
+      .then(() => {
+        completeSpinnerTask()
 
-    return loadSamplesTask.then(() => {
-      loadTaskCb()
+        const offlineTransportDuration = getOfflineTransportduration(instances,
+          { times: selectedSequencerItems, buffer: cleanupPlayerBuffer }
+        )
 
-      const offlineTransportDuration = getOfflineTransportduration(instances, { times: selectedSequencerItems, buffer: cleanupPlayerBuffer})
+        // render audio
+        return Tone.Offline(OfflineTransport => {
+          OfflineTransport.position = 0
 
-      // render audio
-      return Tone.Offline(OfflineTransport => {
-        OfflineTransport.position = 0
+          const times = Object.keys(selectedSequencerItems).filter(time => selectedSequencerItems[time])
 
-        const times = Object.keys(selectedSequencerItems).filter(time => selectedSequencerItems[time])
+          addSequencerToTrak(times, cleanupPlayerBuffer, OfflineTransport)
 
-        addSequencerToTrak(times, cleanupPlayerBuffer, OfflineTransport)
+          instances.forEach(instance => {
+            const times = instance.sequencer_csv.split(',')
 
-        instances.forEach(instance => {
-          const times = instance.sequencer_csv.split(',')
+            addSequencerBufferToTrak(bufferCache[instance.sample.id],
+              instance,
+              OfflineTransport,
+              times
+            )
+          })
 
-          addBufferToTrak(bufferCache[instance.sample.id],
-            instance,
-            OfflineTransport,
-            times
-          )
-        })
-
-        loadTaskCb()
-
-        OfflineTransport.start()
-      }, offlineTransportDuration)
-    })
-    .then(buffer => {
-      loadTaskCb()
-      playlistBuffer = buffer
-      // this buffer will be saved to s3 on /staging save action
-      trakRenderer.setBuffer(buffer.get())
-
-      player = new Tone.Player(buffer).toMaster()
-      return player
-    })
+          OfflineTransport.start()
+        }, offlineTransportDuration)
+      })
+      .then(buffer => {
+        completeSpinnerTask()
+        return new Tone.Player(buffer).toMaster()
+      })
   }
 
   createFullTrakPlayer (filename, trakId, duration, completeSpinnerTask = () => {}) {
@@ -328,7 +277,7 @@ class PlaylistRenderer {
 
           const times = instance.sequencer_csv.split(',')
 
-          addBufferToTrak(bufferCache[instance.sample.id],
+          addSequencerBufferToTrak(bufferCache[instance.sample.id],
             instance,
             OfflineTransport,
             times
@@ -339,98 +288,8 @@ class PlaylistRenderer {
       })
       .then(buffer => {
         completeSpinnerTask()
-        player = new Tone.Player(buffer).toMaster()
-        return player
+        return new Tone.Player(buffer).toMaster()
       })
-  }
-
-  getPlayer ({ objectUrlInstance, instances, sequencerInstance, stagedSample, loadTaskCb, fetchTrak }) {
-    /**
-     * @todo allow for both objectUrl and instances to be on the same player
-     */
-    if (objectUrlInstance) {
-      return new Promise((resolve, reject) => new Tone.Buffer(objectUrlInstance.objectUrl, resolve, reject))
-        .then(objectUrlBuffer => {
-          const fullDuration = objectUrlInstance.loopCount === 0
-            ? objectUrlBuffer.get().duration
-            : (objectUrlInstance.loopCount * objectUrlInstance.loopPadding) + objectUrlBuffer.get().duration
-
-          return Tone.Offline(OfflineTransport => {
-            OfflineTransport.position = 0
-
-            addBufferToTrak(objectUrlBuffer, objectUrlInstance, OfflineTransport)
-
-            OfflineTransport.start()
-          }, fullDuration)
-        })
-        .then(buffer => {
-          playlistBuffer = buffer
-          loadTaskCb()
-          return new Tone.Player(buffer).toMaster()
-        })
-    } else {
-      const trakAndOrBufferExist = (instances && instances.length) || sequencerInstance
-
-      let areInstancesCacheMiss
-      // check isBufferCacheMiss first bc its quicker than checking the instances cache miss
-      const cacheMiss = isBufferCacheMiss(sequencerInstance && sequencerInstance.buffer, stagedSample) || (areInstancesCacheMiss = didInstancesCacheMiss(instances))
-
-      // skip all this if
-      // 1. this is a trak Fetch (we don't want to cache these) OR
-      // 2. the buffers are all cached
-      if (fetchTrak || (trakAndOrBufferExist && cacheMiss)) {
-        // only fetch instances if the instances aren't cached
-        // i.e. a change in `stagedSample` shouldn't require refetching of the instances
-        const loadSamplesTask = areInstancesCacheMiss || didInstancesCacheMiss(instances)
-          ? Promise.all(instances.map(instance => loadSample(instance, loadTaskCb, fetchTrak)))
-          : Promise.resolve()
-
-        return loadSamplesTask.then(() => {
-          const offlineTransportDuration = getOfflineTransportduration(instances, sequencerInstance)
-
-          // render audio
-          return Tone.Offline(OfflineTransport => {
-            OfflineTransport.position = 0
-
-            if (sequencerInstance) {
-              cachedStagedBuffer = sequencerInstance.buffer
-
-              const times = Object.keys(sequencerInstance.times).filter(time => sequencerInstance.times[time])
-
-              addBufferToTrak(
-                sequencerInstance.buffer,
-                stagedSample,
-                OfflineTransport,
-                times
-              )
-            }
-
-            instances.forEach(instance => {
-              const times = instance.sequencer_csv.split(',')
-
-              addBufferToTrak(bufferCache[instance.sample.id],
-                instance,
-                OfflineTransport,
-                times
-              )
-            })
-
-            OfflineTransport.start()
-          }, offlineTransportDuration)
-        })
-        .then(buffer => {
-          loadTaskCb()
-          playlistBuffer = buffer
-          // this buffer will be saved to s3 on /staging save action
-          trakRenderer.setBuffer(buffer.get())
-
-          player = new Tone.Player(buffer).toMaster()
-          return player
-        })
-      }
-    }
-
-    return Promise.resolve(player)
   }
 }
 

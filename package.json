@@ -30,7 +30,8 @@
     ],
     "ignore": [
       "/internal/scripts/preinstall.js"
-    ]
+    ],
+    "parser": "babel-eslint"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -81,7 +82,6 @@
     "helmet": "3.5.0",
     "hpp": "0.2.2",
     "lamejs": "^1.2.0",
-    "lodash.isequal": "^4.5.0",
     "modernizr": "3.5.0",
     "moment": "^2.21.0",
     "nocache": "^2.0.0",

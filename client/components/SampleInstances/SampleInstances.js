@@ -2,8 +2,6 @@ import React from 'react'
 import { connect } from 'react-redux'
 import viewportDimensions from 'viewport-dimensions'
 
-import * as selectors from '../../../shared/reducers'
-
 import { calculateInstanceRectangles } from './calculateInstanceRectangles'
 
 const padding = 5
@@ -87,9 +85,9 @@ const SampleInstances = ({ instances = [], trackDimensions = {}, stagedSample = 
 
 function mapStateToProps (state) {
   return {
-    //instances: selectors.getInstances(state),
-    //trackDimensions: selectors.getTrackDimensions(state),
-    //stagedSample: selectors.getStagedSample(state)
+    // instances: selectors.getInstances(state),
+    // trackDimensions: selectors.getTrackDimensions(state),
+    // stagedSample: selectors.getStagedSample(state)
   }
 }
 
