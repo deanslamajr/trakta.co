@@ -3,10 +3,12 @@ import PropTypes from 'prop-types'
 import viewportDimensions from 'viewport-dimensions'
 
 import { unitLength, unitDuration } from '../../lib/units'
+import getColorFromString from '../../../shared/lib/getColorFromString'
 import calculateInstanceRectangles from './calculateInstanceRectangles'
 
+import colors from '../../../shared/styles/colors.css'
+
 const padding = 1
-const STAGED_SAMPLE = 'staged-sample'
 
 function drawRectangles (columnsOfRectangles, viewportWidth, trakHeight) {
   const columnsCount = columnsOfRectangles.length
@@ -15,19 +17,49 @@ function drawRectangles (columnsOfRectangles, viewportWidth, trakHeight) {
   const columnWidth = viewportWidthWithoutPadding / columnsCount
 
   const svgRectangles = columnsOfRectangles.reduce((rectangles, columnOfRectangles, index) => {
-    const newRectangles = columnOfRectangles.map(({ scaledSequencerPositions, scaledDuration, id }) => (
-      <rect
-        key={id}
-        y={(scaledSequencerPositions[0])}
-        x={((index + 1) * padding) + (index * columnWidth)}
-        width={columnWidth}
-        height={scaledDuration}
-        fill={id === STAGED_SAMPLE ? 'rgb(226,132,19)' : '#cfcfcf'}
-        stroke='black'
-        strokeWidth='.15'
-        strokeLinecap='round'
-      />
-    ))
+    const x = ((index + 1) * padding) + (index * columnWidth)
+    const newRectangles = columnOfRectangles.map(({
+      scaledSampleDuration,
+      scaledSequencerPositions,
+      scaledDurationFirstStartToLastEnd,
+      id
+    }) => {
+      const rectColor = getColorFromString(id)
+      const colorCode = colors[rectColor]
+ 
+      return (
+        <React.Fragment>
+          <rect
+            key={id}
+            y={(scaledSequencerPositions[0])}
+            x={x}
+            width={columnWidth}
+            height={scaledDurationFirstStartToLastEnd}
+            fill='none'
+            stroke={colorCode}
+            strokeWidth='.15'
+            strokeLinecap='round'
+          />
+          {
+            scaledSequencerPositions.map(position => (
+              <rect
+                key={`${id}::${position}`}
+                y={position}
+                x={x}
+                width={columnWidth}
+                height={scaledSampleDuration}
+                fill={colorCode}
+                opacity='.25'
+                stroke={colorCode}
+                strokeWidth='.25'
+                strokeLinecap='round'
+              />
+            ))
+          }
+
+        </React.Fragment>
+      )
+    })
 
     return [...rectangles, ...newRectangles]
   }, [])

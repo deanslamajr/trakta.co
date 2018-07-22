@@ -2,7 +2,7 @@ import React from 'react'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import classnames from 'classnames'
 
-import getColorFromString from './getColorFromString'
+import getColorFromString from '../../../lib/getColorFromString'
 
 import styles from './listItem.css'
 

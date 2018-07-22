@@ -17,11 +17,12 @@ function convertSampleTimesToPixels ({ sampleDuration, id, sequencerCsv }) {
 
   const sampleUnitCount = sampleDuration / unitDuration
   const scaledSampleDuration = sampleUnitCount * unitLength
-  const scaledDuration = scaledSequencerPositions[scaledSequencerPositions.length - 1] + scaledSampleDuration
+  const scaledDurationFirstStartToLastEnd = (scaledSequencerPositions[scaledSequencerPositions.length - 1] + scaledSampleDuration) - scaledSequencerPositions[0]
 
   return {
     id,
-    scaledDuration,
+    scaledDurationFirstStartToLastEnd,
+    scaledSampleDuration,
     scaledSequencerPositions
   }
 }

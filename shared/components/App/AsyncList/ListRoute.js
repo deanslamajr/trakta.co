@@ -12,7 +12,7 @@ import ListItem from './ListItem'
 import InstancePlaylist from '../../../../client/components/InstancePlaylist'
 import { NavButton } from '../AsyncNavBar/AsyncNavBar'
 
-import getColorFromString from './getColorFromString'
+import getColorFromString from '../../../lib/getColorFromString'
 
 import config from '../../../../config'
 
