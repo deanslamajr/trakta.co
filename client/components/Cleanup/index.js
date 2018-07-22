@@ -49,7 +49,7 @@ class Cleanup extends React.Component {
   _clickUseThisSelection = () => {
     const mainEditUrl = getMainEditUrl(this.props.match.path)
 
-    this.props.history.push(`${mainEditUrl}/staging`)
+    this.props.history.push(`${mainEditUrl}/sequencer`)
   }
 
   _drawWaveForm = () => {

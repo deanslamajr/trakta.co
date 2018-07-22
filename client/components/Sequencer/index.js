@@ -9,13 +9,13 @@ import InstanceRectangles from '../InstanceRectangles'
 
 import config from '../../../config'
 
-import styles from './staging.css'
+import styles from './index.css'
 
 function getMainEditUrl (url) {
-  return url.replace('/staging', '')
+  return url.replace('/sequencer', '')
 }
 
-class Staging extends React.Component {
+class SequencerContainer extends React.Component {
   static propTypes = {
     instances: PropTypes.array,
     history: PropTypes.object,
@@ -38,7 +38,7 @@ class Staging extends React.Component {
     return (
       <div>
         <Helmet>
-          <title>{`${this.props.trakName} - staging - ${config('appTitle')}`}</title>
+          <title>{`${this.props.trakName} - sequencer - ${config('appTitle')}`}</title>
         </Helmet>
 
         <InstanceRectangles instances={this.props.instances} />
@@ -68,6 +68,6 @@ class Staging extends React.Component {
   }
 }
 
-export { Staging }
+export { SequencerContainer }
 
-export default withStyles(styles)(Staging)
+export default withStyles(styles)(SequencerContainer)

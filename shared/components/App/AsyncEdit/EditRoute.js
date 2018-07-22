@@ -5,7 +5,7 @@ import Redirect from 'react-router/Redirect'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import axios from 'axios'
 
-import Staging from './AsyncStaging'
+import Sequencer from './AsyncSequencer'
 import Cleanup from './AsyncCleanup'
 import Recorder from './AsyncRecorder'
 import Slices from './AsyncSlices'
@@ -336,8 +336,8 @@ class EditRoute extends React.Component {
                   trakName={this.state.trakName}
                 />
               )} />,
-              <Route key={1} path={`${this.props.match.url}/staging`} render={props => (
-                <Staging
+              <Route key={1} path={`${this.props.match.url}/sequencer`} render={props => (
+                <Sequencer
                   {...props}
                   createPlayerFromSequencer={this._createPlayerFromSequencer}
                   createPlayerFromSequencerItemSelect={this._createPlayerFromSequencerItemSelect}
