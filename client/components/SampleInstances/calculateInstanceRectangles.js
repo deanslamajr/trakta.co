@@ -1,72 +1,62 @@
-/* eslint-disable camelcase */
-function generateRectangle (trackWindowStart, trackWindowLength, { start_time, duration, id }) {
-  // Calculate start position as fraction of total width
-  const scaledStartPos = start_time > trackWindowStart
-    ? (start_time - trackWindowStart) / trackWindowLength
-    : 0
+import { unitLength, unitDuration } from '../../lib/units'
 
-  const durationBeforeTrackWindow = start_time < trackWindowStart
-    ? trackWindowStart - start_time
-    : 0
+function convertSampleTimesToPixels ({ sampleDuration, id, sequencerCsv }) {
+  // convert from csv positions to viewport scale
 
-  const durationAfterTrackWindow = start_time + duration > trackWindowStart + trackWindowLength
-    ? (start_time + duration) - (trackWindowStart + trackWindowLength)
-    : 0
-
-  const durationInTrackWindow = duration - durationBeforeTrackWindow - durationAfterTrackWindow
-
-  const scaledDuration = durationInTrackWindow / trackWindowLength
-
-  return { scaledStartPos, scaledDuration, id }
-}
-
-/**
- * Convert absolute instance values to the fractional values in the given track window
- * @param {Number} trackWindowStart
- * @param {Number} trackWindowLength
- * @param {Array<Object<start_time: Number, duration: Number, id: Number>>} instances
- * @return {Array<Object<scaledStartPos: Number, scaledDuration: Number, id: Number>>} array of converted data
- */
-function generateRectangles (trackWindowStart, trackWindowLength, instances) {
-  return instances.filter(({ start_time, duration }) => {
-    return start_time + duration > trackWindowStart &&
-        start_time < trackWindowStart + trackWindowLength
+  const sequencerPositionsArray = sequencerCsv.split(',')
+  const scaledSequencerPositions = sequencerPositionsArray.map(position => {
+    /**
+     * Account for 1 px border of sequencer items
+     * 1px for top border on of first item
+     * 2px for each set of four sequencer items
+     **/
+    const setOfFourIndex = Math.floor(position / 4)
+    const sequencerItemBorderSpacing = 1 + (setOfFourIndex * 2)
+    return (position * unitLength) + sequencerItemBorderSpacing
   })
-    .map(generateRectangle.bind(null, trackWindowStart, trackWindowLength))
+
+  const sampleUnitCount = sampleDuration / unitDuration
+  const scaledSampleDuration = sampleUnitCount * unitLength
+  const scaledDuration = scaledSequencerPositions[scaledSequencerPositions.length - 1] + scaledSampleDuration
+
+  return {
+    id,
+    scaledDuration,
+    scaledSequencerPositions
+  }
 }
-/* eslint-enable camelcase */
 
 /**
  * Group rectangles into rows to ensure there are no collisions between rectangles on the same row
  * @param {Array<Object<scaledStartPos: Number, scaledDuration: Number, id: Number>>} rectangles
  * @return {Array<Array<Object<scaledStartPos: Number, scaledDuration: Number, id: Number>>>} array of rows
  */
-function arrangeRectanglesIntoRows (rectangles) {
+function arrangeRectanglesIntoColumns (rectangles) {
   let rectanglesCopy = Array.from(rectangles)
-  rectanglesCopy.sort((a, b) => a.scaledStartPos - b.scaledStartPos)
+  rectanglesCopy.sort((a, b) => a.scaledSequencerPositions[0] - b.scaledSequencerPositions[0])
 
-  const arrangedRows = []
+  const arrangedColumns = []
 
   while (rectanglesCopy.length) {
     const tempArray = []
     let currentInstance = rectanglesCopy.splice(0, 1)[0]
-    const row = [currentInstance]
+    const column = [currentInstance]
 
     while (rectanglesCopy.length) {
       const nextInstance = rectanglesCopy.splice(0, 1)[0]
-      if (nextInstance.scaledStartPos >= currentInstance.scaledStartPos + currentInstance.scaledDuration) {
-        row.push(nextInstance)
+      if (nextInstance.scaledSequencerPositions[0] >= currentInstance.scaledSequencerPositions[0] + currentInstance.scaledDuration) {
+        column.push(nextInstance)
         currentInstance = nextInstance
       } else {
         tempArray.push(nextInstance)
       }
     }
 
-    arrangedRows.push(row)
+    arrangedColumns.push(column)
     rectanglesCopy = Array.from(tempArray)
   }
 
-  return arrangedRows
+  return arrangedColumns
 }
 
 /**
@@ -76,14 +66,9 @@ function arrangeRectanglesIntoRows (rectangles) {
  * @param {Array<Object<start_time: Number, duration: Number, id: String>>} instances
  * @return {Array<Array<Object<scaledStartPos: Number, scaledDuration: Number, id: String>>>} data to draw game board
  */
-function calculateInstanceRectangles (trackWindowStart, trackWindowLength, instances) {
-  const rectangles = generateRectangles(trackWindowStart, trackWindowLength, instances)
-  return arrangeRectanglesIntoRows(rectangles)
+function calculateInstanceRectangles (samples) {
+  const rectangles = samples.map(sample => convertSampleTimesToPixels(sample))
+  return arrangeRectanglesIntoColumns(rectangles)
 }
 
-export {
-  calculateInstanceRectangles,
-  arrangeRectanglesIntoRows,
-  generateRectangles,
-  generateRectangle
-}
+export default calculateInstanceRectangles

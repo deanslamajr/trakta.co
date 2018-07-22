@@ -13,6 +13,7 @@ import styles from './styles.css'
 
 class SlicesRoute extends React.Component {
   static propTypes = {
+    instances: PropTypes.array,
     fetchInstances: PropTypes.func,
     history: PropTypes.object,
     shouldFetchInstances: PropTypes.bool,
@@ -49,7 +50,7 @@ class SlicesRoute extends React.Component {
         <Helmet>
           <title>{`${this.props.trakName} - ${config('appTitle')}`}</title>
         </Helmet>
-        <SampleInstances />
+        <SampleInstances instances={this.props.instances} />
         <NavButton
           type={'BACK'}
           cb={this._navigateToList}

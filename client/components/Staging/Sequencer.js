@@ -23,7 +23,7 @@ class Sequencer extends React.Component {
       columns.push([])
     }
 
-    let i = 1
+    let i = 0
     while (i < totalNumberOfSixteenths) {
       columns.forEach(column => {
         if (i < totalNumberOfSixteenths) {

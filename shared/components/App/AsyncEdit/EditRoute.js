@@ -308,6 +308,7 @@ class EditRoute extends React.Component {
           <Route exact path={this.props.match.url} render={props => (
             <Slices
               {...props}
+              instances={this.state.instances}
               fetchInstances={this._fetchInstances}
               shouldFetchInstances={this.state.shouldFetchInstances}
               trakName={this.state.trakName}
@@ -340,6 +341,7 @@ class EditRoute extends React.Component {
                   {...props}
                   createPlayerFromSequencer={this._createPlayerFromSequencer}
                   createPlayerFromSequencerItemSelect={this._createPlayerFromSequencerItemSelect}
+                  instances={this.state.instances}
                   saveRecording={this._saveRecording}
                   selectedSequencerItems={this.state.selectedSequencerItems}
                   showNavbarItems={this.state.showNavbarItems}

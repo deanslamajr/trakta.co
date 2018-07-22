@@ -5,6 +5,7 @@ import Helmet from 'react-helmet'
 
 import Sequencer from './Sequencer'
 import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
+import SampleInstances from '../SampleInstances'
 
 import config from '../../../config'
 
@@ -16,6 +17,7 @@ function getMainEditUrl (url) {
 
 class Staging extends React.Component {
   static propTypes = {
+    instances: PropTypes.array,
     history: PropTypes.object,
     createPlayerFromSequencer: PropTypes.func,
     createPlayerFromSequencerItemSelect: PropTypes.func,
@@ -38,6 +40,8 @@ class Staging extends React.Component {
         <Helmet>
           <title>{`${this.props.trakName} - staging - ${config('appTitle')}`}</title>
         </Helmet>
+
+        <SampleInstances instances={this.props.instances} />
 
         {
           this.props.showNavbarItems && (
