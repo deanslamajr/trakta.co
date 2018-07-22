@@ -1,5 +1,10 @@
 @import "../../../shared/styles/colors.css";
 
+.outer-container {
+  position: relative;
+  height: auto;
+}
+
 .container {
   display: flex;
   justify-content: center;

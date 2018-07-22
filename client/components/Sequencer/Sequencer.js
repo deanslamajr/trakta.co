@@ -34,28 +34,30 @@ class Sequencer extends React.Component {
     }
 
     return (
-      <div className={styles.container}>
-        {
-          columns.map((column, index) => {
-            return (
-              <span
-                key={index}
-                className={styles.column}
-                style={{ marginTop: `${index}rem` }}
-              >
-                {
-                column.map(itemNumber => (
-                  <div
-                    key={itemNumber}
-                    className={classnames(styles.item, {[styles.selected]: selectedItems[itemNumber]})}
-                    onClick={() => onItemSelect(itemNumber)}
-                  />
-                ))
-              }
-              </span>
-            )
-          })
-        }
+      <div className={styles.outerContainer}>
+        <div className={styles.container}>
+          {
+            columns.map((column, index) => {
+              return (
+                <span
+                  key={index}
+                  className={styles.column}
+                  style={{ marginTop: `${index}rem` }}
+                >
+                  {
+                  column.map(itemNumber => (
+                    <div
+                      key={itemNumber}
+                      className={classnames(styles.item, {[styles.selected]: selectedItems[itemNumber]})}
+                      onClick={() => onItemSelect(itemNumber)}
+                    />
+                  ))
+                }
+                </span>
+              )
+            })
+          }
+        </div>
       </div>
     )
   }

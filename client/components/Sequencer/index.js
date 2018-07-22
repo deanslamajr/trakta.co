@@ -36,12 +36,10 @@ class SequencerContainer extends React.Component {
     const mainEditUrl = getMainEditUrl(this.props.match.url)
 
     return (
-      <div>
+      <div className={styles.container}>
         <Helmet>
           <title>{`${this.props.trakName} - sequencer - ${config('appTitle')}`}</title>
         </Helmet>
-
-        <InstanceRectangles instances={this.props.instances} />
 
         {
           this.props.showNavbarItems && (
@@ -63,6 +61,8 @@ class SequencerContainer extends React.Component {
             </React.Fragment>
           )
         }
+
+        <InstanceRectangles instances={this.props.instances} />
       </div>
     )
   }
