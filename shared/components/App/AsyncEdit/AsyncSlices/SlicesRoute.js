@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import Helmet from 'react-helmet'
 
-import SampleInstances from '../../../../../client/components/SampleInstances'
+import InstanceRectangles from '../../../../../client/components/InstanceRectangles'
 
 import { NavButton } from '../../AsyncNavBar/AsyncNavBar'
 
@@ -50,7 +50,7 @@ class SlicesRoute extends React.Component {
         <Helmet>
           <title>{`${this.props.trakName} - ${config('appTitle')}`}</title>
         </Helmet>
-        <SampleInstances instances={this.props.instances} />
+        <InstanceRectangles instances={this.props.instances} />
         <NavButton
           type={'BACK'}
           cb={this._navigateToList}

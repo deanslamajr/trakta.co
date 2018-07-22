@@ -28,7 +28,7 @@ function drawRectangles (columnsOfRectangles, viewportWidth, trakHeight) {
       const colorCode = colors[rectColor]
  
       return (
-        <React.Fragment>
+        <React.Fragment key={id}>
           <rect
             key={id}
             y={(scaledSequencerPositions[0])}
@@ -71,7 +71,7 @@ function drawRectangles (columnsOfRectangles, viewportWidth, trakHeight) {
   )
 }
 
-const SampleInstances = ({ instances = [] }) => {
+const InstanceRectangles = ({ instances = [] }) => {
   if (instances.length === 0) {
     return null
   }
@@ -98,7 +98,7 @@ const SampleInstances = ({ instances = [] }) => {
   return drawRectangles(columnsOfRectangles, viewportWidth, trakHeight)
 }
 
-SampleInstances.propTypes = {
+InstanceRectangles.propTypes = {
   instances: PropTypes.arrayOf(PropTypes.shape({
     created_at: PropTypes.string,
     id: PropTypes.string,
@@ -130,4 +130,4 @@ SampleInstances.propTypes = {
   }))
 }
 
-export default SampleInstances
+export default InstanceRectangles

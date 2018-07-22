@@ -5,7 +5,7 @@ import Helmet from 'react-helmet'
 
 import Sequencer from './Sequencer'
 import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
-import SampleInstances from '../SampleInstances'
+import InstanceRectangles from '../InstanceRectangles'
 
 import config from '../../../config'
 
@@ -41,7 +41,7 @@ class Staging extends React.Component {
           <title>{`${this.props.trakName} - staging - ${config('appTitle')}`}</title>
         </Helmet>
 
-        <SampleInstances instances={this.props.instances} />
+        <InstanceRectangles instances={this.props.instances} />
 
         {
           this.props.showNavbarItems && (
