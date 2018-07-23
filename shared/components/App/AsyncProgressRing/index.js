@@ -1,4 +1,7 @@
 import React from 'react'
+import withStyles from 'isomorphic-style-loader/lib/withStyles'
+
+import styles from './styles.css'
 
 class ProgressRing extends React.Component {
   constructor (props) {
@@ -15,23 +18,25 @@ class ProgressRing extends React.Component {
     const strokeDashoffset = this.circumference - progress * this.circumference || 0
 
     return (
-      <svg
-        height={radius * 2}
-        width={radius * 2}
-        >
-        <circle
-          stroke='black'
-          fill='transparent'
-          strokeWidth={stroke}
-          strokeDasharray={this.circumference + ' ' + this.circumference}
-          style={{ strokeDashoffset }}
-          r={this.normalizedRadius}
-          cx={radius}
-          cy={radius}
-          />
-      </svg>
+      <div className={styles.container}>
+        <svg
+          height={radius * 2}
+          width={radius * 2}
+          >
+          <circle
+            stroke='black'
+            fill='transparent'
+            strokeWidth={stroke}
+            strokeDasharray={this.circumference + ' ' + this.circumference}
+            style={{ strokeDashoffset }}
+            r={this.normalizedRadius}
+            cx={radius}
+            cy={radius}
+            />
+        </svg>
+      </div>
     )
   }
 }
 
-export default ProgressRing
+export default withStyles(styles)(ProgressRing)
