@@ -11,8 +11,12 @@ import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBa
 import styles from './InstancePlaylist.css'
 
 let playCode
+
+const animationData = {
+  id: null,
+  position: 0
+}
 let intervalAnimationId
-let position = 0
 
 /**
  * generate code
@@ -30,10 +34,10 @@ function postEndSignal (trakName) {
   axios.post('/api/play-back', { code: playCode, trakName })
 }
 
-function playArrangement () {
+function startPlayback () {
   Tone.Transport.start()
 }
-function stopArrangement () {
+function stopPlayback () {
   Tone.Transport.stop()
 }
 
@@ -41,7 +45,9 @@ class InstancePlaylist extends React.Component {
   static propTypes = {
     buttonColor: PropTypes.string,
     incrementPlaysCount: PropTypes.bool,
+    playAnimation: PropTypes.func,
     player: PropTypes.object,
+    stopAnimation: PropTypes.func,
     trakName: PropTypes.string
   }
 
@@ -50,45 +56,84 @@ class InstancePlaylist extends React.Component {
     isPlaying: false
   }
 
-  _drawPosition = (displacementPerFrame, endPosition) => {
-    position = position <= endPosition
-      ? position + displacementPerFrame
-      : endPosition
+  _playDefaultAnimation (playbackDurationSeconds, aniData, time) {
+    const animationInterval = 20
+    const playbackDurationMilliseconds = playbackDurationSeconds * 1000
+    const numberOfFrames = (playbackDurationMilliseconds / animationInterval) + 1
 
-    if (this.playIndicatorEl) {
-      this.playIndicatorEl.style.left = `${position}px`
-    }
-  }
-
-  _prepTransport = (trakDuration) => {
     const width = viewportDimensions
       ? viewportDimensions.width() && viewportDimensions.width()
       : 300
-
-    const animationInterval = 20
-    const sampleDuration = trakDuration * 1000
-    const numberOfFrames = (sampleDuration / animationInterval) + 1
-
     const displacementPerFrame = width / numberOfFrames
+    aniData.position = 0
 
+    function drawPosition (playIndicatorEl) {
+      aniData.position = aniData.position <= width
+        ? aniData.position + displacementPerFrame
+        : width
+  
+      if (playIndicatorEl) {
+        playIndicatorEl.style.left = `${aniData.position}px`
+      }
+    }
+
+    Tone.Draw.schedule(() => {
+      this.playIndicatorEl.style.backgroundColor = 'black'
+
+      if (aniData.id) {
+        clearInterval(aniData.id)
+      }
+      // draw first frame of animation
+      drawPosition(this.playIndicatorEl)
+      // setup interval for the other frames
+      aniData.id = setInterval(() => drawPosition(this.playIndicatorEl), animationInterval)
+    }, time)
+  }
+
+  _stopDefaultAnimation = (aniData) => {
+    clearInterval(aniData.id)
+    this.playIndicatorEl.style.backgroundColor = 'transparent'
+    aniData.position = 0
+  }
+
+  _resetTransportAndPrepPlaybackAnimation = (playbackDuration, playAnimation = this._playDefaultAnimation) => {
     // clear the transport
     Tone.Transport.cancel()
 
     Tone.Transport.loop = true
     Tone.Transport.position = 0
-    Tone.Transport.loopEnd = trakDuration
+    Tone.Transport.loopEnd = playbackDuration
 
-    Tone.Transport.schedule((time) => {
-      Tone.Draw.schedule(() => {
-        position = 0
-        this.playIndicatorEl.style.backgroundColor = 'black'
-        clearInterval(intervalAnimationId)
-        // draw first frame of animation
-        this._drawPosition(displacementPerFrame, width)
-        // setup interval for the other frames
-        intervalAnimationId = setInterval(() => this._drawPosition(displacementPerFrame, width), animationInterval)
-      }, time)
-    }, 0)
+    Tone.Transport.schedule(playAnimation.bind(this, playbackDuration, animationData), 0)
+  }
+
+  _stop = () => {
+    const stopAnimation = this.props.stopAnimation || this._stopDefaultAnimation
+    stopAnimation(animationData)    
+    
+    stopPlayback()
+
+    this.setState({
+      activeButton: 'PLAY',
+      isPlaying: false
+    })
+
+    if (this.props.incrementPlaysCount) {
+      postEndSignal(this.props.trakName)
+    }
+  }
+
+  _play = () => {
+    startPlayback()
+
+    this.setState({
+      activeButton: 'STOP',
+      isPlaying: true
+    })
+
+    if (this.props.incrementPlaysCount) {
+      postStartSignal(this.props.trakName)
+    }
   }
 
   _finishPlayerInit = (player) => {
@@ -102,41 +147,9 @@ class InstancePlaylist extends React.Component {
     }
   }
 
-  _stop = () => {
-    clearInterval(intervalAnimationId)
-    this.playIndicatorEl.style.backgroundColor = 'transparent'
-    position = 0
-    stopArrangement()
-
-    this.setState({
-      activeButton: 'PLAY',
-      isPlaying: false
-    })
-
-    if (this.props.incrementPlaysCount) {
-      postEndSignal(this.props.trakName)
-    }
-  }
-
-  _play = () => {
-    playArrangement()
-
-    this.setState({
-      activeButton: 'STOP',
-      isPlaying: true
-    })
-
-    if (this.props.incrementPlaysCount) {
-      postStartSignal(this.props.trakName)
-    }
-  }
-
   _initializePlayer = (player) => {
     if (player) {
-      /**
-       * @todo is player is playing, stop old player and start new player
-       */
-      this._prepTransport(player.buffer.get().duration)
+      this._resetTransportAndPrepPlaybackAnimation(player.buffer.get().duration, this.props.playAnimation)
       this._finishPlayerInit(player)
     }
   }

@@ -54,7 +54,9 @@ class EditRoute extends React.Component {
       selectedSequencerItems: {},
       sequencerPlayer: null,
 
-      showNavbarItems: true
+      showNavbarItems: true,
+
+      playAnimation: undefined
     }
   }
 
@@ -77,8 +79,18 @@ class EditRoute extends React.Component {
           activePlayer: currentTrakPlayer,
           shouldFetchInstances: false,
           shouldPlayerIncrementPlaysCount: true
-        })
+        }, () => this._setPlayAnimation())
       })
+  }
+
+  _setPlayAnimation = () => {
+    const { unitLength, unitDuration } = require('../../../../client/lib/units')
+
+    const pixelsPerSecond = (unitLength + 1) / unitDuration
+
+    const trakHeight = this.state.currentTrakPlayer.buffer.get().duration * pixelsPerSecond
+
+    //this.setState({ playAnimation })
   }
 
   _renderLoadingComponent = (progress) => {
@@ -357,6 +369,7 @@ class EditRoute extends React.Component {
           this.state.activePlayer && (
             <InstancePlaylist
               incrementPlaysCount={this.state.shouldPlayerIncrementPlaysCount}
+              playAnimation={this.state.playAnimation}
               player={this.state.activePlayer}
               trakName={this.state.trakName}
             />
