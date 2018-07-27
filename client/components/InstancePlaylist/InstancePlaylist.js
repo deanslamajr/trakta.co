@@ -147,22 +147,25 @@ class InstancePlaylist extends React.Component {
     }
   }
 
-  _initializePlayer = (player) => {
+  _initializePlayer = (player, playAnimation) => {
     if (player) {
-      this._resetTransportAndPrepPlaybackAnimation(player.buffer.get().duration, this.props.playAnimation)
+      this._resetTransportAndPrepPlaybackAnimation(player.buffer.get().duration, playAnimation)
       this._finishPlayerInit(player)
     }
   }
 
   componentWillReceiveProps (nextProps) {
     const playerHasChanged = this.props.player !== nextProps.player
-    if (playerHasChanged) {
-      this._initializePlayer(nextProps.player)
+    const animationsHaveChanged = this.props.playAnimation !== nextProps.playAnimation ||
+      this.props.stopAnimation !== nextProps.stopAnimation
+    
+    if (playerHasChanged || animationsHaveChanged) {
+      this._initializePlayer(nextProps.player, nextProps.playAnimation)
     }
   }
 
   componentDidMount () {
-    this._initializePlayer(this.props.player)
+    this._initializePlayer(this.props.player, this.props.playAnimation)
   }
 
   componentWillUnmount () {
