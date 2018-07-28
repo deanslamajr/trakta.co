@@ -80,61 +80,9 @@ class EditRoute extends React.Component {
           activePlayer: currentTrakPlayer,
           shouldFetchInstances: false,
           shouldPlayerIncrementPlaysCount: true
-        })//, () => this._setPlayerAnimations())
+        })
       })
   }
-
-  _getInstancesPlaybackAnimation = (trakHeight) => (playbackDurationSeconds, aniData, time) => {
-    const animationInterval = 20
-    const playbackDurationMilliseconds = playbackDurationSeconds * 1000
-    const numberOfFrames = (playbackDurationMilliseconds / animationInterval) + 1
-
-    const displacementPerFrame = trakHeight / numberOfFrames
-    aniData.position = 0
-
-    function drawPosition (playIndicatorEl) {
-      aniData.position = aniData.position <= trakHeight
-        ? aniData.position + displacementPerFrame
-        : trakHeight
-  
-      if (playIndicatorEl) {
-        playIndicatorEl.style.top = `${aniData.position}px`
-      }
-    }
-
-    const Tone = require('tone')
-
-    Tone.Draw.schedule(() => {
-      this.playIndicatorEl.style.backgroundColor = 'black'
-
-      if (aniData.id) {
-        clearInterval(aniData.id)
-      }
-      // draw first frame of animation
-      drawPosition(this.playIndicatorEl)
-      // setup interval for the other frames
-      aniData.id = setInterval(() => drawPosition(this.playIndicatorEl), animationInterval)
-    }, time)
-  }
-
-  _stopAnimation = (aniData) => {
-    clearInterval(aniData.id)
-    this.playIndicatorEl.style.backgroundColor = 'transparent'
-    aniData.position = 0
-  }
-
-  // _setPlayerAnimations = () => {
-  //   const { unitLength, unitDuration } = require('../../../../client/lib/units')
-
-  //   const pixelsPerSecond = (unitLength + 1) / unitDuration
-  //   const trakHeight = this.state.currentTrakPlayer.buffer.get().duration * pixelsPerSecond
-  //   const playAnimation = this._getInstancesPlaybackAnimation(trakHeight)
-    
-  //   this.setState({
-  //     playAnimation,
-  //     stopAnimation: this._stopAnimation
-  //   })
-  // }
 
   _setPlayerAnimations = (playAnimation, stopAnimation) => {
     this.setState({
@@ -416,8 +364,6 @@ class EditRoute extends React.Component {
           }
           <Redirect to={{ pathname: this.props.match.url }} />
         </Switch>
-
-        {/* <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} /> */}
 
         {
           this.state.activePlayer && (
