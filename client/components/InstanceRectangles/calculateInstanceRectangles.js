@@ -1,4 +1,11 @@
+import React from 'react'
+
 import { unitLength, unitDuration } from '../../lib/units'
+import getColorFromString from '../../../shared/lib/getColorFromString'
+
+import colors from '../../../shared/styles/colors.css'
+
+const padding = 1
 
 function convertSampleTimesToPixels ({ sampleDuration, id, sequencerCsv }) {
   // convert from csv positions to viewport scale
@@ -60,6 +67,61 @@ function arrangeRectanglesIntoColumns (rectangles) {
   return arrangedColumns
 }
 
+function generateRectangles (columnsOfRectangles, viewportWidth) {
+  const columnsCount = columnsOfRectangles.length
+  const totalPaddingWidth = (columnsCount + 1) * padding
+  const viewportWidthWithoutPadding = viewportWidth - totalPaddingWidth
+  const columnWidth = viewportWidthWithoutPadding / columnsCount
+
+  return columnsOfRectangles.reduce((rectangles, columnOfRectangles, index) => {
+    const x = ((index + 1) * padding) + (index * columnWidth)
+    const newRectangles = columnOfRectangles.map(({
+      scaledSampleDuration,
+      scaledSequencerPositions,
+      scaledDurationFirstStartToLastEnd,
+      id
+    }) => {
+      const rectColor = getColorFromString(id)
+      const colorCode = colors[rectColor]
+ 
+      return (
+        <React.Fragment key={id}>
+          <rect
+            key={id}
+            y={(scaledSequencerPositions[0])}
+            x={x}
+            width={columnWidth}
+            height={scaledDurationFirstStartToLastEnd}
+            fill='none'
+            stroke={colorCode}
+            strokeWidth='.15'
+            strokeLinecap='round'
+          />
+          {
+            scaledSequencerPositions.map(position => (
+              <rect
+                key={`${id}::${position}`}
+                y={position}
+                x={x}
+                width={columnWidth}
+                height={scaledSampleDuration}
+                fill={colorCode}
+                opacity='.25'
+                stroke={colorCode}
+                strokeWidth='.25'
+                strokeLinecap='round'
+              />
+            ))
+          }
+
+        </React.Fragment>
+      )
+    })
+
+    return [...rectangles, ...newRectangles]
+  }, [])
+}
+
 /**
  * generate the instructions to draw the instances that should appear on the given track viewport
  * @param {Number} trackWindowStart
@@ -67,9 +129,10 @@ function arrangeRectanglesIntoColumns (rectangles) {
  * @param {Array<Object<start_time: Number, duration: Number, id: String>>} instances
  * @return {Array<Array<Object<scaledStartPos: Number, scaledDuration: Number, id: String>>>} data to draw game board
  */
-function calculateInstanceRectangles (samples) {
+function calculateInstanceRectangles (samples, viewportWidth) {
   const rectangles = samples.map(sample => convertSampleTimesToPixels(sample))
-  return arrangeRectanglesIntoColumns(rectangles)
+  const columnsOfRectangles = arrangeRectanglesIntoColumns(rectangles)
+  return generateRectangles(columnsOfRectangles, viewportWidth)
 }
 
 export default calculateInstanceRectangles

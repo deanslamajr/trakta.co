@@ -24,6 +24,7 @@ class SequencerContainer extends React.Component {
     saveRecording: PropTypes.func,
     selectedSequencerItems: PropTypes.object,
     setCurrentPlayerActive: PropTypes.func,
+    setPlayerAnimations: PropTypes.func,
     showNavbarItems: PropTypes.bool,
     trakName: PropTypes.string
   }
@@ -62,7 +63,10 @@ class SequencerContainer extends React.Component {
           )
         }
 
-        <InstanceRectangles instances={this.props.instances} />
+        <InstanceRectangles
+          instances={this.props.instances}
+          setPlayerAnimations={this.props.setPlayerAnimations}
+        />
       </div>
     )
   }

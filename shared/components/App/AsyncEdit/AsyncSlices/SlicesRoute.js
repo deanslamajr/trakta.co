@@ -16,6 +16,7 @@ class SlicesRoute extends React.Component {
     instances: PropTypes.array,
     fetchInstances: PropTypes.func,
     history: PropTypes.object,
+    setPlayerAnimations: PropTypes.func,
     shouldFetchInstances: PropTypes.bool,
     trakName: PropTypes.string
   }
@@ -50,7 +51,10 @@ class SlicesRoute extends React.Component {
         <Helmet>
           <title>{`${this.props.trakName} - ${config('appTitle')}`}</title>
         </Helmet>
-        <InstanceRectangles instances={this.props.instances} />
+        <InstanceRectangles
+          setPlayerAnimations={this.props.setPlayerAnimations}
+          instances={this.props.instances}
+        />
         <NavButton
           type={'BACK'}
           cb={this._navigateToList}

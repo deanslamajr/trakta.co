@@ -80,7 +80,7 @@ class EditRoute extends React.Component {
           activePlayer: currentTrakPlayer,
           shouldFetchInstances: false,
           shouldPlayerIncrementPlaysCount: true
-        }, () => this._setPlayerAnimations())
+        })//, () => this._setPlayerAnimations())
       })
   }
 
@@ -123,16 +123,23 @@ class EditRoute extends React.Component {
     aniData.position = 0
   }
 
-  _setPlayerAnimations = () => {
-    const { unitLength, unitDuration } = require('../../../../client/lib/units')
+  // _setPlayerAnimations = () => {
+  //   const { unitLength, unitDuration } = require('../../../../client/lib/units')
 
-    const pixelsPerSecond = (unitLength + 1) / unitDuration
-    const trakHeight = this.state.currentTrakPlayer.buffer.get().duration * pixelsPerSecond
-    const playAnimation = this._getInstancesPlaybackAnimation(trakHeight)
+  //   const pixelsPerSecond = (unitLength + 1) / unitDuration
+  //   const trakHeight = this.state.currentTrakPlayer.buffer.get().duration * pixelsPerSecond
+  //   const playAnimation = this._getInstancesPlaybackAnimation(trakHeight)
     
+  //   this.setState({
+  //     playAnimation,
+  //     stopAnimation: this._stopAnimation
+  //   })
+  // }
+
+  _setPlayerAnimations = (playAnimation, stopAnimation) => {
     this.setState({
       playAnimation,
-      stopAnimation: this._stopAnimation
+      stopAnimation
     })
   }
 
@@ -365,6 +372,7 @@ class EditRoute extends React.Component {
               {...props}
               instances={this.state.instances}
               fetchInstances={this._fetchInstances}
+              setPlayerAnimations={this._setPlayerAnimations}
               shouldFetchInstances={this.state.shouldFetchInstances}
               trakName={this.state.trakName}
             />
@@ -399,6 +407,7 @@ class EditRoute extends React.Component {
                   instances={this.state.instances}
                   saveRecording={this._saveRecording}
                   selectedSequencerItems={this.state.selectedSequencerItems}
+                  setPlayerAnimations={this._setPlayerAnimations}
                   showNavbarItems={this.state.showNavbarItems}
                   trakName={this.state.trakName}
                 />
@@ -408,7 +417,7 @@ class EditRoute extends React.Component {
           <Redirect to={{ pathname: this.props.match.url }} />
         </Switch>
 
-        <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} />
+        {/* <div ref={ref => { this.playIndicatorEl = ref }} className={styles.playIndicator} /> */}
 
         {
           this.state.activePlayer && (
