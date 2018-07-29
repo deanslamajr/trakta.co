@@ -104,7 +104,7 @@ class InstanceRectangles extends React.Component {
     } = this.props
 
     const trakDuration = instances[0].trak.duration
-    const pixelsPerSecond = (unitLength + 1) / unitDuration
+    const pixelsPerSecond = unitLength / unitDuration
     const trakHeight = trakDuration * pixelsPerSecond
     const playAnimation = this._getInstancesPlaybackAnimation(trakHeight)
 
