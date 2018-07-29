@@ -46,9 +46,9 @@ class InstanceRectangles extends React.Component {
   }
 
   _getInstancesPlaybackAnimation = (trakHeight) => (playbackDurationSeconds, aniData, time) => {
-    const animationInterval = 20
+    const animationInterval = 40
     const playbackDurationMilliseconds = playbackDurationSeconds * 1000
-    const numberOfFrames = (playbackDurationMilliseconds / animationInterval) + 1
+    const numberOfFrames = (playbackDurationMilliseconds / animationInterval)
 
     const displacementPerFrame = trakHeight / numberOfFrames
     aniData.position = 0
