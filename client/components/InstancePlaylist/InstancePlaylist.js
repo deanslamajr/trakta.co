@@ -104,7 +104,7 @@ class InstancePlaylist extends React.Component {
     Tone.Transport.position = 0
     Tone.Transport.loopEnd = playbackDuration
 
-    Tone.Transport.schedule(playAnimation.bind(this, playbackDuration, animationData), 0)
+    Tone.Transport.schedule(playAnimation.bind(this, playbackDuration, animationData))
   }
 
   _stop = () => {
