@@ -108,7 +108,7 @@ function generateRectangles (columnsOfRectangles, viewportWidth) {
                 fill={colorCode}
                 opacity='.25'
                 stroke={colorCode}
-                strokeWidth='.25'
+                strokeWidth='1px'
                 strokeLinecap='round'
               />
             ))

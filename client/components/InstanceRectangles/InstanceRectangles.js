@@ -67,7 +67,9 @@ class InstanceRectangles extends React.Component {
     const Tone = require('tone')
 
     Tone.Draw.schedule(() => {
-      this.playIndicatorEl.setAttribute('stroke', 'black')
+      if (this.playIndicatorEl) {
+        this.playIndicatorEl.setAttribute('stroke', 'black')
+      }
 
       if (aniData.id) {
         clearInterval(aniData.id)
@@ -79,36 +81,19 @@ class InstanceRectangles extends React.Component {
     }, time)
   }
 
-  tester = () => {
-    const viewportWidth = viewportDimensions
-      ? viewportDimensions.width() && viewportDimensions.width()
-      : 300
-
-    this.playIndicatorEl.setAttribute('x1', 0)
-    this.playIndicatorEl.setAttribute('x2', viewportWidth)
-    this.playIndicatorEl.setAttribute('y1', 0)
-    this.playIndicatorEl.setAttribute('y2', 0)
-    this.playIndicatorEl.setAttribute('stroke', 'black')
-  }
-
   _stopAnimation = (aniData) => {
     clearInterval(aniData.id)
-    this.playIndicatorEl.setAttribute('stroke', 'transparent')
+    if (this.playIndicatorEl) {
+      this.playIndicatorEl.setAttribute('stroke', 'transparent')
+    }
     aniData.position = 0
   }
 
   _getAndSetPlayerAnimations = () => {
-    const {
-      instances,
-      setPlayerAnimations
-    } = this.props
-
-    const trakDuration = instances[0].trak.duration
-    const pixelsPerSecond = unitLength / unitDuration
-    const trakHeight = trakDuration * pixelsPerSecond
+    const trakHeight = this.getTrakHeight()
     const playAnimation = this._getInstancesPlaybackAnimation(trakHeight)
 
-    setPlayerAnimations(playAnimation, this._stopAnimation)
+    this.props.setPlayerAnimations(playAnimation, this._stopAnimation)
   }
 
   componentDidMount () {
@@ -123,6 +108,15 @@ class InstanceRectangles extends React.Component {
     }
   }
 
+  getTrakHeight = () => {
+    const { instances } = this.props
+
+    const trakDuration = instances[0].trak.duration
+    const pixelsPerSecond = (unitLength) / unitDuration
+
+    return trakDuration * pixelsPerSecond
+  }
+
   render () {
     const { instances } = this.props
 
@@ -134,10 +128,7 @@ class InstanceRectangles extends React.Component {
       ? viewportDimensions.width() && viewportDimensions.width()
       : 300
   
-    const trakDuration = instances[0].trak.duration
-  
-    const pixelsPerSecond = (unitLength + 1) / unitDuration
-    const trakHeight = trakDuration * pixelsPerSecond
+    const trakHeight = this.getTrakHeight()
   
     const samples = instances.map(instance => {
       return {
