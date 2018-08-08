@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import viewportDimensions from 'viewport-dimensions'
+import isequal from 'lodash.isequal'
 
 import { unitLength, unitDuration } from '../../lib/units'
 
@@ -43,6 +44,10 @@ class InstanceRectangles extends React.Component {
 
   static defaultProps = {
     instances: []
+  }
+
+  state = {
+    svgRectangles: null
   }
 
   _getInstancesPlaybackAnimation = (trakHeight) => (playbackDurationSeconds, aniData, time) => {
@@ -99,17 +104,23 @@ class InstanceRectangles extends React.Component {
   componentDidMount () {
     if (this.props.instances.length) {
       this._getAndSetPlayerAnimations()
+      this.setSvgRectangles()
     }
   }
 
   componentDidUpdate (prevProps) {
-    if ((this.props.instances !== prevProps.instances) && this.props.instances.length) {
+    if (!isequal(this.props.instances, prevProps.instances) && this.props.instances.length) {
       this._getAndSetPlayerAnimations()
+      this.setSvgRectangles()
     }
   }
 
   getTrakHeight = () => {
     const { instances } = this.props
+
+    if (!instances.length) {
+      return 0
+    }
 
     const trakDuration = instances[0].trak.duration
     const pixelsPerSecond = (unitLength) / unitDuration
@@ -117,20 +128,12 @@ class InstanceRectangles extends React.Component {
     return trakDuration * pixelsPerSecond
   }
 
-  render () {
-    const { instances } = this.props
-
-    if (instances.length === 0) {
-      return null
-    }
-  
+  setSvgRectangles = () => {
     const viewportWidth = viewportDimensions
       ? viewportDimensions.width() && viewportDimensions.width()
       : 300
   
-    const trakHeight = this.getTrakHeight()
-  
-    const samples = instances.map(instance => {
+    const samples = this.props.instances.map(instance => {
       return {
         sequencerCsv: instance.sequencer_csv,
         sampleDuration: instance.sample.duration,
@@ -138,6 +141,18 @@ class InstanceRectangles extends React.Component {
       }
     })
     const svgRectangles = calculateInstanceRectangles(samples, viewportWidth)
+    
+    this.setState({ svgRectangles })
+  }
+
+  render () {
+    const { svgRectangles } = this.state
+  
+    const viewportWidth = viewportDimensions
+      ? viewportDimensions.width() && viewportDimensions.width()
+      : 300
+  
+    const trakHeight = this.getTrakHeight()
 
     return (
       <svg style={{ display: 'block' }} width={viewportWidth} height={trakHeight}>
