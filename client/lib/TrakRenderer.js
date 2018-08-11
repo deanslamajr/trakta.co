@@ -11,10 +11,8 @@ function createTrakRenderer () {
 
 function createBlobFromBuffer (buf, mp3Encoder) {
   // @todo if stereo is going to be supported on trakTacos, need to make a new Encoder method for that
-  return mp3Encoder.encode(buf.getChannelData(0))
-    .then(encodedBuffer => {
-      return mp3Encoder.createBlob(encodedBuffer)
-    })
+  const encodedBuffer = mp3Encoder.encode(buf.getChannelData(0))
+  return mp3Encoder.createBlob(encodedBuffer)
 }
 
 /**

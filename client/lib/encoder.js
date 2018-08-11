@@ -26,36 +26,6 @@ function floatTo16BitPCM (input, output) {
   }
 }
 
-/**
- * Mp3 Encoding results in Tone.Transport being unresponsive for an amount of time
- * proportional to the length of Mp3 encoding
- *
- * Consequently, don't proceed until Tone.Transport is responsive once again
- */
-function haltUntilTransportIsReady () {
-  return new Promise(resolve => {
-    Tone.Transport.cancel()
-    Tone.Transport.loop = true
-    // save looppoints
-    const loopStart = Tone.Transport.loopStart
-    const loopEnd = Tone.Transport.loopEnd
-
-    Tone.Transport.setLoopPoints(0, 0.5)
-
-    Tone.Transport.schedule((time) => {
-      // reset looppoints
-      Tone.Transport.setLoopPoints(loopStart, loopEnd)
-
-      Tone.Transport.stop()
-      Tone.Transport.cancel()
-
-      resolve()
-    }, 0)
-
-    Tone.Transport.start()
-  })
-}
-
 export default class Encoder {
   constructor (sampleRate) {
     mp3Encoder = new lamejs.Mp3Encoder(1, sampleRate, 128)
@@ -77,7 +47,7 @@ export default class Encoder {
 
     appendToDataBuffer(mp3Encoder.flush())
 
-    return haltUntilTransportIsReady().then(() => dataBuffer)
+    return dataBuffer
   }
 
   createBlob (dataBuffer, startOfSplice, endOfSplice) {

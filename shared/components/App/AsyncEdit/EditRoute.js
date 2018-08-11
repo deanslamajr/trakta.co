@@ -249,19 +249,18 @@ class EditRoute extends React.Component {
       showNavbarItems: false
     }, () => {
       this._addSpinnerTask(4, true)
-      this._getBlobFromBuffer(this.state.cleanupPlayer.buffer.get())
-        .then(blob => {
-          this._completeSpinnerTask()
+      const sampleBlob = this._getBlobFromBuffer(this.state.cleanupPlayer.buffer.get())
 
-          const sampleDuration = this.state.cleanupPlayer.buffer.get().duration
-          const trakDuration = this.state.sequencerPlayer.buffer.get().duration
-          const sequencerCsv = Object.keys(this.state.selectedSequencerItems)
-            .filter(item => this.state.selectedSequencerItems[item])
-            .join(',')
-          const queryString = `?trakName=${this.state.trakName}&sampleDuration=${sampleDuration}&sequencerCsv=${sequencerCsv}&trakDuration=${trakDuration}`
+      this._completeSpinnerTask()
 
-          return axios.post(`/api/sample${queryString}`, blob)
-        })
+      const sampleDuration = this.state.cleanupPlayer.buffer.get().duration
+      const trakDuration = this.state.sequencerPlayer.buffer.get().duration
+      const sequencerCsv = Object.keys(this.state.selectedSequencerItems)
+        .filter(item => this.state.selectedSequencerItems[item])
+        .join(',')
+      const queryString = `?trakName=${this.state.trakName}&sampleDuration=${sampleDuration}&sequencerCsv=${sequencerCsv}&trakDuration=${trakDuration}`
+
+      return axios.post(`/api/sample${queryString}`, sampleBlob)
         .then(({ data }) => {
           const {
             trakName,
@@ -277,12 +276,34 @@ class EditRoute extends React.Component {
             this._setTrakName(trakName)
           }
 
-          // get new trak blob
-          return this._getBlobFromBuffer(this.state.sequencerPlayer.buffer.get())
-            .then(blob => {
-              this._completeSpinnerTask()
-              return axios.post(`/api/version/${versionId}`, blob)
-            })
+          // create new trak blob
+          const trakBlob = this._getBlobFromBuffer(this.state.sequencerPlayer.buffer.get())
+          return axios.post(`/api/version/${versionId}`, trakBlob)
+        })
+        .then(() => {
+          this._completeSpinnerTask()
+          /**
+           * Mp3 Encoding results in Tone.Transport being unresponsive for an amount of time
+           * proportional to the length of Mp3 encoding
+           *
+           * Consequently, don't proceed until Tone.Transport is responsive once again
+           */
+          const Tone = require('tone')
+
+          return new Promise(resolve => {
+            Tone.Transport.cancel()
+            Tone.Transport.loop = true
+            Tone.Transport.setLoopPoints(0, 0.5)
+
+            Tone.Transport.schedule((time) => {
+              Tone.Transport.stop()
+              Tone.Transport.cancel()
+
+              resolve()
+            }, 0)
+
+            Tone.Transport.start()
+          })
         })
         .then(() => {
           this._completeSpinnerTask()

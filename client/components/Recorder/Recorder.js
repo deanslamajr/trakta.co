@@ -238,6 +238,30 @@ class Recorder extends React.Component {
     clearCanvas(this.canvasContext)
 
     this.sampleCreator.stopAndFinishRecording()
+      .then((buffer) => {
+        /**
+         * Mp3 Encoding results in Tone.Transport being unresponsive for an amount of time
+         * proportional to the length of Mp3 encoding
+         *
+         * Consequently, don't proceed until Tone.Transport is responsive once again
+         */
+        const Tone = require('tone')
+
+        return new Promise(resolve => {
+          Tone.Transport.cancel()
+          Tone.Transport.loop = true
+          Tone.Transport.setLoopPoints(0, 0.5)
+
+          Tone.Transport.schedule((time) => {
+            Tone.Transport.stop()
+            Tone.Transport.cancel()
+
+            resolve(buffer)
+          }, 0)
+
+          Tone.Transport.start()
+        })
+      })
       .then(buffer => {
         this.props.setSourceBuffer(buffer)
 
