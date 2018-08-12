@@ -96,7 +96,9 @@ function addCleanupBufferToTrak (buffer, instance, transport, offset = 0) {
 }
 
 function getSequencerDuration (sequencerInstance) {
-  const timesArray = Object.keys(sequencerInstance.times).map(time => parseInt(time))
+  const timesArray = Object.keys(sequencerInstance.times)
+    .filter(time => sequencerInstance.times[time])
+    .map(time => parseInt(time))
   const bufferDuration = sequencerInstance.buffer.get().duration
 
   const endTimesInSeconds = timesArray.map(time => {

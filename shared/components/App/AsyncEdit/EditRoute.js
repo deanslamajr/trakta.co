@@ -194,6 +194,7 @@ class EditRoute extends React.Component {
   _createPlayerFromSequencer = () => {
     const spinnerTasksCount = 2 + this.state.instances.length
     this._addSpinnerTask(spinnerTasksCount, true)
+    
     const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
     const PlaylistRenderer = getPlaylistRenderer()
 
