@@ -17,6 +17,10 @@ import styles from './styles.css'
 const initialLeftSliderValue = 0.2
 const initialRightSliderValue = 0.8
 
+const initializedSequencerItems = {
+  0: true
+}
+
 class EditRoute extends React.Component {
   constructor (props) {
     super(props)
@@ -51,7 +55,7 @@ class EditRoute extends React.Component {
       },
       sourceBuffer: null,
 
-      selectedSequencerItems: {},
+      selectedSequencerItems: initializedSequencerItems,
       sequencerPlayer: null,
 
       showNavbarItems: true,
@@ -310,7 +314,7 @@ class EditRoute extends React.Component {
           this._completeSpinnerTask()
           this.setState({
             showNavbarItems: true,
-            selectedSequencerItems: {}
+            selectedSequencerItems: initializedSequencerItems
           })
           this.props.history.push(`/e/${this.state.trakName}`)
         })
