@@ -164,7 +164,7 @@ class EditRoute extends React.Component {
     })
   }
 
-  _createPlayerFromCleanup = (change) => {
+  _createPlayerFromCleanup = (change, animations = {}) => {
     this._addSpinnerTask(2, true)
     this.setState(({ cleanupState: prevCleanupState }) => {
       const newCleanupState = Object.assign({}, prevCleanupState, change)
@@ -188,7 +188,8 @@ class EditRoute extends React.Component {
               activePlayer: cleanupPlayer,
               cleanupPlayer,
               shouldPlayerIncrementPlaysCount: false,
-              cleanupState: newCleanupState
+              cleanupState: newCleanupState,
+              ...animations
             }
           })
         })
@@ -370,6 +371,7 @@ class EditRoute extends React.Component {
                   clearActivePlayer={this._clearActivePlayer}
                   createPlayerFromCleanup={this._createPlayerFromCleanup}
                   setCleanupState={this._setCleanupState}
+                  setPlayerAnimations={this._setPlayerAnimations}
                   trakName={this.state.trakName}
                 />
               )} />,

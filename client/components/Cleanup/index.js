@@ -26,6 +26,7 @@ class Cleanup extends React.Component {
     createPlayerFromCleanup: PropTypes.func,
     history: PropTypes.object,
     setCleanupState: PropTypes.func,
+    setPlayerAnimations: PropTypes.func,
     trakName: PropTypes.string
   }
 
@@ -106,27 +107,84 @@ class Cleanup extends React.Component {
     this.props.setCleanupState({ leftSliderValue: value })
   }
 
-  _onLeftSliderFinish = (value) => {
-    this.props.createPlayerFromCleanup({ leftSliderValue: value })
-  }
-
   _onRightSliderChange = (value) => {
     this.props.setCleanupState({ rightSliderValue: value })
   }
 
+  _createPlaybackAnimation = () => {
+    const top = this.state.canvasHeight * this.props.cleanupState.leftSliderValue
+    const bottom = this.state.canvasHeight * this.props.cleanupState.rightSliderValue
+    const trakHeight = bottom - top
+    
+    return this._getInstancesPlaybackAnimation(top, trakHeight)
+  }
+
+  _onLeftSliderFinish = (value) => {
+    const playAnimation = this._createPlaybackAnimation()    
+
+    this.props.createPlayerFromCleanup({ leftSliderValue: value }, {
+      playAnimation,
+      stopAnimation: this._stopAnimation
+    })
+  }
+
   _onRightSliderFinish = (value) => {
-    this.props.createPlayerFromCleanup({ rightSliderValue: value })
+    const playAnimation = this._createPlaybackAnimation() 
+
+    this.props.createPlayerFromCleanup({ rightSliderValue: value }, {
+      playAnimation,
+      stopAnimation: this._stopAnimation
+    })
   }
 
   _handleBackAction = () => {
-    /**
-     * reset the dimensions of the trak to that without staged sample
-     */
-    // this.props.updateDimensionsWithAdditionalSample({})
-
     const mainEditUrl = getMainEditUrl(this.props.match.url)
     this.props.clearActivePlayer()
     this.props.history.push(`${mainEditUrl}/recorder`)
+  }
+
+  _stopAnimation = (aniData) => {
+    clearInterval(aniData.id)
+    if (this.playIndicatorEl) {
+      this.playIndicatorEl.setAttribute('stroke', 'transparent')
+    }
+    aniData.position = 0
+  }
+
+  _getInstancesPlaybackAnimation = (startYPosition, trakHeight) => (playbackDurationSeconds, aniData, time) => {
+    const animationInterval = 40
+    const playbackDurationMilliseconds = playbackDurationSeconds * 1000
+    const numberOfFrames = (playbackDurationMilliseconds / animationInterval)
+
+    const displacementPerFrame = trakHeight / numberOfFrames
+    aniData.position = 0
+
+    function drawPosition (playIndicatorEl) {
+      aniData.position = aniData.position <= trakHeight
+        ? aniData.position + displacementPerFrame
+        : trakHeight
+  
+      if (playIndicatorEl) {
+        playIndicatorEl.setAttribute('y1', aniData.position + startYPosition)
+        playIndicatorEl.setAttribute('y2', aniData.position + startYPosition)
+      }
+    }
+
+    const Tone = require('tone')
+
+    Tone.Draw.schedule(() => {
+      if (this.playIndicatorEl) {
+        this.playIndicatorEl.setAttribute('stroke', 'black')
+      }
+
+      if (aniData.id) {
+        clearInterval(aniData.id)
+      }
+      // draw first frame of animation
+      drawPosition(this.playIndicatorEl)
+      // setup interval for the other frames
+      aniData.id = setInterval(() => drawPosition(this.playIndicatorEl), animationInterval)
+    }, time)
   }
 
   componentDidMount () {
@@ -154,7 +212,12 @@ class Cleanup extends React.Component {
           this.canvasContext.canvas.height = this.state.canvasHeight
 
           this._drawWaveForm()
-          this.props.createPlayerFromCleanup({})
+
+          const playAnimation = this._createPlaybackAnimation() 
+          this.props.createPlayerFromCleanup({}, {
+            playAnimation,
+            stopAnimation: this._stopAnimation
+          })
         }
       })
     }
@@ -172,12 +235,26 @@ class Cleanup extends React.Component {
         <div className={styles.label}>
           {
             <div>
+              {/* WAVEFORM */}
               <canvas
                 className={styles.canvas}
                 width={this.state.canvasWidth || 0}
                 height={this.state.canvasHeight || 0}
                 ref={(canvas) => { this.canvas = canvas }}
               />
+              {/* PLAYBACK INDICATER */}
+              <svg
+                className={styles.canvas}
+                width={this.state.canvasWidth || 0}
+                height={this.state.canvasHeight || 0}
+              >
+                <line
+                  x1='0'
+                  x2={this.state.canvasWidth || 0}
+                  ref={ref => { this.playIndicatorEl = ref }}
+                />
+              </svg>
+              {/* CLEANUP SECTION INDICATER */}
               <div style={{ top: `${top}px`, bottom: `${bottom}px` }} className={styles.canvasMask} />
 
               <div>
