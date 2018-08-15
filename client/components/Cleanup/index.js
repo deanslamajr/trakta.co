@@ -172,19 +172,17 @@ class Cleanup extends React.Component {
 
     const Tone = require('tone')
 
-    Tone.Draw.schedule(() => {
-      if (this.playIndicatorEl) {
-        this.playIndicatorEl.setAttribute('stroke', 'black')
-      }
+    if (this.playIndicatorEl) {
+      this.playIndicatorEl.setAttribute('stroke', 'black')
+    }
 
-      if (aniData.id) {
-        clearInterval(aniData.id)
-      }
-      // draw first frame of animation
-      drawPosition(this.playIndicatorEl)
-      // setup interval for the other frames
-      aniData.id = setInterval(() => drawPosition(this.playIndicatorEl), animationInterval)
-    }, time)
+    if (aniData.id) {
+      clearInterval(aniData.id)
+    }
+    // draw first frame of animation
+    drawPosition(this.playIndicatorEl)
+    // setup interval for the other frames
+    aniData.id = setInterval(() => drawPosition(this.playIndicatorEl), animationInterval)
   }
 
   componentDidMount () {

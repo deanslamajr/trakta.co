@@ -31,7 +31,9 @@ class ListRoute extends React.Component {
     this.state = {
       activePlayer: null,
       loading: false,
+      playAnimation: null,
       selectedTrakId: null,
+      stopAnimation: null,
       viewedTraks: []
     }
   }
@@ -44,7 +46,7 @@ class ListRoute extends React.Component {
     this.props.history.push(`/e/new/recorder`)
   }
 
-  _handleTrakSelect = (trak) => {
+  _handleTrakSelect = (trak, playAnimation, stopAnimation) => {
     const trakColor = getColorFromString(trak.name)
 
     const updatedViewedTraks = Array.from(this.state.viewedTraks)
@@ -71,7 +73,9 @@ class ListRoute extends React.Component {
         PlaylistRenderer.createFullTrakPlayer(filename, trak.id, duration)
           .then(player => this.setState({
             activePlayer: player,
-            loading: false
+            playAnimation,
+            loading: false,
+            stopAnimation
           }))
       })
   }
@@ -113,7 +117,9 @@ class ListRoute extends React.Component {
           activePlayer && (
             <InstancePlaylist
               incrementPlaysCount={shouldPlayerIncrementPlaysCount}
+              playAnimation={this.state.playAnimation}
               player={activePlayer}
+              stopAnimation={this.state.stopAnimation}
               trakName={trakName}
               buttonColor={trakColor}
             />

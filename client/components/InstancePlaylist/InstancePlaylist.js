@@ -77,17 +77,15 @@ class InstancePlaylist extends React.Component {
       }
     }
 
-    Tone.Draw.schedule(() => {
-      this.playIndicatorEl.style.backgroundColor = 'black'
+    this.playIndicatorEl.style.backgroundColor = 'black'
 
-      if (aniData.id) {
-        clearInterval(aniData.id)
-      }
-      // draw first frame of animation
-      drawPosition(this.playIndicatorEl)
-      // setup interval for the other frames
-      aniData.id = setInterval(() => drawPosition(this.playIndicatorEl), animationInterval)
-    }, time)
+    if (aniData.id) {
+      clearInterval(aniData.id)
+    }
+    // draw first frame of animation
+    drawPosition(this.playIndicatorEl)
+    // setup interval for the other frames
+    aniData.id = setInterval(() => drawPosition(this.playIndicatorEl), animationInterval)
   }
 
   _stopDefaultAnimation = (aniData) => {
@@ -104,7 +102,9 @@ class InstancePlaylist extends React.Component {
     Tone.Transport.position = 0
     Tone.Transport.loopEnd = playbackDuration
 
-    Tone.Transport.schedule(playAnimation.bind(this, playbackDuration, animationData))
+    Tone.Transport.schedule(() => {
+      Tone.Draw.schedule(playAnimation.bind(this, playbackDuration, animationData))
+    })
   }
 
   _stop = () => {
