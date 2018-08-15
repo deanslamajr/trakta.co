@@ -6,14 +6,13 @@ import classnames from 'classnames'
 import Helmet from 'react-helmet'
 
 import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
+import EffectsModal from './EffectsModal'
 
 import { getSampleCreator } from '../../lib/SampleCreator'
 
 import config from '../../../config'
 
 import styles from './cleanup.css'
-
-const maxLoopCount = 30
 
 function getMainEditUrl (url) {
   return url.replace('/cleanup', '')
@@ -93,14 +92,6 @@ class Cleanup extends React.Component {
     const volume = value * -1
 
     this.props.createPlayerFromCleanup({ volume })
-  }
-
-  _onLoopCountSliderFinish = (value) => {
-    this.props.createPlayerFromCleanup({ loopCount: value })
-  }
-
-  _onLoopPaddingSliderFinish = (value) => {
-    this.props.createPlayerFromCleanup({ loopPadding: value })
   }
 
   _onLeftSliderChange = (value) => {
@@ -295,40 +286,14 @@ class Cleanup extends React.Component {
                 )
               }
 
-              {
-                this.state.showEffectsModal && (
-                  <div className={styles.container}>
-                    <React.Fragment>
-                      <div>
-                      # of loops
-                      </div>
-                      <ReactSlider
-                        orientation='horizontal'
-                        className={styles.loopsSlider}
-                        handleClassName={styles.loopsSliderHandle}
-                        max={maxLoopCount}
-                        min={0}
-                        step={1}
-                        onAfterChange={this._onLoopCountSliderFinish}
-                        defaultValue={this.props.cleanupState.loopCount}
-                      />
-                      <div>
-                      Space between loops
-                      </div>
-                      <ReactSlider
-                        orientation='horizontal'
-                        className={styles.loopsSlider}
-                        handleClassName={styles.loopsSliderHandle}
-                        max={this.props.cleanupState.clipDuration}
-                        min={0}
-                        step={this.props.cleanupState.clipDuration / 500}
-                        onAfterChange={this._onLoopPaddingSliderFinish}
-                        defaultValue={this.props.cleanupState.loopPadding}
-                      />
-                    </React.Fragment>
-                  </div>
-                )
-              }
+              {this.state.showEffectsModal && (
+                <EffectsModal 
+                  createPlayerFromCleanup={this.props.createPlayerFromCleanup}
+                  clipDuration={this.props.cleanupState.clipDuration}
+                  loopCount={this.props.cleanupState.loopCount}
+                  loopPadding={this.props.cleanupState.loopPadding}
+                />
+              )}
             </div>
           }
         </div>
