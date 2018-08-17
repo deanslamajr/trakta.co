@@ -1,5 +1,7 @@
 import Tone from 'tone'
 
+import { instantiateActiveEffect } from './effects'
+
 import config from '../../config'
 
 const baseSampleUrl = config('s3SampleBucket')
@@ -64,13 +66,22 @@ function addPlayerToTransport (samplePlayer, time, transport = Tone.Transport) {
   }, playerStartTime)
 }
 
-function addPluginsToPlayer (samplePlayer, volume, panning) {
-  // Plugins
-  //
-  const panVol = new Tone.PanVol(panning, volume)
-  // const limiter = new Tone.Limiter(-6)
 
-  samplePlayer.chain(panVol, /* limiter, */ Tone.Master)
+
+function addPluginsToPlayer (samplePlayer, volume, panning, effects) {
+  const panVol = new Tone.PanVol(panning, volume)
+  let activeEffect
+
+  if (effects) {
+    activeEffect = instantiateActiveEffect(effects)
+  }
+
+  if (activeEffect) {
+    samplePlayer.chain(activeEffect, panVol, Tone.Master)
+  }
+  else {
+    samplePlayer.chain(panVol, Tone.Master)
+  }
 }
 
 function addSequencerBufferToTrak (buffer, instance, transport, times) {
@@ -82,14 +93,14 @@ function addSequencerBufferToTrak (buffer, instance, transport, times) {
   })
 }
 
-function addCleanupBufferToTrak (buffer, instance, transport, offset = 0) {
+function addCleanupBufferToTrak (buffer, instance, transport, offset = 0, effects) {
   let i = 0
 
   do {
     const samplePlayer = new Tone.Player(buffer)
     const playerStartTime = instance.startTime + (i * instance.loopPadding)
 
-    addPluginsToPlayer(samplePlayer, instance.volume, instance.panning)
+    addPluginsToPlayer(samplePlayer, instance.volume, instance.panning, effects)
     syncPlayerToTransport(samplePlayer, playerStartTime, transport, offset)
     i++
   } while (i <= (instance.loopCount || 0))
@@ -190,7 +201,7 @@ class PlaylistRenderer {
       })
   }
 
-  createPlayerFromCleanup (sourceBuffer, cleanupState, completeSpinnerTask) {
+  createPlayerFromCleanup (sourceBuffer, cleanupState, completeSpinnerTask, effects) {
     const startTime = cleanupState.sourceDuration * cleanupState.leftSliderValue
     const endTime = cleanupState.sourceDuration * cleanupState.rightSliderValue
     const snippetDuration = endTime - startTime
@@ -208,7 +219,7 @@ class PlaylistRenderer {
         startTime: 0,
         panning: cleanupState.panning,
         volume: cleanupState.volume
-      }, OfflineTransport, startTime)
+      }, OfflineTransport, startTime, effects)
       completeSpinnerTask()
 
       OfflineTransport.start()

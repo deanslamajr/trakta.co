@@ -61,7 +61,9 @@ class EditRoute extends React.Component {
       showNavbarItems: true,
 
       playAnimation: undefined,
-      stopAnimation: undefined
+      stopAnimation: undefined,
+
+      effects: []
     }
   }
 
@@ -166,6 +168,7 @@ class EditRoute extends React.Component {
 
   _createPlayerFromCleanup = (change, animations = {}) => {
     this._addSpinnerTask(2, true)
+
     this.setState(({ cleanupState: prevCleanupState }) => {
       const newCleanupState = Object.assign({}, prevCleanupState, change)
       return { cleanupState: newCleanupState }
@@ -173,7 +176,7 @@ class EditRoute extends React.Component {
       const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
       const PlaylistRenderer = getPlaylistRenderer()
 
-      PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask)
+      PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask, this.state.effects)
         .then(cleanupPlayer => {
           this._completeSpinnerTask()
 
@@ -190,6 +193,58 @@ class EditRoute extends React.Component {
               shouldPlayerIncrementPlaysCount: false,
               cleanupState: newCleanupState,
               ...animations
+            }
+          })
+        })
+    })
+  }
+
+  _createPlayerFromCleanupWithEffect = (effect) => {
+    this._addSpinnerTask(2, true)
+    
+    this.setState(({ effects: prevEffects }) => {
+      // copy current effects
+      const updatedEffects = Array.from(prevEffects)
+      // inactivate current active effect
+      const currentActiveEffect = updatedEffects.find(({ isActive }) => isActive)
+      if (currentActiveEffect) {
+        currentActiveEffect.isActive = false
+      }
+      // check if new effect already exists in current effects
+      const effectToUpdate = updatedEffects.find(({ type }) => type === effect.type)
+
+      if (effectToUpdate) {
+        // set this effect to active
+        // update the values of this effect
+        Object.assign(effectToUpdate, effect, { isActive: true })
+      } else {
+        // set new effect to active
+        effect.isActive = true
+        // add new effect to current effects
+        updatedEffects.push(effect)
+      }
+      
+      return { effects: updatedEffects }
+    }, () => {
+      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
+      const PlaylistRenderer = getPlaylistRenderer()
+
+      PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask, this.state.effects)
+        .then(cleanupPlayer => {
+          this._completeSpinnerTask()
+
+          this.setState(({ cleanupState: prevCleanupState }) => {
+            const startTime = prevCleanupState.sourceDuration * prevCleanupState.leftSliderValue
+            const endTime = prevCleanupState.sourceDuration * prevCleanupState.rightSliderValue
+            const clipDuration = endTime - startTime
+
+            const newCleanupState = Object.assign({}, prevCleanupState, { clipDuration })
+
+            return {
+              activePlayer: cleanupPlayer,
+              cleanupPlayer,
+              shouldPlayerIncrementPlaysCount: false,
+              cleanupState: newCleanupState
             }
           })
         })
@@ -370,6 +425,8 @@ class EditRoute extends React.Component {
                   cleanupState={this.state.cleanupState}
                   clearActivePlayer={this._clearActivePlayer}
                   createPlayerFromCleanup={this._createPlayerFromCleanup}
+                  createPlayerFromCleanupWithEffect={this._createPlayerFromCleanupWithEffect}
+                  effects={this.state.effects}
                   setCleanupState={this._setCleanupState}
                   setPlayerAnimations={this._setPlayerAnimations}
                   trakName={this.state.trakName}

@@ -18,6 +18,16 @@
   width: 100%;
 }
 
+.vertical-slider {
+  position: fixed !important;
+  top: calc(4rem + 2px);
+  bottom: calc(4rem + 2px);
+  left: 50%;
+  right: 50%;
+  background: color(var(--blue) alpha(50%));
+  width: var(--navBarButtonSideLength);
+}
+
 .loops-slider-handle {
   background-color: var(--red);
   border: 1px solid var(--white);

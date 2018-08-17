@@ -23,6 +23,8 @@ class Cleanup extends React.Component {
     cleanupState: PropTypes.object,
     clearActivePlayer: PropTypes.func,
     createPlayerFromCleanup: PropTypes.func,
+    createPlayerFromCleanupWithEffect: PropTypes.func,
+    effects: PropTypes.array,
     history: PropTypes.object,
     setCleanupState: PropTypes.func,
     setPlayerAnimations: PropTypes.func,
@@ -289,7 +291,9 @@ class Cleanup extends React.Component {
               {this.state.showEffectsModal && (
                 <EffectsModal 
                   createPlayerFromCleanup={this.props.createPlayerFromCleanup}
+                  createPlayerFromCleanupWithEffect={this.props.createPlayerFromCleanupWithEffect}
                   clipDuration={this.props.cleanupState.clipDuration}
+                  effects={this.props.effects}
                   loopCount={this.props.cleanupState.loopCount}
                   loopPadding={this.props.cleanupState.loopPadding}
                 />

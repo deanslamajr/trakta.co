@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import ReactSlider from 'react-slider'
 import classnames from 'classnames'
+import Tone from 'tone'
+
+import { PITCH } from '../../lib/effects'
 
 import styles from './effectsModal.css'
 
@@ -12,6 +15,8 @@ class EffectsModal extends React.Component {
   static propTypes = {
     clipDuration: PropTypes.number,
     createPlayerFromCleanup: PropTypes.func,
+    createPlayerFromCleanupWithEffect: PropTypes.func,
+    effects: PropTypes.array,
     loopCount: PropTypes.number,
     loopPadding: PropTypes.number
   }
@@ -20,7 +25,7 @@ class EffectsModal extends React.Component {
     super(props)
 
     this.state = {
-
+      renderContent: this._renderPitchShift
     }
   }
 
@@ -32,7 +37,7 @@ class EffectsModal extends React.Component {
     this.props.createPlayerFromCleanup({ loopPadding: value })
   }
 
-  render () {
+  _renderLoopsModal = () => {
     return (
       <div className={styles.container}>
         <React.Fragment>
@@ -65,6 +70,45 @@ class EffectsModal extends React.Component {
         </React.Fragment>
       </div>
     )
+  }
+
+  _handlePitchShiftSlider = (value) => {
+    const shiftInterval = value * -1
+
+    const pitchShiftConfig = {
+      type: PITCH,
+      shiftInterval
+    }
+
+    this.props.createPlayerFromCleanupWithEffect(pitchShiftConfig)
+  }
+
+  _renderPitchShift = () => {
+    const pitchShiftConfig = this.props.effects.find(({ type }) => type === PITCH)
+
+    return (
+      <div className={styles.container}>
+        <React.Fragment>
+          <div>
+          Pitch Shift
+          </div>
+          <ReactSlider
+            orientation='vertical'
+            className={styles.verticalSlider}
+            handleClassName={styles.loopsSliderHandle}
+            max={12}
+            min={-12}
+            step={1}
+            onAfterChange={this._handlePitchShiftSlider}
+            defaultValue={pitchShiftConfig ? -1 * pitchShiftConfig.shiftInterval : 0}
+          />
+        </React.Fragment>
+      </div>
+    )
+  }
+
+  render () {
+    return this.state.renderContent()
   }
 }
 
