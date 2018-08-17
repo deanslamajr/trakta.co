@@ -20,6 +20,18 @@ const initialRightSliderValue = 0.8
 const initializedSequencerItems = {
   0: true
 }
+const initializedEffects = []
+
+const initialCleanupState = {
+  leftSliderValue: 0,
+  rightSliderValue: 1,
+  loopCount: 0,
+  loopPadding: 0,
+  panning: 0,
+  volume: 0,
+  clipDuration: 0,
+  sourceDuration: 0
+}
 
 class EditRoute extends React.Component {
   constructor (props) {
@@ -30,18 +42,7 @@ class EditRoute extends React.Component {
 
       instances: [],
 
-      cleanupState: {
-        leftSliderValue: 0,
-        rightSliderValue: 1,
-
-        loopCount: 0,
-        loopPadding: 0,
-        panning: 0,
-        volume: 0,
-
-        clipDuration: 0,
-        sourceDuration: 0
-      },
+      cleanupState: initialCleanupState,
 
       currentTrakPlayer: null,
       cleanupPlayer: null,
@@ -63,7 +64,7 @@ class EditRoute extends React.Component {
       playAnimation: undefined,
       stopAnimation: undefined,
 
-      effects: []
+      effects: initializedEffects
     }
   }
 
@@ -368,9 +369,12 @@ class EditRoute extends React.Component {
         })
         .then(() => {
           this._completeSpinnerTask()
+          /** initialize editor */
           this.setState({
-            showNavbarItems: true,
-            selectedSequencerItems: initializedSequencerItems
+            cleanupState: initialCleanupState,
+            effects: initializedEffects,
+            selectedSequencerItems: initializedSequencerItems,
+            showNavbarItems: true
           })
           this.props.history.push(`/e/${this.state.trakName}`)
         })
