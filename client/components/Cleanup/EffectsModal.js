@@ -5,11 +5,24 @@ import ReactSlider from 'react-slider'
 import classnames from 'classnames'
 import Tone from 'tone'
 
-import { PITCH } from '../../lib/effects'
+import {
+  CHORUS,
+  PITCHSHIFT
+} from '../../lib/effects'
 
 import styles from './effectsModal.css'
 
 const maxLoopCount = 30
+const initialShiftInterval = 5
+const initialChorusDepth = 0.5
+
+function convertChorusDepthSlider (value) {
+  return (value - 1) * -1
+}
+
+function convertPitchShiftSlider (value) {
+  return value * -1
+}
 
 class EffectsModal extends React.Component {
   static propTypes = {
@@ -25,7 +38,12 @@ class EffectsModal extends React.Component {
     super(props)
 
     this.state = {
-      renderContent: this._renderPitchShift
+      activeEffect: null
+    }
+
+    this.effects = {
+      [PITCHSHIFT]: this._renderPitchShift,
+      [CHORUS]: this._renderChorus
     }
   }
 
@@ -72,11 +90,24 @@ class EffectsModal extends React.Component {
     )
   }
 
+  /**
+   * PitchShift
+   */
+
   _handlePitchShiftSlider = (value) => {
-    const shiftInterval = value * -1
+    const shiftInterval = convertPitchShiftSlider(value)
 
     const pitchShiftConfig = {
-      type: PITCH,
+      type: PITCHSHIFT,
+      shiftInterval
+    }
+
+    this.props.createPlayerFromCleanupWithEffect(pitchShiftConfig)
+  }
+
+  _createPlayerWithPitchShift = (shiftInterval) => {
+    const pitchShiftConfig = {
+      type: PITCHSHIFT,
       shiftInterval
     }
 
@@ -84,31 +115,114 @@ class EffectsModal extends React.Component {
   }
 
   _renderPitchShift = () => {
-    const pitchShiftConfig = this.props.effects.find(({ type }) => type === PITCH)
+    const pitchShiftConfig = this.props.effects.find(({ type }) => type === PITCHSHIFT)
 
     return (
-      <div className={styles.container}>
-        <React.Fragment>
-          <div>
-          Pitch Shift
-          </div>
-          <ReactSlider
-            orientation='vertical'
-            className={styles.verticalSlider}
-            handleClassName={styles.loopsSliderHandle}
-            max={12}
-            min={-12}
-            step={1}
-            onAfterChange={this._handlePitchShiftSlider}
-            defaultValue={pitchShiftConfig ? -1 * pitchShiftConfig.shiftInterval : 0}
-          />
-        </React.Fragment>
+      <React.Fragment>
+        <div>
+        {PITCHSHIFT}
+        </div>
+        <ReactSlider
+          orientation='vertical'
+          className={styles.verticalSlider}
+          handleClassName={styles.loopsSliderHandle}
+          max={12}
+          min={-12}
+          step={1}
+          onAfterChange={this._handlePitchShiftSlider}
+          defaultValue={pitchShiftConfig ? convertPitchShiftSlider(pitchShiftConfig.shiftInterval) : initialShiftInterval}
+        />
+      </React.Fragment>
+    )
+  }
+
+  _handlePitchShiftSelect = () => {
+    const pitchShiftConfig = this.props.effects.find(({ type }) => type === PITCHSHIFT)
+
+    const shiftInterval = pitchShiftConfig
+      ? pitchShiftConfig.shiftInterval
+      : initialShiftInterval
+
+    this._createPlayerWithPitchShift(shiftInterval)
+
+    this.setState({ activeEffect: PITCHSHIFT })
+  }
+
+  /**
+   * Chorus
+   */
+
+  _handleChorusShiftSlider = (value) => {
+    const chorusDepth = convertChorusDepthSlider(value)
+    this._createPlayerWithChorus(chorusDepth)
+  }
+
+  _createPlayerWithChorus = (chorusDepth) => {
+    const chorusConfig = {
+      type: CHORUS,
+      chorusDepth
+    }
+
+    this.props.createPlayerFromCleanupWithEffect(chorusConfig)
+  }
+
+  _renderChorus = () => {
+    const chorusConfig = this.props.effects.find(({ type }) => type === CHORUS)
+
+    return (
+      <React.Fragment>
+        <div>
+        {CHORUS}
+        </div>
+        <ReactSlider
+          orientation='vertical'
+          className={styles.verticalSlider}
+          handleClassName={styles.loopsSliderHandle}
+          max={1}
+          min={0}
+          step={.01}
+          onAfterChange={this._handleChorusShiftSlider}
+          defaultValue={chorusConfig ? convertChorusDepthSlider(chorusConfig.chorusDepth) : initialChorusDepth}
+        />
+      </React.Fragment>
+    )
+  }
+
+  _handleChorusSelect = () => {
+    const chorusConfig = this.props.effects.find(({ type }) => type === CHORUS)
+
+    const chorusDepth = chorusConfig
+      ? chorusConfig.chorusDepth
+      : initialChorusDepth
+
+    this._createPlayerWithChorus(chorusDepth)
+
+    this.setState({ activeEffect: CHORUS })
+  }
+
+  /**
+   * Menu
+   */
+
+  _renderMenu = () => {
+    return (
+      <div className={styles.menu}>
+        <div onClick={this._handlePitchShiftSelect} className={classnames(styles.effectsItem, styles.pitchshift)}>pitchshift</div>
+        <div onClick={this._handleChorusSelect} className={classnames(styles.effectsItem, styles.chorus)}>chorus</div>
       </div>
     )
   }
 
   render () {
-    return this.state.renderContent()
+    return (
+      <div className={styles.container}>
+        {
+          this.state.activeEffect
+            ? this.effects[this.state.activeEffect]()
+            : this._renderMenu()
+        }
+      </div>
+    )
   }
 }
 
