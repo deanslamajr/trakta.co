@@ -31,6 +31,10 @@
   background-color: color(var(--pink) alpha(75%));
 }
 
+.reverb {
+  background-color: color(var(--green) alpha(50%));
+}
+
 .loops-slider {
   width: 100%;
 }

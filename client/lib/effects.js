@@ -8,8 +8,13 @@ function createPitchShifter (effect) {
   return new Tone.PitchShift(effect.shiftInterval)
 }
 
+function createReverb (effect) {
+  return new Tone.JCReverb(effect.roomSize)
+}
+
 export const PITCHSHIFT = 'pitchshift'
 export const CHORUS = 'chorus'
+export const REVERB = 'reverb'
 
 export function instantiateActiveEffect (effects) {
   const activeEffect = effects.find(({ isActive }) => isActive)
@@ -22,6 +27,9 @@ export function instantiateActiveEffect (effects) {
         break
       case PITCHSHIFT:
         instantiatedEffect = createPitchShifter(activeEffect)
+        break
+      case REVERB:
+        instantiatedEffect = createReverb(activeEffect)
         break
     }
   }

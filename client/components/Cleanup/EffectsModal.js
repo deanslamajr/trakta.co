@@ -7,7 +7,8 @@ import Tone from 'tone'
 
 import {
   CHORUS,
-  PITCHSHIFT
+  PITCHSHIFT,
+  REVERB
 } from '../../lib/effects'
 
 import styles from './effectsModal.css'
@@ -15,8 +16,9 @@ import styles from './effectsModal.css'
 const maxLoopCount = 30
 const initialShiftInterval = 5
 const initialChorusDepth = 0.5
+const initialRoomSize = 0.7
 
-function convertChorusDepthSlider (value) {
+function convertNormalScaledSlider (value) {
   return (value - 1) * -1
 }
 
@@ -43,7 +45,8 @@ class EffectsModal extends React.Component {
 
     this.effects = {
       [PITCHSHIFT]: this._renderPitchShift,
-      [CHORUS]: this._renderChorus
+      [CHORUS]: this._renderChorus,
+      [REVERB]: this._renderReverb
     }
   }
 
@@ -153,7 +156,7 @@ class EffectsModal extends React.Component {
    */
 
   _handleChorusShiftSlider = (value) => {
-    const chorusDepth = convertChorusDepthSlider(value)
+    const chorusDepth = convertNormalScaledSlider(value)
     this._createPlayerWithChorus(chorusDepth)
   }
 
@@ -182,7 +185,7 @@ class EffectsModal extends React.Component {
           min={0}
           step={.01}
           onAfterChange={this._handleChorusShiftSlider}
-          defaultValue={chorusConfig ? convertChorusDepthSlider(chorusConfig.chorusDepth) : initialChorusDepth}
+          defaultValue={chorusConfig ? convertNormalScaledSlider(chorusConfig.chorusDepth) : initialChorusDepth}
         />
       </React.Fragment>
     )
@@ -201,14 +204,67 @@ class EffectsModal extends React.Component {
   }
 
   /**
+   * Reverb
+   */
+
+  _handleReverbSlider = (value) => {
+    const roomSize = convertNormalScaledSlider(value)
+    this._createPlayerWithReverb(roomSize)
+  }
+
+  _createPlayerWithReverb = (roomSize) => {
+    const reverbConfig = {
+      type: REVERB,
+      roomSize
+    }
+
+    this.props.createPlayerFromCleanupWithEffect(reverbConfig)
+  }
+
+  _renderReverb = () => {
+    const reverbConfig = this.props.effects.find(({ type }) => type === REVERB)
+
+    return (
+      <React.Fragment>
+        <div>
+        {REVERB}
+        </div>
+        <ReactSlider
+          orientation='vertical'
+          className={styles.verticalSlider}
+          handleClassName={styles.loopsSliderHandle}
+          max={1}
+          min={0}
+          step={.01}
+          onAfterChange={this._handleReverbSlider}
+          defaultValue={reverbConfig ? convertNormalScaledSlider(reverbConfig.roomSize) : initialRoomSize}
+        />
+      </React.Fragment>
+    )
+  }
+
+  _handleReverbSelect = () => {
+    const reverbConfig = this.props.effects.find(({ type }) => type === REVERB)
+
+    const roomSize = reverbConfig
+      ? reverbConfig.roomSize
+      : initialRoomSize
+
+    this._createPlayerWithReverb(roomSize)
+
+    this.setState({ activeEffect: REVERB })
+  }
+
+  /**
    * Menu
    */
 
   _renderMenu = () => {
     return (
       <div className={styles.menu}>
-        <div onClick={this._handlePitchShiftSelect} className={classnames(styles.effectsItem, styles.pitchshift)}>pitchshift</div>
-        <div onClick={this._handleChorusSelect} className={classnames(styles.effectsItem, styles.chorus)}>chorus</div>
+        <div onClick={this._handlePitchShiftSelect} className={classnames(styles.effectsItem, styles.pitchshift)}>{PITCHSHIFT}</div>
+        <div onClick={this._handleChorusSelect} className={classnames(styles.effectsItem, styles.chorus)}>{CHORUS}</div>
+        <div onClick={this._handleReverbSelect} className={classnames(styles.effectsItem, styles.reverb)}>{REVERB}</div>
       </div>
     )
   }
