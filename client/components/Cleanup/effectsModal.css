@@ -15,15 +15,19 @@
 }
 
 .pitchshift-container {
-  background: color(var(--yellow) alpha(75%));
+  background: color(var(--yellow) alpha(50%));
 }
 
 .chorus-container {
-  background: color(var(--pink) alpha(75%));
+  background: color(var(--pink) alpha(50%));
 }
 
 .reverb-container {
-  background: color(var(--green) alpha(75%));
+  background: color(var(--green) alpha(50%));
+}
+
+.distortion-container {
+  background: color(var(--red) alpha(50%));
 }
 
 .menu {
@@ -36,15 +40,19 @@
 }
 
 .pitchshift {
-  background-color: color(var(--yellow) alpha(75%));
+  background-color: color(var(--yellow) alpha(50%));
 }
 
 .chorus {
-  background-color: color(var(--pink) alpha(75%));
+  background-color: color(var(--pink) alpha(50%));
 }
 
 .reverb {
   background-color: color(var(--green) alpha(50%));
+}
+
+.distortion {
+  background-color: color(var(--red) alpha(50%));
 }
 
 .loops-slider {

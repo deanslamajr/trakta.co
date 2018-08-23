@@ -12,9 +12,14 @@ function createReverb (effect) {
   return new Tone.JCReverb(effect.roomSize)
 }
 
+function createDistortion (effect) {
+  return new Tone.Distortion(effect.distortion)
+}
+
 export const PITCHSHIFT = 'pitchshift'
 export const CHORUS = 'chorus'
 export const REVERB = 'reverb'
+export const DISTORTION = 'distortion'
 
 export function instantiateActiveEffect (effects) {
   const activeEffect = effects.find(({ isActive }) => isActive)
@@ -30,6 +35,9 @@ export function instantiateActiveEffect (effects) {
         break
       case REVERB:
         instantiatedEffect = createReverb(activeEffect)
+        break
+      case DISTORTION:
+        instantiatedEffect = createDistortion(activeEffect)
         break
     }
   }

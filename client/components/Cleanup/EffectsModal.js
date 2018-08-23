@@ -8,7 +8,8 @@ import Tone from 'tone'
 import {
   CHORUS,
   PITCHSHIFT,
-  REVERB
+  REVERB,
+  DISTORTION
 } from '../../lib/effects'
 
 import styles from './effectsModal.css'
@@ -17,6 +18,7 @@ const maxLoopCount = 30
 const initialShiftInterval = 5
 const initialChorusDepth = 0.5
 const initialRoomSize = 0.7
+const initialDistortion = 0.5
 
 function convertNormalScaledSlider (value) {
   return (value - 1) * -1
@@ -46,7 +48,8 @@ class EffectsModal extends React.Component {
     this.effects = {
       [PITCHSHIFT]: this._renderPitchShift,
       [CHORUS]: this._renderChorus,
-      [REVERB]: this._renderReverb
+      [REVERB]: this._renderReverb,
+      [DISTORTION]: this._renderDistortion
     }
   }
 
@@ -240,6 +243,57 @@ class EffectsModal extends React.Component {
     this.setState({ activeEffect: REVERB })
   }
 
+  /**
+   * Distortion
+   */
+
+  _handleDistortionSlider = (value) => {
+    const distortion = convertNormalScaledSlider(value)
+    this._createPlayerWithDistortion(distortion)
+  }
+
+  _createPlayerWithDistortion = (distortion) => {
+    const distortionConfig = {
+      type: DISTORTION,
+      distortion
+    }
+
+    this.props.createPlayerFromCleanupWithEffect(distortionConfig)
+  }
+
+  _renderDistortion = () => {
+    const distortionConfig = this.props.effects.find(({ type }) => type === DISTORTION)
+
+    return (
+      <ReactSlider
+        orientation='vertical'
+        className={styles.verticalSlider}
+        handleClassName={styles.loopsSliderHandle}
+        max={1}
+        min={0}
+        step={.01}
+        onAfterChange={this._handleDistortionSlider}
+        defaultValue={distortionConfig ? convertNormalScaledSlider(distortionConfig.distortion) : initialDistortion}
+      />
+    )
+  }
+
+  _handleDistortionSelect = () => {
+    const distortionConfig = this.props.effects.find(({ type }) => type === DISTORTION)
+
+    const distortion = distortionConfig
+      ? distortionConfig.distortion
+      : initialRoomSize
+
+    this._createPlayerWithDistortion(distortion)
+
+    this.setState({ activeEffect: DISTORTION })
+  }
+
+  /**
+   * No effects
+   */
+
   _handleNoneSelect = () => {
     const activeEffect = this.props.effects.find(({ isActive }) => isActive)
 
@@ -263,6 +317,7 @@ class EffectsModal extends React.Component {
         <div onClick={this._handlePitchShiftSelect} className={classnames(styles.effectsItem, styles.pitchshift, { [styles.selected]: activeEffectType === PITCHSHIFT })}>{PITCHSHIFT}</div>
         <div onClick={this._handleChorusSelect} className={classnames(styles.effectsItem, styles.chorus, { [styles.selected]: activeEffectType === CHORUS })}>{CHORUS}</div>
         <div onClick={this._handleReverbSelect} className={classnames(styles.effectsItem, styles.reverb, { [styles.selected]: activeEffectType === REVERB })}>{REVERB}</div>
+        <div onClick={this._handleDistortionSelect} className={classnames(styles.effectsItem, styles.distortion, { [styles.selected]: activeEffectType === DISTORTION })}>{DISTORTION}</div>
       </div>
     )
   }
