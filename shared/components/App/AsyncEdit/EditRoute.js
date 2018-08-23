@@ -200,7 +200,7 @@ class EditRoute extends React.Component {
     })
   }
 
-  _createPlayerFromCleanupWithEffect = (effect) => {
+  _createPlayerFromCleanupWithEffect = (effect, newIsActive = true) => {
     this._addSpinnerTask(2, true)
     
     this.setState(({ effects: prevEffects }) => {
@@ -217,7 +217,7 @@ class EditRoute extends React.Component {
       if (effectToUpdate) {
         // set this effect to active
         // update the values of this effect
-        Object.assign(effectToUpdate, effect, { isActive: true })
+        Object.assign(effectToUpdate, effect, { isActive: newIsActive })
       } else {
         // set new effect to active
         effect.isActive = true

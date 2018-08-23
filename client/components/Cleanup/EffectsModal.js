@@ -121,21 +121,16 @@ class EffectsModal extends React.Component {
     const pitchShiftConfig = this.props.effects.find(({ type }) => type === PITCHSHIFT)
 
     return (
-      <React.Fragment>
-        <div>
-        {PITCHSHIFT}
-        </div>
-        <ReactSlider
-          orientation='vertical'
-          className={styles.verticalSlider}
-          handleClassName={styles.loopsSliderHandle}
-          max={12}
-          min={-12}
-          step={1}
-          onAfterChange={this._handlePitchShiftSlider}
-          defaultValue={pitchShiftConfig ? convertPitchShiftSlider(pitchShiftConfig.shiftInterval) : initialShiftInterval}
-        />
-      </React.Fragment>
+      <ReactSlider
+        orientation='vertical'
+        className={styles.verticalSlider}
+        handleClassName={styles.loopsSliderHandle}
+        max={12}
+        min={-12}
+        step={1}
+        onAfterChange={this._handlePitchShiftSlider}
+        defaultValue={pitchShiftConfig ? convertPitchShiftSlider(pitchShiftConfig.shiftInterval) : initialShiftInterval}
+      />
     )
   }
 
@@ -173,21 +168,16 @@ class EffectsModal extends React.Component {
     const chorusConfig = this.props.effects.find(({ type }) => type === CHORUS)
 
     return (
-      <React.Fragment>
-        <div>
-        {CHORUS}
-        </div>
-        <ReactSlider
-          orientation='vertical'
-          className={styles.verticalSlider}
-          handleClassName={styles.loopsSliderHandle}
-          max={1}
-          min={0}
-          step={.01}
-          onAfterChange={this._handleChorusShiftSlider}
-          defaultValue={chorusConfig ? convertNormalScaledSlider(chorusConfig.chorusDepth) : initialChorusDepth}
-        />
-      </React.Fragment>
+      <ReactSlider
+        orientation='vertical'
+        className={styles.verticalSlider}
+        handleClassName={styles.loopsSliderHandle}
+        max={1}
+        min={0}
+        step={.01}
+        onAfterChange={this._handleChorusShiftSlider}
+        defaultValue={chorusConfig ? convertNormalScaledSlider(chorusConfig.chorusDepth) : initialChorusDepth}
+      />
     )
   }
 
@@ -225,21 +215,16 @@ class EffectsModal extends React.Component {
     const reverbConfig = this.props.effects.find(({ type }) => type === REVERB)
 
     return (
-      <React.Fragment>
-        <div>
-        {REVERB}
-        </div>
-        <ReactSlider
-          orientation='vertical'
-          className={styles.verticalSlider}
-          handleClassName={styles.loopsSliderHandle}
-          max={1}
-          min={0}
-          step={.01}
-          onAfterChange={this._handleReverbSlider}
-          defaultValue={reverbConfig ? convertNormalScaledSlider(reverbConfig.roomSize) : initialRoomSize}
-        />
-      </React.Fragment>
+      <ReactSlider
+        orientation='vertical'
+        className={styles.verticalSlider}
+        handleClassName={styles.loopsSliderHandle}
+        max={1}
+        min={0}
+        step={.01}
+        onAfterChange={this._handleReverbSlider}
+        defaultValue={reverbConfig ? convertNormalScaledSlider(reverbConfig.roomSize) : initialRoomSize}
+      />
     )
   }
 
@@ -255,23 +240,36 @@ class EffectsModal extends React.Component {
     this.setState({ activeEffect: REVERB })
   }
 
+  _handleNoneSelect = () => {
+    const activeEffect = this.props.effects.find(({ isActive }) => isActive)
+
+    this.props.createPlayerFromCleanupWithEffect(activeEffect, false)
+  }
+
   /**
    * Menu
    */
 
   _renderMenu = () => {
+    const activeEffect = this.props.effects.find(({ isActive }) => isActive)
+    
+    const activeEffectType = activeEffect
+      ? activeEffect.type
+      : 'none'
+
     return (
       <div className={styles.menu}>
-        <div onClick={this._handlePitchShiftSelect} className={classnames(styles.effectsItem, styles.pitchshift)}>{PITCHSHIFT}</div>
-        <div onClick={this._handleChorusSelect} className={classnames(styles.effectsItem, styles.chorus)}>{CHORUS}</div>
-        <div onClick={this._handleReverbSelect} className={classnames(styles.effectsItem, styles.reverb)}>{REVERB}</div>
+        <div onClick={this._handleNoneSelect} className={classnames(styles.effectsItem, styles.none, { [styles.selected]: activeEffectType === 'none' })}>(no effects)</div>
+        <div onClick={this._handlePitchShiftSelect} className={classnames(styles.effectsItem, styles.pitchshift, { [styles.selected]: activeEffectType === PITCHSHIFT })}>{PITCHSHIFT}</div>
+        <div onClick={this._handleChorusSelect} className={classnames(styles.effectsItem, styles.chorus, { [styles.selected]: activeEffectType === CHORUS })}>{CHORUS}</div>
+        <div onClick={this._handleReverbSelect} className={classnames(styles.effectsItem, styles.reverb, { [styles.selected]: activeEffectType === REVERB })}>{REVERB}</div>
       </div>
     )
   }
 
   render () {
     return (
-      <div className={styles.container}>
+      <div className={classnames(styles.container, styles[`${this.state.activeEffect}Container`])}>
         {
           this.state.activeEffect
             ? this.effects[this.state.activeEffect]()

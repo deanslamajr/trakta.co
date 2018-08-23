@@ -14,6 +14,18 @@
   z-index: 999;
 }
 
+.pitchshift-container {
+  background: color(var(--yellow) alpha(75%));
+}
+
+.chorus-container {
+  background: color(var(--pink) alpha(75%));
+}
+
+.reverb-container {
+  background: color(var(--green) alpha(75%));
+}
+
 .menu {
   display: flex;
   flex-direction: column;
@@ -59,3 +71,7 @@
   margin: 0;
 }
 
+.selected:before {
+  content: "»";
+  margin-right: 6px;
+}
