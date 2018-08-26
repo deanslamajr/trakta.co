@@ -1,5 +1,6 @@
 @import "../../../shared/styles/colors.css";
 @import "../../../shared/styles/constants.css";
+@import "../../../shared/styles/breakpoints.css";
 
 .container {
   display: flex;
@@ -82,4 +83,10 @@
 .selected:before {
   content: "»";
   margin-right: 6px;
+}
+
+@media (--small-viewport) {
+  .effects-item {
+    font-size: 1.5rem;
+  }
 }
