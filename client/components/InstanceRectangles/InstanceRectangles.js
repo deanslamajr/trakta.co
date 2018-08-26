@@ -4,12 +4,14 @@ import viewportDimensions from 'viewport-dimensions'
 import isequal from 'lodash.isequal'
 
 import { unitLength, unitDuration } from '../../lib/units'
+import { getOfflineTransportduration } from '../../lib/PlaylistRenderer'
 
 import calculateInstanceRectangles from './calculateInstanceRectangles'
 
 class InstanceRectangles extends React.Component {
   static propTypes = {
     instances: PropTypes.arrayOf(PropTypes.shape({
+      cleanupBuffer: PropTypes.object,
       created_at: PropTypes.string,
       id: PropTypes.string,
       player_id: PropTypes.string,
@@ -23,6 +25,7 @@ class InstanceRectangles extends React.Component {
       }),
       sample_id: PropTypes.string,
       sequencer_csv: PropTypes.string,
+      selectedSequencerItems: PropTypes.object,
       setPlayerAnimations: PropTypes.func,
       trak: PropTypes.shape({
         id: PropTypes.string,
@@ -107,20 +110,27 @@ class InstanceRectangles extends React.Component {
   }
 
   componentDidUpdate (prevProps) {
-    if (!isequal(this.props.instances, prevProps.instances) && this.props.instances.length) {
+    if (
+      (!isequal(this.props.instances, prevProps.instances) && this.props.instances.length) ||
+      !isequal(this.props.selectedSequencerItems, prevProps.selectedSequencerItems)
+    ) {
       this._getAndSetPlayerAnimations()
       this.setSvgRectangles()
     }
   }
 
   getTrakHeight = () => {
-    const { instances } = this.props
+    const {
+      cleanupBuffer,
+      instances,
+      selectedSequencerItems
+    } = this.props
 
-    if (!instances.length) {
-      return 0
-    }
+    const sequencerObject = cleanupBuffer
+      ? { times: selectedSequencerItems, buffer: cleanupBuffer }
+      : null
 
-    const trakDuration = instances[0].trak.duration
+    const trakDuration = getOfflineTransportduration(instances, sequencerObject)
     const pixelsPerSecond = (unitLength) / unitDuration
 
     return trakDuration * pixelsPerSecond

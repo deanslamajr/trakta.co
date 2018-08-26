@@ -19,6 +19,7 @@ class SequencerContainer extends React.Component {
   static propTypes = {
     instances: PropTypes.array,
     history: PropTypes.object,
+    cleanupBuffer: PropTypes.object,
     createPlayerFromSequencer: PropTypes.func,
     createPlayerFromSequencerItemSelect: PropTypes.func,
     saveRecording: PropTypes.func,
@@ -64,7 +65,9 @@ class SequencerContainer extends React.Component {
         }
 
         <InstanceRectangles
+          cleanupBuffer={this.props.cleanupBuffer}
           instances={this.props.instances}
+          selectedSequencerItems={this.props.selectedSequencerItems}
           setPlayerAnimations={this.props.setPlayerAnimations}
         />
       </div>

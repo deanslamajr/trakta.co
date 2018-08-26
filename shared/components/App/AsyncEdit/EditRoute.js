@@ -410,6 +410,7 @@ class EditRoute extends React.Component {
               <Route key={1} path={`${this.props.match.url}/sequencer`} render={props => (
                 <Sequencer
                   {...props}
+                  cleanupBuffer={this.state.cleanupPlayer.buffer}
                   createPlayerFromSequencer={this._createPlayerFromSequencer}
                   createPlayerFromSequencerItemSelect={this._createPlayerFromSequencerItemSelect}
                   instances={this.state.instances}

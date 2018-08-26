@@ -130,7 +130,7 @@ function getInstancesDuration (instances) {
   return endTimesInSeconds[endTimesInSeconds.length - 1]
 }
 
-function getOfflineTransportduration (instances, sequencerInstance) {
+export function getOfflineTransportduration (instances, sequencerInstance) {
   let sequencerDuration
   let instancesDuration
 
