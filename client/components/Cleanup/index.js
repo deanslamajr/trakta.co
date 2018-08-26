@@ -292,10 +292,7 @@ class Cleanup extends React.Component {
                 <EffectsModal 
                   createPlayerFromCleanup={this.props.createPlayerFromCleanup}
                   createPlayerFromCleanupWithEffect={this.props.createPlayerFromCleanupWithEffect}
-                  clipDuration={this.props.cleanupState.clipDuration}
                   effects={this.props.effects}
-                  loopCount={this.props.cleanupState.loopCount}
-                  loopPadding={this.props.cleanupState.loopPadding}
                 />
               )}
             </div>

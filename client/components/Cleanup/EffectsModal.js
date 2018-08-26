@@ -14,7 +14,6 @@ import {
 
 import styles from './effectsModal.css'
 
-const maxLoopCount = 30
 const initialShiftInterval = 5
 const initialChorusDepth = 0.5
 const initialRoomSize = 0.7
@@ -30,12 +29,9 @@ function convertPitchShiftSlider (value) {
 
 class EffectsModal extends React.Component {
   static propTypes = {
-    clipDuration: PropTypes.number,
     createPlayerFromCleanup: PropTypes.func,
     createPlayerFromCleanupWithEffect: PropTypes.func,
-    effects: PropTypes.array,
-    loopCount: PropTypes.number,
-    loopPadding: PropTypes.number
+    effects: PropTypes.array
   }
 
   constructor (props) {
@@ -51,49 +47,6 @@ class EffectsModal extends React.Component {
       [REVERB]: this._renderReverb,
       [DISTORTION]: this._renderDistortion
     }
-  }
-
-  _onLoopCountSliderFinish = (value) => {
-    this.props.createPlayerFromCleanup({ loopCount: value })
-  }
-
-  _onLoopPaddingSliderFinish = (value) => {
-    this.props.createPlayerFromCleanup({ loopPadding: value })
-  }
-
-  _renderLoopsModal = () => {
-    return (
-      <div className={styles.container}>
-        <React.Fragment>
-          <div>
-          # of loops
-          </div>
-          <ReactSlider
-            orientation='horizontal'
-            className={styles.loopsSlider}
-            handleClassName={styles.loopsSliderHandle}
-            max={maxLoopCount}
-            min={0}
-            step={1}
-            onAfterChange={this._onLoopCountSliderFinish}
-            defaultValue={this.props.loopCount}
-          />
-          <div>
-          Space between loops
-          </div>
-          <ReactSlider
-            orientation='horizontal'
-            className={styles.loopsSlider}
-            handleClassName={styles.loopsSliderHandle}
-            max={this.props.clipDuration}
-            min={0}
-            step={this.props.clipDuration / 500}
-            onAfterChange={this._onLoopPaddingSliderFinish}
-            defaultValue={this.props.loopPadding}
-          />
-        </React.Fragment>
-      </div>
-    )
   }
 
   /**

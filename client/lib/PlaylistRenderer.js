@@ -94,16 +94,11 @@ function addSequencerBufferToTrak (buffer, instance, transport, times) {
 }
 
 function addCleanupBufferToTrak (buffer, instance, transport, offset = 0, effects) {
-  let i = 0
+  const samplePlayer = new Tone.Player(buffer)
+  const playerStartTime = instance.startTime
 
-  do {
-    const samplePlayer = new Tone.Player(buffer)
-    const playerStartTime = instance.startTime + (i * instance.loopPadding)
-
-    addPluginsToPlayer(samplePlayer, instance.volume, instance.panning, effects)
-    syncPlayerToTransport(samplePlayer, playerStartTime, transport, offset)
-    i++
-  } while (i <= (instance.loopCount || 0))
+  addPluginsToPlayer(samplePlayer, instance.volume, instance.panning, effects)
+  syncPlayerToTransport(samplePlayer, playerStartTime, transport, offset)
 }
 
 function getSequencerDuration (sequencerInstance) {
@@ -204,18 +199,12 @@ class PlaylistRenderer {
   createPlayerFromCleanup (sourceBuffer, cleanupState, completeSpinnerTask, effects) {
     const startTime = cleanupState.sourceDuration * cleanupState.leftSliderValue
     const endTime = cleanupState.sourceDuration * cleanupState.rightSliderValue
-    const snippetDuration = endTime - startTime
-
-    const playerDuration = cleanupState.loopCount === 0
-      ? snippetDuration
-      : (cleanupState.loopCount * cleanupState.loopPadding) + snippetDuration
+    const playerDuration = endTime - startTime
 
     return Tone.Offline(OfflineTransport => {
       OfflineTransport.position = 0
 
       addCleanupBufferToTrak(sourceBuffer, {
-        loopCount: cleanupState.loopCount,
-        loopPadding: cleanupState.loopPadding,
         startTime: 0,
         panning: cleanupState.panning,
         volume: cleanupState.volume

@@ -25,11 +25,8 @@ const initializedEffects = []
 const initialCleanupState = {
   leftSliderValue: 0,
   rightSliderValue: 1,
-  loopCount: 0,
-  loopPadding: 0,
   panning: 0,
   volume: 0,
-  clipDuration: 0,
   sourceDuration: 0
 }
 
@@ -136,18 +133,10 @@ class EditRoute extends React.Component {
   }
 
   _setSourceBuffer = (buffer) => {
-    const sourceDuration = buffer.get().duration
-
-    const startTime = sourceDuration * initialLeftSliderValue
-    const endTime = sourceDuration * initialRightSliderValue
-    const clipDuration = endTime - startTime
-
     const initialCleanupState = {
       leftSliderValue: initialLeftSliderValue,
       rightSliderValue: initialRightSliderValue,
-      loopPadding: clipDuration,
-      clipDuration,
-      sourceDuration
+      sourceDuration: buffer.get().duration
     }
 
     this.setState(({ cleanupState: prevCleanupState }) => {
@@ -181,20 +170,11 @@ class EditRoute extends React.Component {
         .then(cleanupPlayer => {
           this._completeSpinnerTask()
 
-          this.setState(({ cleanupState: prevCleanupState }) => {
-            const startTime = prevCleanupState.sourceDuration * prevCleanupState.leftSliderValue
-            const endTime = prevCleanupState.sourceDuration * prevCleanupState.rightSliderValue
-            const clipDuration = endTime - startTime
-
-            const newCleanupState = Object.assign({}, prevCleanupState, { clipDuration })
-
-            return {
-              activePlayer: cleanupPlayer,
-              cleanupPlayer,
-              shouldPlayerIncrementPlaysCount: false,
-              cleanupState: newCleanupState,
-              ...animations
-            }
+          this.setState({
+            activePlayer: cleanupPlayer,
+            cleanupPlayer,
+            shouldPlayerIncrementPlaysCount: false,
+            ...animations
           })
         })
     })
@@ -234,19 +214,10 @@ class EditRoute extends React.Component {
         .then(cleanupPlayer => {
           this._completeSpinnerTask()
 
-          this.setState(({ cleanupState: prevCleanupState }) => {
-            const startTime = prevCleanupState.sourceDuration * prevCleanupState.leftSliderValue
-            const endTime = prevCleanupState.sourceDuration * prevCleanupState.rightSliderValue
-            const clipDuration = endTime - startTime
-
-            const newCleanupState = Object.assign({}, prevCleanupState, { clipDuration })
-
-            return {
-              activePlayer: cleanupPlayer,
-              cleanupPlayer,
-              shouldPlayerIncrementPlaysCount: false,
-              cleanupState: newCleanupState
-            }
+          this.setState({
+            activePlayer: cleanupPlayer,
+            cleanupPlayer,
+            shouldPlayerIncrementPlaysCount: false
           })
         })
     })
