@@ -54,6 +54,7 @@ class InstanceRectangles extends React.Component {
   }
 
   _getInstancesPlaybackAnimation = (trakHeight) => (playbackDurationSeconds, aniData, time) => {
+
     const animationInterval = 40
     const playbackDurationMilliseconds = playbackDurationSeconds * 1000
     const numberOfFrames = (playbackDurationMilliseconds / animationInterval)
@@ -103,7 +104,7 @@ class InstanceRectangles extends React.Component {
   }
 
   componentDidMount () {
-    if (this.props.instances.length) {
+    if (this.props.instances.length || this.props.selectedSequencerItems) {
       this._getAndSetPlayerAnimations()
       this.setSvgRectangles()
     }
@@ -162,7 +163,7 @@ class InstanceRectangles extends React.Component {
   
     const trakHeight = this.getTrakHeight()
 
-    return (
+    return (trakHeight &&
       <svg style={{ display: 'block' }} width={viewportWidth} height={trakHeight}>
         { svgRectangles }
         <line
