@@ -8,7 +8,7 @@ import viewportDimensions from 'viewport-dimensions'
 
 import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
 
-import styles from './InstancePlaylist.css'
+import styles from './AudioPlayer.css'
 
 let playCode
 
@@ -41,7 +41,7 @@ function stopPlayback () {
   Tone.Transport.stop()
 }
 
-class InstancePlaylist extends React.Component {
+class AudioPlayer extends React.Component {
   static propTypes = {
     buttonColor: PropTypes.string,
     incrementPlaysCount: PropTypes.bool,
@@ -205,4 +205,4 @@ class InstancePlaylist extends React.Component {
   }
 }
 
-export default withStyles(styles)(InstancePlaylist)
+export default withStyles(styles)(AudioPlayer)

@@ -8,7 +8,7 @@ const baseSampleUrl = config('s3SampleBucket')
 const baseTrakUrl = config('s3TrakBucket')
 
 const bufferCache = {}
-let playlistRenderer
+let playerRenderer
 
 function loadSample (instance, loadTaskCb, fetchTrak) {
   return new Promise((resolve, reject) => {
@@ -164,7 +164,7 @@ function addSequencerToTrak (times, buffer, transport) {
  * PUBLIC
  */
 
-class PlaylistRenderer {
+class PlayerRenderer {
   createCurrentTrakPlayer (instances, completeSpinnerTask) {
     return Promise.all(instances.map(instance => bufferCache[instance.sample.id]
         ? Promise.resolve(completeSpinnerTask())
@@ -263,7 +263,7 @@ class PlaylistRenderer {
       sample: {
         url: filename,
         /**
-         * @todo investigate using a slidingArray to leverage the PlaylistRenderer cache for the last 5? traks selected
+         * @todo investigate using a slidingArray to leverage the PlayerRenderer cache for the last 5? traks selected
          */
         id: trakId,
         duration
@@ -295,10 +295,10 @@ class PlaylistRenderer {
   }
 }
 
-export function getPlaylistRenderer () {
-  if (!playlistRenderer) {
-    playlistRenderer = new PlaylistRenderer()
+export function getPlayerRenderer () {
+  if (!playerRenderer) {
+    playerRenderer = new PlayerRenderer()
   }
 
-  return playlistRenderer
+  return playerRenderer
 }

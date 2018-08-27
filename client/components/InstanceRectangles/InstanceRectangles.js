@@ -4,7 +4,7 @@ import viewportDimensions from 'viewport-dimensions'
 import isequal from 'lodash.isequal'
 
 import { unitLength, unitDuration } from '../../lib/units'
-import { getOfflineTransportduration } from '../../lib/PlaylistRenderer'
+import { getOfflineTransportduration } from '../../lib/PlayerRenderer'
 
 import calculateInstanceRectangles from './calculateInstanceRectangles'
 

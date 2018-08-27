@@ -10,7 +10,7 @@ import Cleanup from './AsyncCleanup'
 import Recorder from './AsyncRecorder'
 import Slices from './AsyncSlices'
 import ProgressRing from '../AsyncProgressRing'
-import InstancePlaylist from '../../../../client/components/InstancePlaylist'
+import AudioPlayer from '../../../../client/components/AudioPlayer'
 
 import styles from './styles.css'
 
@@ -73,15 +73,15 @@ class EditRoute extends React.Component {
         if (!instances.length) {
           return
         }
-        
+
         this.setState({ instances })
         this._addSpinnerTask(instances.length * 2) /** x2 to account for the rendering task taking ~50% of the total time */
         this._completeSpinnerTask()
 
-        const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
-        const PlaylistRenderer = getPlaylistRenderer()
+        const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
+        const PlayerRenderer = getPlayerRenderer()
 
-        return PlaylistRenderer.createCurrentTrakPlayer(instances, this._completeSpinnerTask)
+        return PlayerRenderer.createCurrentTrakPlayer(instances, this._completeSpinnerTask)
           .then(currentTrakPlayer => {
             this.setState({
               currentTrakPlayer,
@@ -168,10 +168,10 @@ class EditRoute extends React.Component {
       const newCleanupState = Object.assign({}, prevCleanupState, change)
       return { cleanupState: newCleanupState }
     }, () => {
-      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
-      const PlaylistRenderer = getPlaylistRenderer()
+      const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
+      const PlayerRenderer = getPlayerRenderer()
 
-      PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask, this.state.effects)
+      PlayerRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask, this.state.effects)
         .then(cleanupPlayer => {
           this._completeSpinnerTask()
 
@@ -212,10 +212,10 @@ class EditRoute extends React.Component {
       
       return { effects: updatedEffects }
     }, () => {
-      const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
-      const PlaylistRenderer = getPlaylistRenderer()
+      const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
+      const PlayerRenderer = getPlayerRenderer()
 
-      PlaylistRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask, this.state.effects)
+      PlayerRenderer.createPlayerFromCleanup(this.state.sourceBuffer, this.state.cleanupState, this._completeSpinnerTask, this.state.effects)
         .then(cleanupPlayer => {
           this._completeSpinnerTask()
 
@@ -232,10 +232,10 @@ class EditRoute extends React.Component {
     const spinnerTasksCount = 2 + this.state.instances.length
     this._addSpinnerTask(spinnerTasksCount, true)
     
-    const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
-    const PlaylistRenderer = getPlaylistRenderer()
+    const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
+    const PlayerRenderer = getPlayerRenderer()
 
-    PlaylistRenderer.createPlayerFromSequencer(
+    PlayerRenderer.createPlayerFromSequencer(
       this.state.selectedSequencerItems,
       this.state.cleanupPlayer.buffer,
       this.state.cleanupState,
@@ -433,7 +433,7 @@ class EditRoute extends React.Component {
 
         {
           this.state.activePlayer && (
-            <InstancePlaylist
+            <AudioPlayer
               incrementPlaysCount={this.state.shouldPlayerIncrementPlaysCount}
               playAnimation={this.state.playAnimation}
               stopAnimation={this.state.stopAnimation}

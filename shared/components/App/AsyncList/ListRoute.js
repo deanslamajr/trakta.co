@@ -9,7 +9,7 @@ import axios from 'axios'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
 import ListItem from './ListItem'
-import InstancePlaylist from '../../../../client/components/InstancePlaylist'
+import AudioPlayer from '../../../../client/components/AudioPlayer'
 import { NavButton } from '../AsyncNavBar/AsyncNavBar'
 
 import getColorFromString from '../../../lib/getColorFromString'
@@ -67,10 +67,10 @@ class ListRoute extends React.Component {
       .then(({ data }) => {
         const { filename, duration } = data
 
-        const { getPlaylistRenderer } = require('../../../../client/lib/PlaylistRenderer')
-        const PlaylistRenderer = getPlaylistRenderer()
+        const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
+        const PlayerRenderer = getPlayerRenderer()
 
-        PlaylistRenderer.createFullTrakPlayer(filename, trak.id, duration)
+        PlayerRenderer.createFullTrakPlayer(filename, trak.id, duration)
           .then(player => this.setState({
             activePlayer: player,
             playAnimation,
@@ -115,7 +115,7 @@ class ListRoute extends React.Component {
 
         {
           activePlayer && (
-            <InstancePlaylist
+            <AudioPlayer
               incrementPlaysCount={shouldPlayerIncrementPlaysCount}
               playAnimation={this.state.playAnimation}
               player={activePlayer}
