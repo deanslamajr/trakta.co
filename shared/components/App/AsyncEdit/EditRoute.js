@@ -67,8 +67,13 @@ class EditRoute extends React.Component {
 
   _fetchInstances = () => {
     this._addSpinnerTask()
+
     axios.get(`/api/sample-instances/${this.state.trakName}`)
       .then(({ data: instances }) => {
+        if (!instances.length) {
+          return
+        }
+        
         this.setState({ instances })
         this._addSpinnerTask(instances.length * 2) /** x2 to account for the rendering task taking ~50% of the total time */
         this._completeSpinnerTask()
@@ -77,14 +82,14 @@ class EditRoute extends React.Component {
         const PlaylistRenderer = getPlaylistRenderer()
 
         return PlaylistRenderer.createCurrentTrakPlayer(instances, this._completeSpinnerTask)
-      })
-      .then(currentTrakPlayer => {
-        this.setState({
-          currentTrakPlayer,
-          activePlayer: currentTrakPlayer,
-          shouldFetchInstances: false,
-          shouldPlayerIncrementPlaysCount: true
-        })
+          .then(currentTrakPlayer => {
+            this.setState({
+              currentTrakPlayer,
+              activePlayer: currentTrakPlayer,
+              shouldFetchInstances: false,
+              shouldPlayerIncrementPlaysCount: true
+            })
+          })
       })
   }
 
