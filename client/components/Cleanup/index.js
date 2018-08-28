@@ -4,6 +4,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import ReactSlider from 'react-slider'
 import classnames from 'classnames'
 import Helmet from 'react-helmet'
+import MdSwapVert from 'react-icons/lib/md/swap-vert'
 
 import { NavButton } from '../../../shared/components/App/AsyncNavBar/AsyncNavBar'
 import EffectsModal from './EffectsModal'
@@ -17,6 +18,8 @@ import styles from './cleanup.css'
 function getMainEditUrl (url) {
   return url.replace('/cleanup', '')
 }
+
+export const VerticalSliderIcon = () => <MdSwapVert className={styles.verticalSliderIcon} color={styles.white} />
 
 class Cleanup extends React.Component {
   static propTypes = {
@@ -273,6 +276,7 @@ class Cleanup extends React.Component {
                 />
               </div>
 
+              {/* VOLUME SLIDER */}
               {
                 this.state.showVolumeSlider && (
                   <ReactSlider
@@ -284,7 +288,9 @@ class Cleanup extends React.Component {
                     step={0.5}
                     onAfterChange={this._onVolumeSliderFinish}
                     defaultValue={this.props.cleanupState.volume * -1}
-                  />
+                  >
+                    <VerticalSliderIcon />
+                  </ReactSlider>
                 )
               }
 

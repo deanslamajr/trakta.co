@@ -5,6 +5,8 @@ import ReactSlider from 'react-slider'
 import classnames from 'classnames'
 import Tone from 'tone'
 
+import { VerticalSliderIcon } from './index'
+
 import {
   CHORUS,
   PITCHSHIFT,
@@ -86,7 +88,9 @@ class EffectsModal extends React.Component {
         step={1}
         onAfterChange={this._handlePitchShiftSlider}
         defaultValue={pitchShiftConfig ? convertPitchShiftSlider(pitchShiftConfig.shiftInterval) : initialShiftInterval}
-      />
+      >
+        <VerticalSliderIcon />
+      </ReactSlider>
     )
   }
 
@@ -133,7 +137,9 @@ class EffectsModal extends React.Component {
         step={.01}
         onAfterChange={this._handleChorusShiftSlider}
         defaultValue={chorusConfig ? convertNormalScaledSlider(chorusConfig.chorusDepth) : initialChorusDepth}
-      />
+      >
+        <VerticalSliderIcon />
+      </ReactSlider>
     )
   }
 
@@ -180,7 +186,9 @@ class EffectsModal extends React.Component {
         step={.01}
         onAfterChange={this._handleReverbSlider}
         defaultValue={reverbConfig ? convertNormalScaledSlider(reverbConfig.roomSize) : initialRoomSize}
-      />
+      >
+        <VerticalSliderIcon />
+      </ReactSlider>
     )
   }
 
@@ -227,7 +235,9 @@ class EffectsModal extends React.Component {
         step={.01}
         onAfterChange={this._handleDistortionSlider}
         defaultValue={distortionConfig ? convertNormalScaledSlider(distortionConfig.distortion) : initialDistortion}
-      />
+      >
+        <VerticalSliderIcon />
+      </ReactSlider>
     )
   }
 
