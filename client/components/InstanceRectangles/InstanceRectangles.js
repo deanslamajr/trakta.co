@@ -54,7 +54,6 @@ class InstanceRectangles extends React.Component {
   }
 
   _getInstancesPlaybackAnimation = (trakHeight) => (playbackDurationSeconds, aniData, time) => {
-
     const animationInterval = 40
     const playbackDurationMilliseconds = playbackDurationSeconds * 1000
     const numberOfFrames = (playbackDurationMilliseconds / animationInterval)
@@ -66,14 +65,12 @@ class InstanceRectangles extends React.Component {
       aniData.position = aniData.position <= trakHeight
         ? aniData.position + displacementPerFrame
         : trakHeight
-  
+
       if (playIndicatorEl) {
         playIndicatorEl.setAttribute('y1', aniData.position)
         playIndicatorEl.setAttribute('y2', aniData.position)
       }
     }
-
-    const Tone = require('tone')
 
     if (this.playIndicatorEl) {
       this.playIndicatorEl.setAttribute('stroke', 'black')
@@ -141,7 +138,7 @@ class InstanceRectangles extends React.Component {
     const viewportWidth = viewportDimensions
       ? viewportDimensions.width() && viewportDimensions.width()
       : 300
-  
+
     const samples = this.props.instances.map(instance => {
       return {
         sequencerCsv: instance.sequencer_csv,
@@ -150,17 +147,17 @@ class InstanceRectangles extends React.Component {
       }
     })
     const svgRectangles = calculateInstanceRectangles(samples, viewportWidth)
-    
+
     this.setState({ svgRectangles })
   }
 
   render () {
     const { svgRectangles } = this.state
-  
+
     const viewportWidth = viewportDimensions
       ? viewportDimensions.width() && viewportDimensions.width()
       : 300
-  
+
     const trakHeight = this.getTrakHeight()
 
     return (trakHeight &&

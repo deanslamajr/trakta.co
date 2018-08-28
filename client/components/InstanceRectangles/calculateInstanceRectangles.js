@@ -83,7 +83,7 @@ function generateRectangles (columnsOfRectangles, viewportWidth) {
     }) => {
       const rectColor = getColorFromString(id)
       const colorCode = colors[rectColor]
- 
+
       return (
         <React.Fragment key={id}>
           <rect

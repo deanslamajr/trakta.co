@@ -16,7 +16,6 @@ const animationData = {
   id: null,
   position: 0
 }
-let intervalAnimationId
 
 /**
  * generate code
@@ -71,7 +70,7 @@ class AudioPlayer extends React.Component {
       aniData.position = aniData.position <= width
         ? aniData.position + displacementPerFrame
         : width
-  
+
       if (playIndicatorEl) {
         playIndicatorEl.style.left = `${aniData.position}px`
       }
@@ -109,8 +108,8 @@ class AudioPlayer extends React.Component {
 
   _stop = () => {
     const stopAnimation = this.props.stopAnimation || this._stopDefaultAnimation
-    stopAnimation(animationData)    
-    
+    stopAnimation(animationData)
+
     stopPlayback()
 
     this.setState({
@@ -158,7 +157,7 @@ class AudioPlayer extends React.Component {
     const playerHasChanged = this.props.player !== nextProps.player
     const animationsHaveChanged = this.props.playAnimation !== nextProps.playAnimation ||
       this.props.stopAnimation !== nextProps.stopAnimation
-    
+
     if (playerHasChanged || animationsHaveChanged) {
       this._initializePlayer(nextProps.player, nextProps.playAnimation)
     }

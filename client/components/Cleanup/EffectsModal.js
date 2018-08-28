@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import ReactSlider from 'react-slider'
 import classnames from 'classnames'
-import Tone from 'tone'
 
 import { VerticalSliderIcon } from './index'
 
@@ -134,7 +133,7 @@ class EffectsModal extends React.Component {
         handleClassName={styles.loopsSliderHandle}
         max={1}
         min={0}
-        step={.01}
+        step={0.01}
         onAfterChange={this._handleChorusShiftSlider}
         defaultValue={chorusConfig ? convertNormalScaledSlider(chorusConfig.chorusDepth) : initialChorusDepth}
       >
@@ -183,7 +182,7 @@ class EffectsModal extends React.Component {
         handleClassName={styles.loopsSliderHandle}
         max={1}
         min={0}
-        step={.01}
+        step={0.01}
         onAfterChange={this._handleReverbSlider}
         defaultValue={reverbConfig ? convertNormalScaledSlider(reverbConfig.roomSize) : initialRoomSize}
       >
@@ -232,7 +231,7 @@ class EffectsModal extends React.Component {
         handleClassName={styles.loopsSliderHandle}
         max={1}
         min={0}
-        step={.01}
+        step={0.01}
         onAfterChange={this._handleDistortionSlider}
         defaultValue={distortionConfig ? convertNormalScaledSlider(distortionConfig.distortion) : initialDistortion}
       >
@@ -269,7 +268,7 @@ class EffectsModal extends React.Component {
 
   _renderMenu = () => {
     const activeEffect = this.props.effects.find(({ isActive }) => isActive)
-    
+
     const activeEffectType = activeEffect
       ? activeEffect.type
       : 'none'

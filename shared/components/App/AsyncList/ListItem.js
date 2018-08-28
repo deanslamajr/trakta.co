@@ -51,18 +51,16 @@ class ListItem extends React.Component {
       const displacementPerFrame = width / numberOfFrames
       aniData.position = 0
 
-      function drawPosition (playIndicatorEl) {
+      const drawPos = function drawPosition (playIndicatorEl) {
         aniData.position = aniData.position <= width
           ? aniData.position + displacementPerFrame
           : width
-    
+
         if (playIndicatorEl) {
           playIndicatorEl.setAttribute('x1', aniData.position)
           playIndicatorEl.setAttribute('x2', aniData.position)
         }
       }
-
-      const Tone = require('tone')
 
       if (this.playIndicatorEl) {
         this.playIndicatorEl.setAttribute('stroke', 'black')
@@ -72,9 +70,9 @@ class ListItem extends React.Component {
         clearInterval(aniData.id)
       }
       // draw first frame of animation
-      drawPosition(this.playIndicatorEl)
+      drawPos(this.playIndicatorEl)
       // setup interval for the other frames
-      aniData.id = setInterval(() => drawPosition(this.playIndicatorEl), animationInterval)
+      aniData.id = setInterval(() => drawPos(this.playIndicatorEl), animationInterval)
     }
   }
 
@@ -85,7 +83,7 @@ class ListItem extends React.Component {
   }
 
   render () {
-    const { trak, handleClick, selectedTrakId, hasViewed } = this.props
+    const { trak, selectedTrakId, hasViewed } = this.props
 
     const width = getWidth(trak.plays_count)
     const colorClass = getColorFromString(trak.name)

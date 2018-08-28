@@ -1,5 +1,4 @@
 import lamejs from 'lamejs'
-import Tone from 'tone'
 
 let mp3Encoder
 let dataBuffer

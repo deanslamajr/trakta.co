@@ -66,8 +66,6 @@ function addPlayerToTransport (samplePlayer, time, transport = Tone.Transport) {
   }, playerStartTime)
 }
 
-
-
 function addPluginsToPlayer (samplePlayer, volume, panning, effects) {
   const panVol = new Tone.PanVol(panning, volume)
   let activeEffect
@@ -78,8 +76,7 @@ function addPluginsToPlayer (samplePlayer, volume, panning, effects) {
 
   if (activeEffect) {
     samplePlayer.chain(activeEffect, panVol, Tone.Master)
-  }
-  else {
+  } else {
     samplePlayer.chain(panVol, Tone.Master)
   }
 }

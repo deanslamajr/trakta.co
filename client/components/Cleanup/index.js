@@ -111,12 +111,12 @@ class Cleanup extends React.Component {
     const top = this.state.canvasHeight * this.props.cleanupState.leftSliderValue
     const bottom = this.state.canvasHeight * this.props.cleanupState.rightSliderValue
     const trakHeight = bottom - top
-    
+
     return this._getInstancesPlaybackAnimation(top, trakHeight)
   }
 
   _onLeftSliderFinish = (value) => {
-    const playAnimation = this._createPlaybackAnimation()    
+    const playAnimation = this._createPlaybackAnimation()
 
     this.props.createPlayerFromCleanup({ leftSliderValue: value }, {
       playAnimation,
@@ -125,7 +125,7 @@ class Cleanup extends React.Component {
   }
 
   _onRightSliderFinish = (value) => {
-    const playAnimation = this._createPlaybackAnimation() 
+    const playAnimation = this._createPlaybackAnimation()
 
     this.props.createPlayerFromCleanup({ rightSliderValue: value }, {
       playAnimation,
@@ -159,14 +159,12 @@ class Cleanup extends React.Component {
       aniData.position = aniData.position <= trakHeight
         ? aniData.position + displacementPerFrame
         : trakHeight
-  
+
       if (playIndicatorEl) {
         playIndicatorEl.setAttribute('y1', aniData.position + startYPosition)
         playIndicatorEl.setAttribute('y2', aniData.position + startYPosition)
       }
     }
-
-    const Tone = require('tone')
 
     if (this.playIndicatorEl) {
       this.playIndicatorEl.setAttribute('stroke', 'black')
@@ -207,7 +205,7 @@ class Cleanup extends React.Component {
 
           this._drawWaveForm()
 
-          const playAnimation = this._createPlaybackAnimation() 
+          const playAnimation = this._createPlaybackAnimation()
           this.props.createPlayerFromCleanup({}, {
             playAnimation,
             stopAnimation: this._stopAnimation
@@ -295,7 +293,7 @@ class Cleanup extends React.Component {
               }
 
               {this.state.showEffectsModal && (
-                <EffectsModal 
+                <EffectsModal
                   createPlayerFromCleanup={this.props.createPlayerFromCleanup}
                   createPlayerFromCleanupWithEffect={this.props.createPlayerFromCleanupWithEffect}
                   effects={this.props.effects}

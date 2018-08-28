@@ -187,7 +187,7 @@ class EditRoute extends React.Component {
 
   _createPlayerFromCleanupWithEffect = (effect, newIsActive = true) => {
     this._addSpinnerTask(2, true)
-    
+
     this.setState(({ effects: prevEffects }) => {
       // copy current effects
       const updatedEffects = Array.from(prevEffects)
@@ -209,7 +209,7 @@ class EditRoute extends React.Component {
         // add new effect to current effects
         updatedEffects.push(effect)
       }
-      
+
       return { effects: updatedEffects }
     }, () => {
       const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
@@ -231,7 +231,7 @@ class EditRoute extends React.Component {
   _createPlayerFromSequencer = () => {
     const spinnerTasksCount = 2 + this.state.instances.length
     this._addSpinnerTask(spinnerTasksCount, true)
-    
+
     const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
     const PlayerRenderer = getPlayerRenderer()
 

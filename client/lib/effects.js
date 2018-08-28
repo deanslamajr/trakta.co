@@ -41,6 +41,6 @@ export function instantiateActiveEffect (effects) {
         break
     }
   }
-  
+
   return instantiatedEffect
 }

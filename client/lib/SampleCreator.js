@@ -174,7 +174,6 @@ export default class SampleCreator {
         }
       )
     })
-
   }
 
   createBuffer (objectUrl) {
