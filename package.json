@@ -102,6 +102,7 @@
     "react-async-component": "1.0.0-beta.3",
     "react-dom": "^16.4.0",
     "react-helmet": "5.0.3",
+    "react-hotkeys": "^1.1.4",
     "react-icons": "^2.2.7",
     "react-redux": "^5.0.6",
     "react-router-dom": "4.1.1",

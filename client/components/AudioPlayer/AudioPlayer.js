@@ -46,6 +46,7 @@ class AudioPlayer extends React.Component {
     incrementPlaysCount: PropTypes.bool,
     playAnimation: PropTypes.func,
     player: PropTypes.object,
+    setSpaceAction: PropTypes.func,
     stopAnimation: PropTypes.func,
     trakName: PropTypes.string
   }
@@ -112,6 +113,10 @@ class AudioPlayer extends React.Component {
 
     stopPlayback()
 
+    if (this.props.setSpaceAction) {
+      this.props.setSpaceAction(this._play)
+    }
+
     this.setState({
       activeButton: 'PLAY',
       isPlaying: false
@@ -124,6 +129,10 @@ class AudioPlayer extends React.Component {
 
   _play = () => {
     startPlayback()
+
+    if (this.props.setSpaceAction) {
+      this.props.setSpaceAction(this._stop)
+    }
 
     this.setState({
       activeButton: 'STOP',
@@ -165,6 +174,10 @@ class AudioPlayer extends React.Component {
 
   componentDidMount () {
     this._initializePlayer(this.props.player, this.props.playAnimation)
+    
+    if (this.props.setSpaceAction) {
+      this.props.setSpaceAction(this._play)
+    }
   }
 
   componentWillUnmount () {

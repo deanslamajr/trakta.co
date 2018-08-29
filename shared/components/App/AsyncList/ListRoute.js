@@ -5,6 +5,7 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import moment from 'moment'
 import axios from 'axios'
+import { HotKeys } from 'react-hotkeys'
 
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
@@ -33,6 +34,7 @@ class ListRoute extends React.Component {
       loading: false,
       playAnimation: null,
       selectedTrakId: null,
+      spaceAction: () => {},
       stopAnimation: null,
       viewedTraks: []
     }
@@ -84,6 +86,10 @@ class ListRoute extends React.Component {
     this.itemRefs[trakId] = ref
   }
 
+  _setSpaceAction = (fn) => {
+    this.setState({ spaceAction: fn })
+  }
+
   componentDidMount () {
     if (!this.props.hasFetched) {
       this.props.fetchTraks()
@@ -108,69 +114,72 @@ class ListRoute extends React.Component {
     )
 
     return (
-      <div className={styles.container}>
-        <Helmet>
-          <title>{config('appTitle')}</title>
-        </Helmet>
+      <HotKeys handlers={{ 'space': this.state.spaceAction }} focused>
+        <div className={styles.container}>
+          <Helmet>
+            <title>{config('appTitle')}</title>
+          </Helmet>
 
-        {
-          activePlayer && (
-            <AudioPlayer
-              incrementPlaysCount={shouldPlayerIncrementPlaysCount}
-              playAnimation={this.state.playAnimation}
-              player={activePlayer}
-              stopAnimation={this.state.stopAnimation}
-              trakName={trakName}
-              buttonColor={trakColor}
-            />
-          )
-        }
-
-        <div className={styles.label}>
-          {sortedTraks.map(trak => (
-            <ListItem
-              key={trak.id}
-              ref={this._setRef.bind(this, trak.id)}
-              trak={trak}
-              handleClick={this._handleTrakSelect}
-              selectedTrakId={selectedTrakId}
-              hasViewed={viewedTraks.includes(trak.id)}
-            />
-          ))}
-        </div>
-
-        <NavButton
-          type={'REFRESH'}
-          cb={this.props.fetchTraks}
-          position={'BOTTOM_LEFT'}
-        />
-        <NavButton
-          type={'ADD'}
-          cb={this._navigateToNew}
-          position={'BOTTOM_RIGHT'}
-        />
-        {
-          selectedTrakName && (
-            <React.Fragment>
-              {
-                loading && (
-                  <NavButton
-                    type={'LOADING'}
-                    color={trakColor}
-                    position={'TOP_RIGHT'}
-                  />
-                )
-              }
-              <NavButton
-                type={'EDIT'}
-                cb={() => this._navigateToEdit(selectedTrakName)}
-                color={trakColor}
-                position={'TOP_LEFT'}
+          {
+            activePlayer && (
+              <AudioPlayer
+                incrementPlaysCount={shouldPlayerIncrementPlaysCount}
+                playAnimation={this.state.playAnimation}
+                player={activePlayer}
+                setSpaceAction={this._setSpaceAction}
+                stopAnimation={this.state.stopAnimation}
+                trakName={trakName}
+                buttonColor={trakColor}
               />
-            </React.Fragment>
-          )
-        }
-      </div>
+            )
+          }
+
+          <div className={styles.label}>
+            {sortedTraks.map(trak => (
+              <ListItem
+                key={trak.id}
+                ref={this._setRef.bind(this, trak.id)}
+                trak={trak}
+                handleClick={this._handleTrakSelect}
+                selectedTrakId={selectedTrakId}
+                hasViewed={viewedTraks.includes(trak.id)}
+              />
+            ))}
+          </div>
+
+          <NavButton
+            type={'REFRESH'}
+            cb={this.props.fetchTraks}
+            position={'BOTTOM_LEFT'}
+          />
+          <NavButton
+            type={'ADD'}
+            cb={this._navigateToNew}
+            position={'BOTTOM_RIGHT'}
+          />
+          {
+            selectedTrakName && (
+              <React.Fragment>
+                {
+                  loading && (
+                    <NavButton
+                      type={'LOADING'}
+                      color={trakColor}
+                      position={'TOP_RIGHT'}
+                    />
+                  )
+                }
+                <NavButton
+                  type={'EDIT'}
+                  cb={() => this._navigateToEdit(selectedTrakName)}
+                  color={trakColor}
+                  position={'TOP_LEFT'}
+                />
+              </React.Fragment>
+            )
+          }
+        </div>
+      </HotKeys>
     )
   }
 }
