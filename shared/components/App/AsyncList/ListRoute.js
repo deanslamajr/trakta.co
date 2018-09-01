@@ -23,6 +23,12 @@ import * as selectors from '../../../reducers'
 
 import styles from './listRoute.css'
 
+function disableSpaceKeydownScrolling (e) {
+  if (e.keyCode == 32) {
+    e.preventDefault()
+  }
+}
+
 class ListRoute extends React.Component {
   constructor () {
     super()
@@ -31,6 +37,7 @@ class ListRoute extends React.Component {
 
     this.state = {
       activePlayer: null,
+      enterAction: () => {},
       loading: false,
       playAnimation: null,
       selectedTrakId: null,
@@ -55,6 +62,7 @@ class ListRoute extends React.Component {
     updatedViewedTraks.push(trak.id)
 
     this.setState({
+      enterAction: () => this._navigateToEdit(trak.name),
       loading: true,
       selectedTrakId: trak.id,
       selectedTrakName: trak.name,
@@ -91,9 +99,15 @@ class ListRoute extends React.Component {
   }
 
   componentDidMount () {
+    window.addEventListener('keydown', disableSpaceKeydownScrolling)
+
     if (!this.props.hasFetched) {
       this.props.fetchTraks()
     }
+  }
+
+  componentWillUnmount () {
+    window.removeEventListener('keydown', disableSpaceKeydownScrolling)
   }
 
   render () {
@@ -113,8 +127,13 @@ class ListRoute extends React.Component {
       : -1
     )
 
+    const hotKeyHandlers = {
+      space: this.state.spaceAction,
+      enter: this.state.enterAction
+    }
+
     return (
-      <HotKeys handlers={{ 'space': this.state.spaceAction }} focused>
+      <HotKeys handlers={hotKeyHandlers} focused>
         <div className={styles.container}>
           <Helmet>
             <title>{config('appTitle')}</title>
