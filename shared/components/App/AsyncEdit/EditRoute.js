@@ -4,6 +4,7 @@ import Route from 'react-router-dom/Route'
 import Redirect from 'react-router/Redirect'
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 import axios from 'axios'
+import KeyHandler from 'react-key-handler'
 
 import Sequencer from './AsyncSequencer'
 import Cleanup from './AsyncCleanup'
@@ -61,7 +62,10 @@ class EditRoute extends React.Component {
       playAnimation: undefined,
       stopAnimation: undefined,
 
-      effects: initializedEffects
+      effects: initializedEffects,
+
+      enterAction: () => {},
+      spaceAction: () => {}
     }
   }
 
@@ -273,6 +277,14 @@ class EditRoute extends React.Component {
     return TrakRenderer.getBlobFromBuffer(buffer)
   }
 
+  _setEnterAction = (fn = () => {}) => {
+    this.setState({ enterAction: fn })
+  }
+
+  _setSpaceAction = (fn) => {
+    this.setState({ spaceAction: fn })
+  }
+
   _setTrakName = (trakName) => {
     this.setState({ trakName })
   }
@@ -375,6 +387,16 @@ class EditRoute extends React.Component {
 
     return (
       <div className={styles.container}>
+        {/* Hot Keys */}
+        <KeyHandler
+          code='Space'
+          onKeyHandle={this.state.spaceAction}
+        />
+        <KeyHandler
+          code='Enter'
+          onKeyHandle={this.state.enterAction}
+        />
+
         <Switch>
           <Redirect exact from='/e/new' to='/e/new/recorder' />
           <Route exact path={this.props.match.url} render={props => (
@@ -382,6 +404,7 @@ class EditRoute extends React.Component {
               {...props}
               instances={this.state.instances}
               fetchInstances={this._fetchInstances}
+              setEnterAction={this._setEnterAction}
               setPlayerAnimations={this._setPlayerAnimations}
               shouldFetchInstances={this.state.shouldFetchInstances}
               trakName={this.state.trakName}
@@ -392,6 +415,7 @@ class EditRoute extends React.Component {
               {...props}
               fetchInstances={this._fetchInstances}
               setCleanupState={this._setCleanupState}
+              setEnterAction={this._setEnterAction}
               setSourceBuffer={this._setSourceBuffer}
               shouldFetchInstances={this.state.shouldFetchInstances}
               trakName={this.state.trakName}
@@ -436,6 +460,7 @@ class EditRoute extends React.Component {
             <AudioPlayer
               incrementPlaysCount={this.state.shouldPlayerIncrementPlaysCount}
               playAnimation={this.state.playAnimation}
+              setSpaceAction={this._setSpaceAction}
               stopAnimation={this.state.stopAnimation}
               player={this.state.activePlayer}
               trakName={this.state.trakName}

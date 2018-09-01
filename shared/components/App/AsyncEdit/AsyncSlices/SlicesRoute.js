@@ -16,6 +16,7 @@ class SlicesRoute extends React.Component {
     instances: PropTypes.array,
     fetchInstances: PropTypes.func,
     history: PropTypes.object,
+    setEnterAction: PropTypes.func,
     setPlayerAnimations: PropTypes.func,
     shouldFetchInstances: PropTypes.bool,
     trakName: PropTypes.string
@@ -26,6 +27,9 @@ class SlicesRoute extends React.Component {
   }
 
   _navigateToContribute = () => {
+    // clear enter keypress binding
+    this.props.setEnterAction()
+
     let urlWithoutTrailingSlash = this.props.match.url
     if (urlWithoutTrailingSlash.charAt(urlWithoutTrailingSlash.length - 1) === '/') {
       urlWithoutTrailingSlash = urlWithoutTrailingSlash.slice(0, -1)
@@ -43,6 +47,8 @@ class SlicesRoute extends React.Component {
     if (this.props.shouldFetchInstances) {
       this.props.fetchInstances()
     }
+
+    this.props.setEnterAction(this._navigateToContribute)
   }
 
   render () {

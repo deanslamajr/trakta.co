@@ -41,6 +41,7 @@ class Recorder extends React.Component {
   static propTypes = {
     history: PropTypes.object,
     fetchInstances: PropTypes.func,
+    setEnterAction: PropTypes.func,
     setSourceBuffer: PropTypes.func,
     shouldFetchInstances: PropTypes.bool,
     trakName: PropTypes.string
@@ -210,6 +211,8 @@ class Recorder extends React.Component {
   }
 
   _startRecording = () => {
+    this.props.setEnterAction(this._stopRecording)
+
     this.sampleCreator.startRecording()
 
     this.setState({
@@ -230,6 +233,8 @@ class Recorder extends React.Component {
   }
 
   _stopRecording = () => {
+    this.props.setEnterAction()
+
     this.setState({
       isRecording: false,
       drawWave: false
@@ -286,6 +291,8 @@ class Recorder extends React.Component {
     if (this.props.shouldFetchInstances) {
       this.props.fetchInstances()
     }
+
+    this.props.setEnterAction(this._startRecording)
 
     this.setState({
       canvasWidth: width,
