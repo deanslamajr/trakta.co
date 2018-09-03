@@ -30,6 +30,7 @@ class Cleanup extends React.Component {
     effects: PropTypes.array,
     history: PropTypes.object,
     setCleanupState: PropTypes.func,
+    setEnterAction: PropTypes.func,
     setPlayerAnimations: PropTypes.func,
     trakName: PropTypes.string
   }
@@ -186,6 +187,8 @@ class Cleanup extends React.Component {
     const width = this.container
         ? this.container.parentNode.clientWidth
         : 0
+
+    this.props.setEnterAction(this._clickUseThisSelection)
 
     // if this component has unmounted by now (e.g. pressing back button quickly, go(-3) at end of creation)
     // don't do this stuff

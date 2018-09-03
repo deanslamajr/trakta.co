@@ -432,6 +432,7 @@ class EditRoute extends React.Component {
                   createPlayerFromCleanupWithEffect={this._createPlayerFromCleanupWithEffect}
                   effects={this.state.effects}
                   setCleanupState={this._setCleanupState}
+                  setEnterAction={this._setEnterAction}
                   setPlayerAnimations={this._setPlayerAnimations}
                   trakName={this.state.trakName}
                 />
