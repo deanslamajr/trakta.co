@@ -296,6 +296,7 @@ class EditRoute extends React.Component {
     /** Disable NavBar Items and all other user interactivity */
     this.setState({
       activePlayer: null,
+      enterAction: () => {},
       showNavbarItems: false
     }, () => {
       this._addSpinnerTask(4, true)
