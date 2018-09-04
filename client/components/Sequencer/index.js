@@ -25,6 +25,7 @@ class SequencerContainer extends React.Component {
     saveRecording: PropTypes.func,
     selectedSequencerItems: PropTypes.object,
     setCurrentPlayerActive: PropTypes.func,
+    setEnterAction: PropTypes.func,
     setPlayerAnimations: PropTypes.func,
     showNavbarItems: PropTypes.bool,
     trakName: PropTypes.string
@@ -32,6 +33,7 @@ class SequencerContainer extends React.Component {
 
   componentDidMount () {
     this.props.createPlayerFromSequencer()
+    this.props.setEnterAction(this.props.saveRecording)
   }
 
   render () {

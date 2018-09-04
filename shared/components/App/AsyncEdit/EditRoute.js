@@ -446,6 +446,7 @@ class EditRoute extends React.Component {
                   instances={this.state.instances}
                   saveRecording={this._saveRecording}
                   selectedSequencerItems={this.state.selectedSequencerItems}
+                  setEnterAction={this._setEnterAction}
                   setPlayerAnimations={this._setPlayerAnimations}
                   showNavbarItems={this.state.showNavbarItems}
                   trakName={this.state.trakName}
