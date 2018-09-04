@@ -5,7 +5,8 @@ import { compose } from 'redux'
 import { connect } from 'react-redux'
 import moment from 'moment'
 import axios from 'axios'
-import { HotKeys } from 'react-hotkeys'
+import KeyHandler from 'react-key-handler'
+import isequal from 'lodash.isequal'
 
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
@@ -37,10 +38,11 @@ class ListRoute extends React.Component {
 
     this.state = {
       activePlayer: null,
-      enterAction: () => {},
+      enterAction: () => this._navigateToNew(),
       loading: false,
       playAnimation: null,
       selectedTrakId: null,
+      sortedTraks: [],
       spaceAction: () => {},
       stopAnimation: null,
       viewedTraks: []
@@ -98,12 +100,32 @@ class ListRoute extends React.Component {
     this.setState({ spaceAction: fn })
   }
 
+  componentWillReceiveProps (nextProps) {
+    const traksHasChanged  = !isequal(this.props.traks, nextProps.traks)
+
+    if (traksHasChanged) {
+      const sortedTraks = nextProps.traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
+        ? 1
+        : -1
+      )
+
+      this.setState({ sortedTraks })
+    }
+  }
+
   componentDidMount () {
     window.addEventListener('keydown', disableSpaceKeydownScrolling)
 
     if (!this.props.hasFetched) {
       this.props.fetchTraks()
     }
+
+    const sortedTraks = this.props.traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
+      ? 1
+      : -1
+    )
+
+    this.setState({ sortedTraks })
   }
 
   componentWillUnmount () {
@@ -122,22 +144,20 @@ class ListRoute extends React.Component {
       viewedTraks
     } = this.state
 
-    const sortedTraks = this.props.traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
-      ? 1
-      : -1
-    )
-
-    const hotKeyHandlers = {
-      space: this.state.spaceAction,
-      enter: this.state.enterAction
-    }
-
     return (
-      <HotKeys handlers={hotKeyHandlers} focused>
         <div className={styles.container}>
           <Helmet>
             <title>{config('appTitle')}</title>
           </Helmet>
+
+          <KeyHandler
+            code='Space'
+            onKeyHandle={this.state.spaceAction}
+          />
+          <KeyHandler
+            code='Enter'
+            onKeyHandle={this.state.enterAction}
+          />
 
           {
             activePlayer && (
@@ -154,7 +174,7 @@ class ListRoute extends React.Component {
           }
 
           <div className={styles.label}>
-            {sortedTraks.map(trak => (
+            {this.state.sortedTraks.map(trak => (
               <ListItem
                 key={trak.id}
                 ref={this._setRef.bind(this, trak.id)}
@@ -198,7 +218,6 @@ class ListRoute extends React.Component {
             )
           }
         </div>
-      </HotKeys>
     )
   }
 }
