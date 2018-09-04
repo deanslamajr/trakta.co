@@ -30,6 +30,13 @@ function disableSpaceKeydownScrolling (e) {
   }
 }
 
+function sortTraks (traks) {
+  return traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
+    ? 1
+    : -1
+  )
+}
+
 class ListRoute extends React.Component {
   constructor () {
     super()
@@ -104,10 +111,7 @@ class ListRoute extends React.Component {
     const traksHasChanged  = !isequal(this.props.traks, nextProps.traks)
 
     if (traksHasChanged) {
-      const sortedTraks = nextProps.traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
-        ? 1
-        : -1
-      )
+      const sortedTraks = sortTraks(nextProps.traks)
 
       this.setState({ sortedTraks })
     }
@@ -120,10 +124,7 @@ class ListRoute extends React.Component {
       this.props.fetchTraks()
     }
 
-    const sortedTraks = this.props.traks.sort((a, b) => moment(a.last_contribution_date).isBefore(b.last_contribution_date)
-      ? 1
-      : -1
-    )
+    const sortedTraks = sortTraks(this.props.traks)
 
     this.setState({ sortedTraks })
   }
