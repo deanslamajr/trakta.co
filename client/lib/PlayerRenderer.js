@@ -104,8 +104,20 @@ function getSequencerDuration (sequencerInstance) {
     .map(time => parseInt(time))
   const bufferDuration = sequencerInstance.buffer.get().duration
 
+  console.log('Tone.Transport.bpm.value')
+  console.dir(Tone.Transport.bpm.value)
+
+  Tone.Transport.bpm.value = 240
+
+  console.log('Tone.Transport.bpm.value')
+  console.dir(Tone.Transport.bpm.value)
+
   const endTimesInSeconds = timesArray.map(time => {
+    console.log('time')
+    console.dir(time)
     const startTimeInSeconds = (new Tone.Time(`0:0:${time}`)).toSeconds()
+    console.log('startTimeInSeconds')
+    console.dir(startTimeInSeconds)
     return startTimeInSeconds + bufferDuration
   })
 
@@ -230,6 +242,12 @@ class PlayerRenderer {
 
         // render audio
         return Tone.Offline(OfflineTransport => {
+          console.log('OfflineTransport.bpm.value')
+          console.dir(OfflineTransport.bpm.value)
+          OfflineTransport.bpm.value = 240
+          console.log('OfflineTransport.bpm.value')
+          console.dir(OfflineTransport.bpm.value)
+
           OfflineTransport.position = 0
 
           const times = Object.keys(selectedSequencerItems).filter(time => selectedSequencerItems[time])
