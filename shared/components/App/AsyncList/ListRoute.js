@@ -20,6 +20,7 @@ import getColorFromString from '../../../lib/getColorFromString'
 import config from '../../../../config'
 
 import { fetchAll as fetchTraks } from '../../../actions/traklist'
+import { setTrakFilename } from '../../../actions/player'
 
 import * as selectors from '../../../reducers'
 
@@ -87,20 +88,17 @@ class ListRoute extends React.Component {
       .then(({ data }) => {
         const { filename, duration } = data
 
+        /**
+         * Tone.Player doesn't seem to work on iOS
+         * fallback to /p/<trakname> 
+         */
         if (isIOS) {
           const baseTrakUrl = config('s3TrakBucket')
           const url = `${baseTrakUrl}/${filename}`
 
-          const Tone = require('tone')
+          this.props.setTrakFilename(filename)
 
-          new Tone.Player(url, (newTrakPlayer) => {
-            this.setState({
-              activePlayer: newTrakPlayer,
-              playAnimation,
-              loading: false,
-              stopAnimation
-            })
-          }).toMaster()
+          this.props.history.push(`/p/${trak.name}`)
         }
         else {
           const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
@@ -242,7 +240,8 @@ class ListRoute extends React.Component {
 }
 
 const mapActionsToProps = {
-  fetchTraks
+  fetchTraks,
+  setTrakFilename
 }
 
 function mapStateToProps (state) {
