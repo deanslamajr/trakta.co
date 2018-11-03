@@ -12,7 +12,7 @@
     "build": "babel-node internal/scripts/build --optimize",
     "build:dev": "babel-node internal/scripts/build",
     "clean": "cross-env babel-node internal/scripts/clean",
-    "deploy": "time eb deploy traktaco-qa-single --timeout 30 -l `git describe`",
+    "deploy": "time eb deploy --timeout 30 -l `git describe`",
     "develop": "cross-env DEPLOYMENT=development babel-node internal/development",
     "lint": "standard --fix",
     "prestart": "babel-node internal/scripts/build --optimize",

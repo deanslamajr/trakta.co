@@ -88,7 +88,19 @@ class ListRoute extends React.Component {
         const { filename, duration } = data
 
         if (isIOS) {
-          this.props.history.push(`/p/${trak.name}`)
+          const baseTrakUrl = config('s3TrakBucket')
+          const url = `${baseTrakUrl}/${filename}`
+
+          const Tone = require('tone')
+
+          new Tone.Player(url, (newTrakPlayer) => {
+            this.setState({
+              activePlayer: newTrakPlayer,
+              playAnimation,
+              loading: false,
+              stopAnimation
+            })
+          }).toMaster()
         }
         else {
           const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
