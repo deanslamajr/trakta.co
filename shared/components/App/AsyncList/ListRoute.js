@@ -7,6 +7,7 @@ import moment from 'moment'
 import axios from 'axios'
 import KeyHandler from 'react-key-handler'
 import isequal from 'lodash.isequal'
+import isIOS from 'is-ios'
 
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
@@ -86,16 +87,21 @@ class ListRoute extends React.Component {
       .then(({ data }) => {
         const { filename, duration } = data
 
-        const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
-        const PlayerRenderer = getPlayerRenderer()
+        if (isIOS) {
+          alert('this is an ios browser!')
+        }
+        else {
+          const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
+          const PlayerRenderer = getPlayerRenderer()
 
-        PlayerRenderer.createFullTrakPlayer(filename, trak.id, duration)
-          .then(player => this.setState({
-            activePlayer: player,
-            playAnimation,
-            loading: false,
-            stopAnimation
-          }))
+          PlayerRenderer.createFullTrakPlayer(filename, trak.id, duration)
+            .then(player => this.setState({
+              activePlayer: player,
+              playAnimation,
+              loading: false,
+              stopAnimation
+            }))
+        }
       })
   }
 

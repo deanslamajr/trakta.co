@@ -18,6 +18,22 @@ Next, run the migrations:
 npm run migrate
 ```
 
+### Development
+
+Ideal development setup is in a docker container. First install Docker and Docker-Compose.
+
+Next, the development environment can most easily be initialized via Make files. If the development environment can execute Make files, try the following:
+
+```bash
+sudo make dev
+```
+
+To install npm dependencies, open a terminal connected to the running docker orchestration via:
+
+```bash
+sudo make bash
+```
+
 ## Docs
 
  - [Project Overview](/internal/docs/PROJECT_OVERVIEW.md)

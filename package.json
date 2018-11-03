@@ -81,6 +81,7 @@
     "format-duration": "^1.0.0",
     "helmet": "3.5.0",
     "hpp": "0.2.2",
+    "is-ios": "^1.0.0",
     "lamejs": "^1.2.0",
     "lodash.isequal": "^4.5.0",
     "modernizr": "3.5.0",
