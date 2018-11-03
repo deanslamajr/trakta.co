@@ -34,6 +34,15 @@ To install npm dependencies, open a terminal connected to the running docker orc
 sudo make bash
 ```
 
+### Deployments
+
+Install AWS EB CLI, initialize the CLI to the proper deployment environment, then execute:
+
+```bash
+npm run deploy
+```
+
+
 ## Docs
 
  - [Project Overview](/internal/docs/PROJECT_OVERVIEW.md)

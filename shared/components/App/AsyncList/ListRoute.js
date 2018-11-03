@@ -88,7 +88,7 @@ class ListRoute extends React.Component {
         const { filename, duration } = data
 
         if (isIOS) {
-          alert('this is an ios browser!')
+          this.props.history.push(`/p/${trak.name}`)
         }
         else {
           const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
