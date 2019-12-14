@@ -1,6 +1,6 @@
 {
   "name": "trakta.co",
-  "version": "0.27.0",
+  "version": "0.27.1-gba92b.0",
   "description": "Make a sound!",
   "main": "build/server/index.js",
   "engines": {
@@ -22,7 +22,6 @@
     "migrate:undo": "sequelize db:migrate:undo",
     "migrate:add": "sequelize migration:create",
     "generate": "all-contributors generate",
-
     "image:build": "sudo docker build -f ../deployment/trakta.co/Dockerfile -t deanslamajr/traktaco:\"$(git describe)\" .",
     "publish": "npm run image:build",
     "publish:test": "npm version prerelease --preid=g\"$(git rev-parse --short=5 HEAD)\" && npm run publish"
