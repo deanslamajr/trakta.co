@@ -12,7 +12,6 @@
     "build": "babel-node internal/scripts/build --optimize",
     "build:dev": "babel-node internal/scripts/build",
     "clean": "cross-env babel-node internal/scripts/clean",
-    "deploy": "time eb deploy --timeout 30 -l `git describe`",
     "develop": "cross-env DEPLOYMENT=development babel-node internal/development",
     "lint": "standard --fix",
     "start": "cross-env NODE_ENV=production node build/server",
@@ -23,8 +22,10 @@
     "migrate:add": "sequelize migration:create",
     "generate": "all-contributors generate",
     "image:build": "sudo docker build -f ../deployment/trakta.co/Dockerfile -t deanslamajr/trakta.co:\"$(git describe)\" .",
+    "image:promote": "sudo docker push deanslamajr/trakta.co:\"$(git describe)\"",
     "image:start": "sudo docker run --env-file ./.env -p 8080:8080/tcp deanslamajr/trakta.co:\"$(git describe)\"",
-    "publish": "npm run image:build",
+    "image:bash": "sudo docker run -p 8080:8080/tcp -it deanslamajr/trakta.co:\"$(git describe)\" /bin/sh",
+    "publish": "npm run image:build && npm run image:promote",
     "publish:test": "npm version prerelease --preid=g\"$(git rev-parse --short=5 HEAD)\" && npm run publish"
   },
   "standard": {

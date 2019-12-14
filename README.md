@@ -34,14 +34,26 @@ To install npm dependencies, open a terminal connected to the running docker orc
 sudo make bash
 ```
 
-### Deployments
+## Test Image
+* `npm run image:build`
+* start the image with either of the folowing:
+  * `npm run image:start`
+  * `npm run image:bash` - to start the container and provide a command line
 
-Install AWS EB CLI, initialize the CLI to the proper deployment environment, then execute:
+## Deploy
 
-```bash
-npm run deploy
-```
+1. Ensure that `docker` is available on the command line
+  * if `docker` install is needed, will also need to create new private repo creds (hub.docker.com) and register these with the local `docker` cli
+2. Commit all changes
+3. `npm run publish:test|patch|minor|major`
+  * This will build, tag, and publish the latest image.
+  * Take note of the new image tag name. e.g. The tag from the following output is `v2.0.3-10`.
+  ```
+  v2.0.3-10: digest: sha256:44587ec99bc610dbfc1019da6b486c110eea8275f01eb40176e67187c36c0092 size: 952
+  ```
+4. Verify image has been promoted to [Docker Hub](https://hub.docker.com/repository/registry-1.docker.io/deanslamajr/trakta.co/tags)
 
+5. Perform k8s rollout via instructions in `deployment` repo
 
 ## Docs
 
