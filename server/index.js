@@ -22,6 +22,25 @@ import config from '../config'
 // Create our express based server.
 const app = express()
 
+// if in production envs
+// only allow https connections
+// http://blog.lookfar.com/blog/2017/07/19/how-to-https-all-the-things-in-node/
+if (process.env.NODE_ENV === 'production') {
+	app.enable('trust proxy');
+
+	app.use(function(req, res, next){
+    // load balancer will add this header to normal requests
+    // health check requests won't have this header
+    // consequently, we allow requests that don't have the header
+    // so that health check passes
+		if (req.header('x-forwarded-proto') === 'http') {
+			res.redirect('https://' + req.header('host') + req.url);
+		} else{
+			next();
+		}
+	})
+}
+
 // Don't expose any software information to potential hackers.
 app.disable('x-powered-by')
 
