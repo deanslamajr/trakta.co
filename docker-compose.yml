@@ -3,7 +3,7 @@ services:
   traktaco:
     build: .
     ports:
-      - "4444:80"
+      - "8080:80"
       - "3000:3000"
       - "7331:7331"
     volumes:

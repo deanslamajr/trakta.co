@@ -7,6 +7,7 @@ import moment from 'moment'
 import axios from 'axios'
 import KeyHandler from 'react-key-handler'
 import isequal from 'lodash.isequal'
+import isIOS from 'is-ios'
 
 import withStyles from 'isomorphic-style-loader/lib/withStyles'
 
@@ -19,6 +20,7 @@ import getColorFromString from '../../../lib/getColorFromString'
 import config from '../../../../config'
 
 import { fetchAll as fetchTraks } from '../../../actions/traklist'
+import { setTrakFilename } from '../../../actions/player'
 
 import * as selectors from '../../../reducers'
 
@@ -86,16 +88,30 @@ class ListRoute extends React.Component {
       .then(({ data }) => {
         const { filename, duration } = data
 
-        const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
-        const PlayerRenderer = getPlayerRenderer()
+        /**
+         * Tone.Player doesn't seem to work on iOS
+         * fallback to /p/<trakname> 
+         */
+        if (isIOS) {
+          const baseTrakUrl = config('s3TrakBucket')
+          const url = `${baseTrakUrl}/${filename}`
 
-        PlayerRenderer.createFullTrakPlayer(filename, trak.id, duration)
-          .then(player => this.setState({
-            activePlayer: player,
-            playAnimation,
-            loading: false,
-            stopAnimation
-          }))
+          this.props.setTrakFilename(filename)
+
+          this.props.history.push(`/p/${trak.name}`)
+        }
+        else {
+          const { getPlayerRenderer } = require('../../../../client/lib/PlayerRenderer')
+          const PlayerRenderer = getPlayerRenderer()
+
+          PlayerRenderer.createFullTrakPlayer(filename, trak.id, duration)
+            .then(player => this.setState({
+              activePlayer: player,
+              playAnimation,
+              loading: false,
+              stopAnimation
+            }))
+        }
       })
   }
 
@@ -224,7 +240,8 @@ class ListRoute extends React.Component {
 }
 
 const mapActionsToProps = {
-  fetchTraks
+  fetchTraks,
+  setTrakFilename
 }
 
 function mapStateToProps (state) {

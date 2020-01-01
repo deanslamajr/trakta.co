@@ -1,6 +1,6 @@
 {
   "name": "trakta.co",
-  "version": "0.27.0",
+  "version": "0.27.1",
   "description": "Make a sound!",
   "main": "build/server/index.js",
   "engines": {
@@ -12,17 +12,24 @@
     "build": "babel-node internal/scripts/build --optimize",
     "build:dev": "babel-node internal/scripts/build",
     "clean": "cross-env babel-node internal/scripts/clean",
-    "deploy": "babel-node internal/scripts/deploy",
     "develop": "cross-env DEPLOYMENT=development babel-node internal/development",
     "lint": "standard --fix",
-    "prestart": "babel-node internal/scripts/build --optimize",
     "start": "cross-env NODE_ENV=production node build/server",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "migrate": "sequelize db:migrate",
     "migrate:undo": "sequelize db:migrate:undo",
     "migrate:add": "sequelize migration:create",
-    "generate": "all-contributors generate"
+    "generate": "all-contributors generate",
+    "image:build": "sudo docker build -f ../deployment/trakta.co/Dockerfile -t deanslamajr/trakta.co:\"$(git describe)\" .",
+    "image:promote": "sudo docker push deanslamajr/trakta.co:\"$(git describe)\"",
+    "image:start": "sudo docker run --env-file ./.env -p 8080:8080/tcp deanslamajr/trakta.co:\"$(git describe)\"",
+    "image:bash": "sudo docker run -p 8080:8080/tcp -it deanslamajr/trakta.co:\"$(git describe)\" /bin/sh",
+    "publish": "npm run image:build && npm run image:promote",
+    "publish:test": "npm version prerelease --preid=g\"$(git rev-parse --short=5 HEAD)\" && npm run publish",
+    "publish:patch": "npm version patch && npm run publish",
+    "publish:minor": "npm version minor && npm run publish",
+    "publish:major": "npm version major && npm run publish"
   },
   "standard": {
     "globals": [
@@ -81,6 +88,7 @@
     "format-duration": "^1.0.0",
     "helmet": "3.5.0",
     "hpp": "0.2.2",
+    "is-ios": "^1.0.0",
     "lamejs": "^1.2.0",
     "lodash.isequal": "^4.5.0",
     "modernizr": "3.5.0",
