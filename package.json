@@ -26,7 +26,10 @@
     "image:start": "sudo docker run --env-file ./.env -p 8080:8080/tcp deanslamajr/trakta.co:\"$(git describe)\"",
     "image:bash": "sudo docker run -p 8080:8080/tcp -it deanslamajr/trakta.co:\"$(git describe)\" /bin/sh",
     "publish": "npm run image:build && npm run image:promote",
-    "publish:test": "npm version prerelease --preid=g\"$(git rev-parse --short=5 HEAD)\" && npm run publish"
+    "publish:test": "npm version prerelease --preid=g\"$(git rev-parse --short=5 HEAD)\" && npm run publish",
+    "publish:patch": "npm version patch && npm run publish",
+    "publish:minor": "npm version minor && npm run publish",
+    "publish:major": "npm version major && npm run publish"
   },
   "standard": {
     "globals": [
