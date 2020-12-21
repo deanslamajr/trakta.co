@@ -163,7 +163,7 @@
     "jest": "19.0.2",
     "md5": "2.2.1",
     "modernizr-loader": "1.0.1",
-    "node-notifier": "5.1.2",
+    "node-notifier": "8.0.1",
     "prettier": "1.2.2",
     "prettier-eslint": "5.1.0",
     "prettier-eslint-cli": "3.4.1",
