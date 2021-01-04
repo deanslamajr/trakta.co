@@ -75,7 +75,7 @@
     "app-root-dir": "1.0.2",
     "autoprefixer": "^7.1.4",
     "aws-sdk": "^2.62.0",
-    "axios": "^0.16.1",
+    "axios": "^0.21.1",
     "body-parser": "^1.18.2",
     "classnames": "^2.2.5",
     "colors": "1.1.2",
